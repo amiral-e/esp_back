@@ -21,6 +21,8 @@ app.get("/", (c) => {
 	return c.text("Hello Hono!");
 });
 
+console.log('Server running on port 3000')
+
 export default {
 	port: 3000,
 	fetch: app.fetch,
