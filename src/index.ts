@@ -3,7 +3,6 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 
 const app = new OpenAPIHono();
 
-// The openapi.json will be available at /doc
 app.doc("/doc", {
 	openapi: "3.0.0",
 	info: {
@@ -12,16 +11,13 @@ app.doc("/doc", {
 	},
 });
 
-// swagger ui doc will be available at {server url}/ui
-// fell free to change the url
-// swaggerUI url must have same path as openapi.json
 app.get("/ui", swaggerUI({ url: "/doc" }));
 
 app.get("/", (c) => {
 	return c.text("Hello Hono!");
 });
 
-console.log('Server running on port 3000')
+console.log("Server running on port 3000");
 
 export default {
 	port: 3000,
