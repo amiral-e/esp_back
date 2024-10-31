@@ -2,6 +2,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import routes_admin from "./admins/index.ts";
+import routes_convs from "./conversations/index.ts";
 
 const app = new OpenAPIHono();
 
@@ -20,6 +21,7 @@ app.get("/", (c) => {
 });
 
 app.route('/admins', routes_admin);
+app.route('/convs', routes_convs);
 
 console.log("Server running on port 3000");
 
