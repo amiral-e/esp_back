@@ -26,7 +26,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        message: z.object({}),
+                        response: z.object({}),
                         id: z.string(),
                     }),
                 },
@@ -109,7 +109,7 @@ send_message.openapi(route, async (c) => {
 
     if (data == undefined && err)
         return c.json({error: err.message}, 500)
-    return c.json({message: "Message sent", id: conv.id}, 200)
+    return c.json({response: body.content, id: conv.id}, 200)
 }, (result, c) => {
     if (!result.success) {
         return c.json({error: "Param validation error"}, 401)
