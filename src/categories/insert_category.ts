@@ -54,7 +54,7 @@ const route = createRoute({
 })
 
 insert_category.openapi(route, async (c) => {
-    const {name, description} = c.req.valid('json')
+    const {name, description} = await c.req.valid('json')
     const {data, error} = await supabase.from('categories').insert({name: name, description: description}).select();
     
     if (data == undefined)
