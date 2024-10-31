@@ -78,7 +78,7 @@ send_message.openapi(route, async (c) => {
         if (Number(conv_id) == 0) {
             const {data: conv, error} = await supabase
                 .from('conversations')
-                .insert({history: [{role: "user", message: message}], name: 'New conversation', user_id: session.data.user?.id}).select('*').single()
+                .insert({history: [], name: 'New conversation', user_id: session.data.user?.id}).select('*').single()
             return {conv, error}
         } else {
             const {data: conv, error} = await supabase
@@ -95,14 +95,20 @@ send_message.openapi(route, async (c) => {
     else if (conv.length == 0)
         return c.json({error: 'Conversation not found'}, 404)
     var history = conv.history
-    history.push({role: "ia", message: "Bonjour le test est réussi"})
-    history.push({role: "user", message: message})
+    history.push({role: "user", content: message})
+
+    const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        body: JSON.stringify(history),
+        headers: { "Content-Type": "application/json" },
+    });
+    
+    const body = await response.json();
+    history.push({role: "assistant", content: body.content})
     const {data, error: err} = await supabase.from('conversations').update({history: history}).eq('id', conv.id).single()
 
     if (data == undefined && err)
         return c.json({error: err.message}, 500)
-
-    /* Send message to the bot */
     return c.json({message: "Message sent", id: conv.id}, 200)
 }, (result, c) => {
     if (!result.success) {
