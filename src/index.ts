@@ -14,7 +14,7 @@ app.doc("/doc", {
 	},
 });
 
-app.get("/ui", swaggerUI({ url: "/doc" }));
+app.get("/docs", swaggerUI({ url: "/doc" }));
 
 app.get("/", (c) => {
 	return c.text("Hello Hono!");
