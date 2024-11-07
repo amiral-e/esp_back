@@ -2,12 +2,9 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import routes_admin from "./admins/index.ts";
-<<<<<<< HEAD
 import routes_category from "./categories/index.ts";
-=======
 import routes_convs from "./conversations/index.ts";
 
->>>>>>> dev
 const app = new OpenAPIHono();
 
 app.doc("/doc", {
