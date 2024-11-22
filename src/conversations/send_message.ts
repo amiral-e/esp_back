@@ -109,7 +109,7 @@ send_message.openapi(route, async (c) => {
     var history = conv.history;
     history.push({ role: "user", content: message });
 
-    const response = await fetch("http://localhost:8000/chat", {
+    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat`, {
         method: "POST",
         body: JSON.stringify(history),
         headers: {
