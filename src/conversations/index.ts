@@ -8,8 +8,8 @@ import get_conversations from "./get_conversations";
 const routes_convs = new OpenAPIHono()
 
 routes_convs.route('/', send_message)
+routes_convs.route('/', get_conversation)
 routes_convs.route('/', get_conversations)
-routes_convs.route('/:conv_id', get_conversation)
 routes_convs.route('/', update_conversation)
 routes_convs.route('/', delete_conversation)
 

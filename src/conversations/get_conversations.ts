@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const get_conversation = new OpenAPIHono()
+const get_conversations = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 
 const route = createRoute({
@@ -18,8 +18,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        conv: z.string({}),
-                        id: z.string(),
+                        convs: z.array(z.object({})),
                     }),
                 },
             },
@@ -58,7 +57,7 @@ const route = createRoute({
     },
 })
 
-get_conversation.openapi(route, async (c) => {
+get_conversations.openapi(route, async (c) => {
     const { access_token, refresh_token } = c.req.header()
 
     const session = await supabase.auth.setSession({
@@ -70,17 +69,16 @@ get_conversation.openapi(route, async (c) => {
         .from('conversations')
         .select('*')
         .eq('user_id', session.data.user?.id)
-        .single()
 
     if (conv == undefined && error)
         return c.json({error: error.message}, 500)
     else if (conv.length == 0)
         return c.json({error: 'Conversation not found'}, 404)
-    return c.json({conv: conv.history, name: conv.name, id: conv.id}, 200)
+    return c.json({convs: conv}, 200)
 }, (result, c) => {
     if (!result.success) {
         return c.json({error: "Param validation error"}, 401)
     }
 })
 
-export default get_conversation;
+export default get_conversations;

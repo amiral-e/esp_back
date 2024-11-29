@@ -12,13 +12,16 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        access_token: z.string(),
-                        refresh_token: z.string(),
                         conv_id: z.string(),
                     }),
                 }
             }
-        }
+        },
+        headers: z.object({
+            'content-type': z.string(),
+            access_token: z.string(),
+            refresh_token: z.string(),
+        }),
     },
     responses: {
         200: {
@@ -66,7 +69,8 @@ const route = createRoute({
 })
 
 delete_conversation.openapi(route, async (c) => {
-    const {access_token, refresh_token, conv_id} = c.req.valid('json')
+    const {conv_id} = c.req.valid('json')
+    const {access_token, refresh_token} = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
