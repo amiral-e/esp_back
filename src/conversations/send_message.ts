@@ -12,14 +12,17 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        access_token: z.string(),
-                        refresh_token: z.string(),
                         conv_id: z.string(),
                         message: z.string(),
                     }),
                 }
             }
-        }
+        },
+        headers: z.object({
+            'content-type': z.string(),
+            access_token: z.string(),
+            refresh_token: z.string(),
+        }),
     },
     responses: {
         200: {
@@ -67,7 +70,8 @@ const route = createRoute({
 })
 
 send_message.openapi(route, async (c) => {
-    const {access_token, refresh_token, conv_id, message} = c.req.valid('json')
+    const {conv_id, message} = c.req.valid('json')
+    const {access_token, refresh_token} = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
@@ -100,7 +104,10 @@ send_message.openapi(route, async (c) => {
     const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         body: JSON.stringify(history),
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "bearer-token": 'beuteu'
+        },
     });
     
     const body = await response.json();
