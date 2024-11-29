@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: esp_back
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    networks:
+      - esp_network
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["bun", "run", "--hot", "src/index.ts"]
+    restart: always
+networks:
+  esp_network:
+    driver: bridge
