@@ -100,7 +100,7 @@ send_message.openapi(route, async (c) => {
     const response = await fetch(`${process.env.BACKEND_IA_URL}/chat`, {
         method: "POST",
         body: JSON.stringify(history),
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.BACKEND_IA_TOKEN}` },
     });
     
     const body = await response.json();
