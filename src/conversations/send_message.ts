@@ -70,57 +70,79 @@ const route = createRoute({
 })
 
 send_message.openapi(route, async (c) => {
-    const {conv_id, message} = c.req.valid('json')
-    const {access_token, refresh_token} = c.req.header()
+    const { conv_id, message } = c.req.valid('json');
+    const { access_token, refresh_token } = c.req.header();
 
     const session = await supabase.auth.setSession({
         access_token,
         refresh_token,
-    })
+    });
 
-    const {conv, error} = await (async () => {
-        if (Number(conv_id) == 0) {
-            const {data: conv, error} = await supabase
-                .from('conversations')
-                .insert({history: [], name: 'New conversation', user_id: session.data.user?.id}).select('*').single()
-            return {conv, error}
-        } else {
-            const {data: conv, error} = await supabase
-                .from('conversations')
-                .select('*')
-                .eq('id', conv_id)
-                .single()
-            return {conv, error}
+    // Vérifiez et insérez une nouvelle conversation si conv_id == 0
+    if (Number(conv_id) == 0) {
+        const { data: conv, error } = await supabase
+            .from('conversations')
+            .insert({ history: [], name: 'New conversation', user_id: session.data.user?.id })
+            .select('*')
+            .single();
+
+        if (conv == undefined && error) {
+            return c.json({ error: error.message }, 500);
         }
-    })();
 
-    if (conv == undefined && error)
-        return c.json({error: error.message}, 500)
-    else if (conv.length == 0)
-        return c.json({error: 'Conversation not found'}, 404)
-    var history = conv.history
-    history.push({role: "user", content: message})
+        return c.json({ response: "Conversation created successfully", id: conv.id }, 200);
+    }
+
+    // Récupérez la conversation existante si conv_id != 0
+    const { data: conv, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('id', conv_id)
+        .single();
+
+    if (conv == undefined && error) {
+        return c.json({ error: error.message }, 500);
+    } else if (conv.length == 0) {
+        return c.json({ error: 'Conversation not found' }, 404);
+    }
+
+    var history = conv.history;
+    history.push({ role: "user", content: message });
 
     const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         body: JSON.stringify(history),
-        headers: { 
+        headers: {
             "Content-Type": "application/json",
-            "bearer-token": 'beuteu'
+            "bearer-token": 'beuteu',
         },
     });
-    
-    const body = await response.json();
-    history.push({role: "assistant", content: body.content})
-    const {data, error: err} = await supabase.from('conversations').update({history: history}).eq('id', conv.id).single()
 
-    if (data == undefined && err)
-        return c.json({error: err.message}, 500)
-    return c.json({response: body.content, id: conv.id}, 200)
+    if (!response.ok) {
+        console.error("Fetch failed with status:", response.status);
+        console.error("Fetch response:", await response.text());
+        return c.json({ error: "Error from external chat service" }, 500);
+    }
+
+    const body = await response.json();
+    history.push({ role: "assistant", content: body.content });
+
+    const { data, error: err } = await supabase
+        .from('conversations')
+        .update({ history: history })
+        .eq('id', conv.id)
+        .single();
+
+    if (data == undefined && err) {
+        return c.json({ error: err.message }, 500);
+    }
+
+    return c.json({ response: body.content, id: conv.id }, 200);
 }, (result, c) => {
     if (!result.success) {
-        return c.json({error: "Param validation error"}, 401)
+        return c.json({ error: "Param validation error" }, 401);
     }
-})
+});
+
 
 export default send_message;
