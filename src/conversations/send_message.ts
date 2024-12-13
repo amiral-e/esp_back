@@ -112,32 +112,29 @@ send_message.openapi(route, async (c) => {
     const response = await fetch(`${process.env.BACKEND_IA_URL}/chat`, {
         method: "POST",
         body: JSON.stringify(history),
-        headers: {
-            "Content-Type": "application/json",
-            "bearer-token": 'beuteu',
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.BACKEND_IA_TOKEN}` },
     });
 
-    if (!response.ok) {
-        console.error("Fetch failed with status:", response.status);
-        console.error("Fetch response:", await response.text());
-        return c.json({ error: "Error from external chat service" }, 500);
-    }
+if (!response.ok) {
+    console.error("Fetch failed with status:", response.status);
+    console.error("Fetch response:", await response.text());
+    return c.json({ error: "Error from external chat service" }, 500);
+}
 
-    const body = await response.json();
-    history.push({ role: "assistant", content: body.content });
+const body = await response.json();
+history.push({ role: "assistant", content: body.content });
 
-    const { data, error: err } = await supabase
-        .from('conversations')
-        .update({ history: history })
-        .eq('id', conv.id)
-        .single();
+const { data, error: err } = await supabase
+    .from('conversations')
+    .update({ history: history })
+    .eq('id', conv.id)
+    .single();
 
-    if (data == undefined && err) {
-        return c.json({ error: err.message }, 500);
-    }
+if (data == undefined && err) {
+    return c.json({ error: err.message }, 500);
+}
 
-    return c.json({ response: body.content, id: conv.id }, 200);
+return c.json({ response: body.content, id: conv.id }, 200);
 }, (result, c) => {
     if (!result.success) {
         return c.json({ error: "Param validation error" }, 401);
