@@ -8,6 +8,9 @@ RUN bun install
 
 COPY . .
 
+COPY .env .env
+
+
 EXPOSE 3000
 
 CMD ["bun", "run", "--hot", "src/index.ts"]
