@@ -1,4 +1,4 @@
-FROM oven/bun:latest
+FROM oven/bun:latest AS build
 
 WORKDIR /app
 
@@ -8,9 +8,14 @@ RUN bun install
 
 COPY . .
 
-COPY .env .env
+RUN bun run build
 
+FROM oven/bun:latest
+
+WORKDIR /app
+
+COPY --from=build /app/dist .
 
 EXPOSE 3000
 
-CMD ["bun", "run", "--hot", "src/index.ts"]
+CMD ["bun", "run", "index.js"]
