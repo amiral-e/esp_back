@@ -6,26 +6,19 @@ const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC
 
 const route = createRoute({
     method: 'get',
-    path: '/',
+    path: '/:conv_id',
     request: {
-        body: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        access_token: z.string(),
-                        refresh_token: z.string(),
-                        conv_id: z.string()
-                    }),
-                }
-            }
-        }
+        headers: z.object({
+            access_token: z.string(),
+            refresh_token: z.string(),
+        }),
     },
     responses: {
         200: {
             content: {
                 'application/json': {
                     schema: z.object({
-                        conv: z.object({}),
+                        conv: z.string({}),
                         id: z.string(),
                     }),
                 },
@@ -66,7 +59,8 @@ const route = createRoute({
 })
 
 get_conversation.openapi(route, async (c) => {
-    const {access_token, refresh_token, conv_id} = c.req.query()
+    const { conv_id } = c.req.param()
+    const { access_token, refresh_token } = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
