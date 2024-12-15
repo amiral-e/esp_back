@@ -10,17 +10,17 @@ import get_global_documents from "./get_global_documents";
 import post_admin_collection from "./post_admin_collection";
 import post_collection from './post_collection'
 
-const routes_collecs = new OpenAPIHono()
+const collections = new OpenAPIHono()
 
-routes_collecs.route('/global', delete_admin_collection)
-routes_collecs.route('/global', delete_admin_document)
-routes_collecs.route('/', delete_collection)
-routes_collecs.route('/', delete_document)
-routes_collecs.route('/', get_collections)
-routes_collecs.route('/', get_documents)
-routes_collecs.route('/global', get_global_collections)
-routes_collecs.route('/global', get_global_documents)
-routes_collecs.route('/global', post_admin_collection)
-routes_collecs.route('/', post_collection)
+collections.route('/global', delete_admin_collection)
+collections.route('/global', delete_admin_document)
+collections.route('/', delete_collection)
+collections.route('/', delete_document)
+collections.route('/', get_collections)
+collections.route('/', get_documents)
+collections.route('/global', get_global_collections)
+collections.route('/global', get_global_documents)
+collections.route('/global', post_admin_collection)
+collections.route('/', post_collection)
 
-export default routes_collecs
+export default collections

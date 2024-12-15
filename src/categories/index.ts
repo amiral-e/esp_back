@@ -3,10 +3,10 @@ import insert_categories from "./insert_category.ts";
 import delete_categories from "./delete_category.ts";
 import edit_categories from "./edit_category.ts";
 
-const routes_category = new OpenAPIHono()
+const categories = new OpenAPIHono()
 
-routes_category.route('/', insert_categories)
-routes_category.route('/', delete_categories)
-routes_category.route('/', edit_categories)
+categories.route('/', insert_categories)
+categories.route('/', delete_categories)
+categories.route('/', edit_categories)
 
-export default routes_category
+export default categories
