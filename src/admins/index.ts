@@ -1,10 +1,10 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import insert_admins from "./insert_admin.ts";
-import delete_admins from "./delete_admin.ts";
+import admin_delete from "./admin_delete.ts";
+import admin_insert from "./admin_insert.ts";
 
-const routes_admin = new OpenAPIHono()
+const admin = new OpenAPIHono()
 
-routes_admin.route('/', insert_admins)
-routes_admin.route('/', delete_admins)
+admin.route('/', admin_delete)
+admin.route('/', admin_insert)
 
-export default routes_admin
+export default admin
