@@ -14,7 +14,7 @@ const route = createRoute({
             refresh_token: z.string(),
         }),
         params: z.object({
-            conv_name: z.string(),
+            conv_name: z.string({}),
         }),
     },
     responses: {
@@ -52,13 +52,18 @@ const route = createRoute({
 })
 
 post_conversation.openapi(route, async (c) => {
-    const { conv_name } = c.req.param()
+    const { conv_name } = c.req.param();
     const { access_token, refresh_token } = c.req.header()
 
-    const session = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-    })
+    let session
+    try {
+        session = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+        })
+    } catch (_) {
+        return c.json({ error: "Invalid credentials" }, 401)
+    }
 
     const { data: conv, error } = await supabase
         .from('conversations')

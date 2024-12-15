@@ -75,10 +75,15 @@ update_conversation.openapi(route, async (c) => {
     const { conv_id } = c.req.param()
     const { access_token, refresh_token } = c.req.header()
 
-    const session = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-    })
+    let session
+    try {
+        session = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+        })
+    } catch (_) {
+        return c.json({ error: "Invalid credentials" }, 401)
+    }
 
     const { data: conv, error } = await supabase
         .from('conversations')
@@ -93,7 +98,7 @@ update_conversation.openapi(route, async (c) => {
     else if (error)
         return c.json({ error: error.message }, 500)
 
-    return c.json({ message: `Conversation ${conv.id}'s name updated from ${conv.name} to ${name}` }, 200)
+    return c.json({ message: `Conversation ${conv.id}'s name updated to ${name}` }, 200)
 }, (result, c) => {
     if (!result.success) {
         return c.json({ error: "Param validation error" }, 401)

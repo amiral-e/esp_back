@@ -67,10 +67,15 @@ get_conversation.openapi(route, async (c) => {
     const { conv_id } = c.req.param()
     const { access_token, refresh_token } = c.req.header()
 
-    const session = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-    })
+    let session
+    try {
+        session = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+        })
+    } catch (_) {
+        return c.json({ error: "Invalid credentials" }, 401)
+    }
 
     const { data: conv, error } = await supabase
         .from('conversations')
