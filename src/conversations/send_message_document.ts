@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const send_message = new OpenAPIHono()
+const send_message_document = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 
 const route = createRoute({
     method: 'post',
-    path: '/',
+    path: '/:collection_name',
     request: {
         body: {
             content: {
@@ -22,6 +22,7 @@ const route = createRoute({
             'content-type': z.string(),
             access_token: z.string(),
             refresh_token: z.string(),
+            uid: z.string(),
         }),
     },
     responses: {
@@ -69,80 +70,60 @@ const route = createRoute({
     },
 })
 
-send_message.openapi(route, async (c) => {
-    const { conv_id, message } = c.req.valid('json');
-    const { access_token, refresh_token } = c.req.header();
+send_message_document.openapi(route, async (c) => {
+    const collection_name = c.req.param()
+    const {conv_id, message} = c.req.valid('json')
+    const {access_token, refresh_token, uid} = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
         refresh_token,
-    });
+    })
 
-    // Vérifiez et insérez une nouvelle conversation si conv_id == 0
-    if (Number(conv_id) == 0) {
-        const { data: conv, error } = await supabase
-            .from('conversations')
-            .insert({ history: [], name: 'New conversation', user_id: session.data.user?.id })
-            .select('*')
-            .single();
-
-        if (conv == undefined && error) {
-            return c.json({ error: error.message }, 500);
+    const {conv, error} = await (async () => {
+        if (Number(conv_id) == 0) {
+            const {data: conv, error} = await supabase
+                .from('conversations')
+                .insert({history: [], name: 'New conversation', user_id: session.data.user?.id}).select('*').single()
+            return {conv, error}
+        } else {
+            const {data: conv, error} = await supabase
+                .from('conversations')
+                .select('*')
+                .eq('id', conv_id)
+                .single()
+            return {conv, error}
         }
+    })();
 
-        return c.json({ response: "Conversation created successfully", id: conv.id }, 200);
-    }
+    if (conv == undefined && error)
+        return c.json({error: error.message}, 500)
+    else if (conv.length == 0)
+        return c.json({error: 'Conversation not found'}, 404)
+    var history = conv.history
+    history.push({role: "user", content: message})
 
-    // Récupérez la conversation existante si conv_id != 0
-    const { data: conv, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('id', conv_id)
-        .single();
-
-    if (conv == undefined && error) {
-        return c.json({ error: error.message }, 500);
-    } else if (conv.length == 0) {
-        return c.json({ error: 'Conversation not found' }, 404);
-    }
-
-    var history = conv.history;
-    history.push({ role: "user", content: message });
-
-    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat`, {
+    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat/${collection_name}`, {
         method: "POST",
         body: JSON.stringify(history),
-      headers: { 
+        headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.BEARER_TOKEN}`
+            "Authorization": `Bearer ${process.env.BEARER_TOKEN}`,
+            "uid": uid,
         },
     });
+    
+    const body = await response.json();
+    history.push({role: "assistant", content: body.content})
+    const {data, error: err} = await supabase.from('conversations').update({history: history}).eq('id', conv.id).single()
 
-if (!response.ok) {
-    console.error("Fetch failed with status:", response.status);
-    console.error("Fetch response:", await response.text());
-    return c.json({ error: "Error from external chat service" }, 500);
-}
-
-const body = await response.json();
-history.push({ role: "assistant", content: body.content });
-
-const { data, error: err } = await supabase
-    .from('conversations')
-    .update({ history: history })
-    .eq('id', conv.id)
-    .single();
-
-if (data == undefined && err) {
-    return c.json({ error: err.message }, 500);
-}
-
-return c.json({ response: body.content, id: conv.id }, 200);
+    if (data == undefined && err)
+        return c.json({error: err.message}, 500)
+    return c.json({response: body.content, id: conv.id}, 200)
 }, (result, c) => {
     if (!result.success) {
-        return c.json({ error: "Param validation error" }, 401);
+        return c.json({error: "Param validation error"}, 401)
     }
-});
+})
 
-
-export default send_message;        
+export default send_message_document;
