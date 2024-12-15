@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const post_collection = new OpenAPIHono()
+const post_global_collection = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 const bearer_token = process.env.BEARER_TOKEN || ''
 const backend_ia_url = process.env.BACKEND_IA_URL || ''
@@ -60,7 +60,7 @@ const route = createRoute({
     },
 })
 
-post_collection.openapi(route, async (c) => {
+post_global_collection.openapi(route, async (c) => {
     const body = await c.req.parseBody({ all: true })
     const files = body.files
     const { collection_name } = c.req.param()
@@ -75,15 +75,19 @@ post_collection.openapi(route, async (c) => {
         return c.json({ error: 'Unauthorized' }, 401)
     }
 
+    const {data, error} = await supabase.from('admins').select('*').eq('user_id', session.data.user?.id).single()
+    if (error || !data) {
+        return c.json({ error: 'Unauthorized' }, 401)
+    }
+
     const formData = new FormData();
     for (const file of Array.from(files)) {
         formData.append('files', file);
     }
-    console.log(formData)
 
     const headers = new Headers();
     headers.append("Authorization", `Bearer ${bearer_token}`);
-    headers.append("uid", String(session.data.user?.id));
+    headers.append("uid", 'global');
     const response = await fetch(`${backend_ia_url}/collections/${collection_name}`, {
         method: "POST",
         body: formData,
@@ -101,4 +105,4 @@ post_collection.openapi(route, async (c) => {
     }
 })
 
-export default post_collection
+export default post_global_collection

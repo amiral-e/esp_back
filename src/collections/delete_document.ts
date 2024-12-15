@@ -1,26 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const post_collection = new OpenAPIHono()
+const delete_document = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 const bearer_token = process.env.BEARER_TOKEN || ''
 const backend_ia_url = process.env.BACKEND_IA_URL || ''
 
 const route = createRoute({
-    method: 'post',
-    path: '/:collection_name',
+    method: 'delete',
+    path: '/:collection_name/documents/:document_id',
     request: {
-        body: {
-            content: {
-                'multipart/form-data': {
-                    schema: z.object({
-                        files: z.array(z.instanceof(File))
-                    })
-                }
-            }
-        },
         headers: z.object({
-            'content-type': z.string(),
             access_token: z.string(),
             refresh_token: z.string(),
             uid: z.string(),
@@ -35,7 +25,7 @@ const route = createRoute({
                     }),
                 },
             },
-            description: 'Collection uploaded',
+            description: 'Document deleted',
         },
         500: {
             content: {
@@ -60,11 +50,9 @@ const route = createRoute({
     },
 })
 
-post_collection.openapi(route, async (c) => {
-    const body = await c.req.parseBody({ all: true })
-    const files = body.files
-    const { collection_name } = c.req.param()
-    const {access_token, refresh_token, uid} = c.req.header()
+delete_document.openapi(route, async (c) => {
+    const { collection_name, document_id } = c.req.param()
+    const { access_token, refresh_token, uid } = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
@@ -73,32 +61,22 @@ post_collection.openapi(route, async (c) => {
 
     if (!session || uid !== session.data.user?.id) {
         return c.json({ error: 'Unauthorized' }, 401)
-    }
+    }    
 
-    const formData = new FormData();
-    for (const file of Array.from(files)) {
-        formData.append('files', file);
-    }
-    console.log(formData)
-
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${bearer_token}`);
-    headers.append("uid", String(session.data.user?.id));
-    const response = await fetch(`${backend_ia_url}/collections/${collection_name}`, {
-        method: "POST",
-        body: formData,
-        headers: headers,
+    const response = await fetch(`${backend_ia_url}/collections/${collection_name}/documents/${document_id}`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${bearer_token}`,
+            'uid': String(session.data.user?.id),
+        },
     });
 
     if (!response.ok) {
         return c.json({ error: 'Internal server error' }, 500)
     }
 
-    return c.json({ response: 'Collection uploaded' }, 200)
-}, (result, c) => {
-    if (!result.success) {
-        return c.json({error: "Param validation error"}, 401)
-    }
+    return c.json({ response: 'Document deleted' }, 200)
 })
 
-export default post_collection
+export default delete_document

@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const send_message = new OpenAPIHono()
+const send_message_document = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 
 const route = createRoute({
     method: 'post',
-    path: '/',
+    path: '/:collection_name',
     request: {
         body: {
             content: {
@@ -22,6 +22,7 @@ const route = createRoute({
             'content-type': z.string(),
             access_token: z.string(),
             refresh_token: z.string(),
+            uid: z.string(),
         }),
     },
     responses: {
@@ -69,9 +70,10 @@ const route = createRoute({
     },
 })
 
-send_message.openapi(route, async (c) => {
+send_message_document.openapi(route, async (c) => {
+    const collection_name = c.req.param()
     const {conv_id, message} = c.req.valid('json')
-    const {access_token, refresh_token} = c.req.header()
+    const {access_token, refresh_token, uid} = c.req.header()
 
     const session = await supabase.auth.setSession({
         access_token,
@@ -101,12 +103,13 @@ send_message.openapi(route, async (c) => {
     var history = conv.history
     history.push({role: "user", content: message})
 
-    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat`, {
+    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat/${collection_name}`, {
         method: "POST",
         body: JSON.stringify(history),
         headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.BEARER_TOKEN}`
+            "Authorization": `Bearer ${process.env.BEARER_TOKEN}`,
+            "uid": uid,
         },
     });
     
@@ -123,4 +126,4 @@ send_message.openapi(route, async (c) => {
     }
 })
 
-export default send_message;        
+export default send_message_document;
