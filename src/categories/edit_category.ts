@@ -1,13 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const insert_category = new OpenAPIHono()
+const edit_categories = new OpenAPIHono()
 const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 
 const route = createRoute({
-    method: 'post',
-    path: '/',
+    method: 'put',
+    path: '/{id}',
     request: {
+        params: z.object({ id: z.string() }),
         body: {
             content: {
                 'application/json': {
@@ -28,7 +29,7 @@ const route = createRoute({
                     }),
                 },
             },
-            description: 'Creates the category',
+            description: 'Deletes the category',
         },
         500: {
             content: {
@@ -39,6 +40,17 @@ const route = createRoute({
                 },
             },
             description: 'Internal server error',
+        },
+
+        404: {
+            content: {
+                'application/json': {
+                    schema: z.object({
+                        error: z.string(),
+                    }),
+                },
+            },
+            description: 'Resource not found',
         },
         401: {
             content: {
@@ -53,13 +65,16 @@ const route = createRoute({
     },
 })
 
-insert_category.openapi(route, async (c) => {
+edit_categories.openapi(route, async (c) => {
+    const { id } = await c.req.valid('param')
     const body = await c.req.json()
-    const {data, error} = await supabase.from('categories').insert(body).select();
-    
+
+    const {data, error} = await supabase.from('categories').update(body).eq('id', id).select();
     if (data == undefined)
         return c.json({error: error.message}, 500)
+    else if (data.length == 0)
+        return c.json({error: `Category with ID ${id} not found` }, 404)
     return c.json({res: data}, 200)
 })
 
-export default insert_category;
+export default edit_categories;
