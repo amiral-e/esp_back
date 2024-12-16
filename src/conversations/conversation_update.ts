@@ -6,21 +6,21 @@ const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC
 
 const route = createRoute({
     method: 'patch',
-    path: '/{conv_id}',
+    path: '/:conv_id',
     tags: ['Conversations'],
     request: {
         body: {
             content: {
                 'application/json': {
                     schema: z.object({
-                        name: z.string(),
+                        name: z.string().min(1),
                     }),
                 }
             }
         },
         headers: z.object({
-            access_token: z.string(),
-            refresh_token: z.string(),
+            access_token: z.string().min(1),
+            refresh_token: z.string().min(1),
         }),
         params: z.object({
             conv_id: z.string(),

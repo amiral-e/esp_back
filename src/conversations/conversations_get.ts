@@ -10,8 +10,8 @@ const route = createRoute({
     tags: ['Conversations'],
     request: {
         headers: z.object({
-            access_token: z.string(),
-            refresh_token: z.string(),
+            access_token: z.string().min(1),
+            refresh_token: z.string().min(1),
         }),
     },
     responses: {

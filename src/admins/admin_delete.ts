@@ -10,14 +10,14 @@ const route = createRoute({
     tags: ['Admins'],
     request: {
         headers: z.object({
-            access_token: z.string(),
-            refresh_token: z.string(),
+            access_token: z.string().min(1),
+            refresh_token: z.string().min(1),
         }),
         body: {
             content: {
                 'application/json': {
                     schema: z.object({
-                        user_id: z.string(),
+                        user_id: z.string().min(1),
                     }),
                 }
             }

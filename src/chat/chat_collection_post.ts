@@ -6,7 +6,7 @@ const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC
 
 const route = createRoute({
     method: 'post',
-    path: '/{conv_id}/{collec_name}',
+    path: '/:conv_id/:collec_name',
     tags: ['Chat'],
     request: {
         params: z.object({
@@ -17,14 +17,14 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        message: z.string(),
+                        message: z.string().min(1),
                     }),
                 }
             }
         },
         headers: z.object({
-            access_token: z.string(),
-            refresh_token: z.string(),
+            access_token: z.string().min(1),
+            refresh_token: z.string().min(1),
         }),
     },
     responses: {
@@ -44,7 +44,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
@@ -114,12 +114,10 @@ post_chat_collection.openapi(route, async (c) => {
     });
 
     if (!response.ok) {
+        let error = await response.text()
         console.error("Fetch failed with status:", response.status);
-        console.error("Fetch response:", await response.text());
-        if (response.status == 404)
-            return c.json({ error: `Collection ${collec_name} not found` }, 404);
-        else
-            return c.json({ error: "Error from ai service" }, 500);
+        console.error("Fetch response:", error);
+        return c.json({ error: error }, 500);
     }
 
     const body = await response.json();
