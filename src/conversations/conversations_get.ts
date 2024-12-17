@@ -29,7 +29,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
@@ -39,7 +39,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
@@ -49,7 +49,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
