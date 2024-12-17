@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
 const get_global_collections = new OpenAPIHono()
-const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
 const backend_ia_url = process.env.BACKEND_IA_URL || ''
 const bearer_token = process.env.BEARER_TOKEN || ''
 
@@ -10,10 +9,6 @@ const route = createRoute({
     method: 'get',
     path: '/',
     request: {
-        headers: z.object({
-            access_token: z.string(),
-            refresh_token: z.string(),
-        }),
     },
     responses: {
         200: {
@@ -30,7 +25,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
@@ -40,7 +35,7 @@ const route = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        error: z.string(),
+                        error: z.any(),
                     }),
                 },
             },
@@ -50,27 +45,24 @@ const route = createRoute({
 })
 
 get_global_collections.openapi(route, async (c) => {
-    const { access_token, refresh_token } = c.req.header()
+    const headers = new Headers();
+    headers.append("Authorization", `Bearer ${bearer_token}`);
+    headers.append("uid", 'global');
 
-    const session = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-    })
-    
-    const response = await fetch(`${backend_ia_url}/collections/`, {
+    const response = await fetch(`${backend_ia_url}/collections`, {
         method: "GET",
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${bearer_token}`,
-            'uid': 'global',
-        },
+        headers: headers,
     });
-    if (!response.ok) {
-        return c.json({ error: 'Internal server error' }, 500)
-    }
-    const res = await response.json()
 
-    return c.json({ response: res }, 200)
+    if (!response.ok) {
+        let error = await response.json()
+        console.error("Fetch failed with status:", response.status);
+        console.error("Fetch response:", error);
+        return c.json({ error: error }, 500);
+    }
+
+    const res = await response.json()
+    return c.json({ response: res.collections }, 200)
 }, (result, c) => {
     if (!result.success) {
         return c.json({error: "Param validation error"}, 401)
