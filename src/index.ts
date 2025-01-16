@@ -1,29 +1,66 @@
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 
-import routes_admin from "./admins/index.ts";
-import routes_category from "./categories/index.ts";
-import routes_convs from "./conversations/index.ts";
+import admin from "./admins/index.ts";
+import categories from "./categories/index.ts";
+import conversations from "./conversations/index.ts";
+import collections from "./collections/index.ts";
+import documents from "./documents/index.ts";
+import chat from "./chat/index.ts";
+import global from "./global/index.ts";
 
-const app = new OpenAPIHono();
+import { decode, sign, verify } from 'hono/jwt'
 
-app.doc("/doc", {
-	openapi: "3.0.0",
-	info: {
-		version: "1.0.0",
-		title: "My API",
-	},
-});
+import config from './config.ts';
+import AuthMiddleware from './auth_middleware.ts';
 
-app.get("/docs", swaggerUI({ url: "/doc" }));
+import { Hono } from "hono";
+
+const app = new Hono();
+
+// app.doc("/doc", {
+// 	openapi: "3.0.0",
+// 	info: {
+// 		version: "1.0.0",
+// 		title: "My API",
+// 	},
+// });
+
+// app.get("/docs", swaggerUI({ url: "/doc" }));
 
 app.get("/", (c) => {
-	return c.text("Hello Hono!");
+	return c.json({
+		message: "Hello World",
+		supabaseClient: config.supabaseClient != null,
+	});
 });
 
-app.route('/admins', routes_admin);
-app.route('/categories', routes_category);
-app.route('/convs', routes_convs);
+// const temp = new OpenAPIHono();
+
+// AuthMiddleware
+// const user = c.get('user');
+
+
+app.get("/test", async (c) => {
+	const payload = {
+		uid: '83774a5e-285f-4b98-b35a-12b3b753f99e',
+	}
+	const token = await sign(payload, config.envVars.JWT_SECRET);
+	console.log(token);
+	// const user = c.get('user');
+	return c.json({
+		message: "Hello World",
+    	// user: user,
+	});
+})
+
+app.route('/admins', admin);
+// // app.route('/categories', categories);
+app.route('/conversations', conversations);
+app.route('/collections', collections);
+app.route('/collections', documents);
+app.route('/global', global);
+app.route('/chat', chat);
 
 console.log("Server running on port 3000");
 
@@ -31,3 +68,4 @@ export default {
 	port: 3000,
 	fetch: app.fetch,
 };
+

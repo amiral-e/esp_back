@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
 const insert_category = new OpenAPIHono()
-const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
+const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_KEY || '')
 
 const route = createRoute({
     method: 'post',
