@@ -4,8 +4,15 @@ import { Hono } from "hono";
 
 const document_post = new Hono();
 
-document_post.post('/:collection_name/documents', AuthMiddleware, async (c: any) => {
+document_post.post('/collections/:collection_name/documents', AuthMiddleware, async (c: any) => {
     const user = c.get('user');
+
+    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
+    if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
+        adminsData.find((admin: any) => admin.user_id == user.uid) == undefined
+    )
+        return c.json({ error: "You don't have admin privileges" }, 401);
+
     const { collection_name } = c.req.param();
 
     const json = await c.req.parseBody({ all: true });
@@ -18,10 +25,9 @@ document_post.post('/:collection_name/documents', AuthMiddleware, async (c: any)
     } else
         formData.append('files', files);
 
-
     const headers = new Headers();
     headers.append("Authorization", `Bearer ${config.envVars.BEARER_TOKEN}`);
-    headers.append("uid", user.uid);
+    headers.append("uid", 'global');
 
     let response: any;
     try {

@@ -1,11 +1,11 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "hono";
 
 import admin_delete from "./admin_delete.ts";
 import admin_insert from "./admin_insert.ts";
 
-const admin = new OpenAPIHono()
+const admin = new Hono();
 
-admin.route('/', admin_delete)
-admin.route('/', admin_insert)
+admin.route('/', admin_delete);
+admin.route('/', admin_insert);
 
-export default admin
+export default admin;

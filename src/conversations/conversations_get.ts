@@ -1,90 +1,18 @@
-import { createClient } from '@supabase/supabase-js'
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import config from "../config";
+import AuthMiddleware from "../auth_middleware";
+import { Hono } from "hono";
 
-const get_conversations = new OpenAPIHono()
-const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
+const conversations_get = new Hono();
 
-const route = createRoute({
-    method: 'get',
-    path: '/',
-    tags: ['Conversations'],
-    request: {
-        headers: z.object({
-            access_token: z.string().min(1),
-            refresh_token: z.string().min(1),
-        }),
-    },
-    responses: {
-        200: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        convs: z.array(z.object({})),
-                    }),
-                },
-            },
-            description: 'Get user conversations',
-        },
-        500: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Internal server error',
-        },
-        401: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Validation error',
-        },
-        404: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Conversation not found',
-        },
-    },
+conversations_get.get(AuthMiddleware, async (c: any) => {
+    const user = c.get('user');
+
+    const { data, error } = await config.supabaseClient.from('conversations').select('*').eq('user_id', user.uid);
+    if (data == undefined || data.length == 0)
+        return c.json({ error: "No conversations found" }, 404);
+    else if (error != undefined)
+        return c.json({ error: error.message }, 500);
+    return c.json({ conversations: data }, 200);
 })
 
-get_conversations.openapi(route, async (c) => {
-    const { access_token, refresh_token } = c.req.header()
-
-    let session
-    try {
-        session = await supabase.auth.setSession({
-            access_token,
-            refresh_token
-        })
-    } catch (_) {
-        return c.json({ error: "Invalid credentials" }, 401)
-    }
-
-    const { data: conv, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('user_id', session.data.user?.id)
-
-    if (conv == undefined && error)
-        return c.json({ error: error.message }, 500)
-    else if (conv.length == 0)
-        return c.json({ error: 'Conversation not found' }, 404)
-    return c.json({ convs: conv }, 200)
-}, (result, c) => {
-    if (!result.success) {
-        return c.json({ error: "Param validation error" }, 401)
-    }
-})
-
-export default get_conversations;
+export default conversations_get;

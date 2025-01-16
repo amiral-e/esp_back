@@ -1,144 +1,59 @@
-import { createClient } from '@supabase/supabase-js'
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import config from '../config.ts';
+import AuthMiddleware from "../auth_middleware.ts";
+import { Hono } from "hono";
 
-const post_chat_collection = new OpenAPIHono()
-const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
+const chat_collection_post = new Hono()
 
-const route = createRoute({
-    method: 'post',
-    path: '/:conv_id/:collec_name',
-    tags: ['Chat'],
-    request: {
-        params: z.object({
-            conv_id: z.string(),
-            collec_name: z.string(),
-        }),
-        body: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        message: z.string().min(1),
-                    }),
-                }
-            }
-        },
-        headers: z.object({
-            access_token: z.string().min(1),
-            refresh_token: z.string().min(1),
-        }),
-    },
-    responses: {
-        200: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        role: z.string(),
-                        content: z.string(),
-                        sources: z.array(z.object({})),
-                    }),
-                },
-            },
-            description: 'Send the message',
-        },
-        500: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Internal server error',
-        },
-        401: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Validation error',
-        },
-        404: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Conversation not found',
-        },
-    },
-})
-
-post_chat_collection.openapi(route, async (c) => {
-    const { message } = c.req.valid('json');
-    const { conv_id, collec_name } = c.req.param();
-    const { access_token, refresh_token } = c.req.header();
-
-    let session
+chat_collection_post.post('/conversations/:conv_id/collections/:collec_name', AuthMiddleware, async (c: any) => {
+    const user = c.get('user');
+    let json: any;
     try {
-        session = await supabase.auth.setSession({
-            access_token,
-            refresh_token
-        })
-    } catch (_) {
-        return c.json({ error: "Invalid credentials" }, 401)
+        json = await c.req.json();
+        if (!json || json.message == undefined)
+            return c.json({ error: 'Invalid JSON' }, 400);
+    } catch (error) {
+        return c.json({ error: 'Invalid JSON' }, 400);
     }
+    const { conv_id, collec_name } = c.req.param();
 
-    const { data: conv, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('user_id', session.data.user?.id)
-        .eq('id', conv_id)
-        .single();
-
-    if (conv == undefined || conv.length == 0)
+    const { data: convData, error: convError } = await config.supabaseClient.from('conversations').select('*').eq('user_id', user.uid).eq('id', conv_id).single();
+    if (convData == undefined || convData.length == 0)
         return c.json({ error: 'Conversation not found' }, 404);
-    else if (error)
-        return c.json({ error: error.message }, 500);
+    else if (convError)
+        return c.json({ error: convError.message }, 500);
 
-    var history = conv.history;
-    history.push({ role: "user", content: message });
+    var history = convData.history;
+    history.push({ role: "user", content: json.message });
 
-    const response = await fetch(`${process.env.BACKEND_IA_URL}/chat/${collec_name}`, {
-        method: "POST",
-        body: JSON.stringify(history),
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.BEARER_TOKEN}`,
-            "uid": session.data.user?.id || '',
-        },
-    });
-
-    if (!response.ok) {
-        let error = await response.text()
-        console.error("Fetch failed with status:", response.status);
-        console.error("Fetch response:", error);
-        return c.json({ error: error }, 500);
+    let response: any;
+    try {
+        response = await fetch(`${config.envVars.IA_URL}/chat/${collec_name}`, {
+            method: "POST",
+            body: JSON.stringify(history),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${config.envVars.BEARER_TOKEN}`,
+                "uid": user.uid,
+            },
+        });
+    } catch (error: any) {
+        if (error instanceof Error) {
+            console.error("Fetch failed with error:", error.message);
+            return c.json({ error: error.message }, 500);
+        } else {
+            console.error("Fetch failed with unknown error:", error);
+            return c.json({ error: 'Unknown error' }, 500);
+        }
     }
 
     const body = await response.json();
     history.push({ role: "assistant", content: body.content });
 
-    const { data, error: err } = await supabase
-        .from('conversations')
-        .update({ history: history })
-        .eq('id', conv.id)
-        .single();
-
-    if (data == undefined && err) {
-        return c.json({ error: err.message }, 500);
-    }
-
-    return c.json({ role: "assistant", content: body.content, sources: body.sources }, 200);
-}, (result, c) => {
-    if (!result.success) {
-        return c.json({ error: "Param validation error" }, 401);
-    }
+    const { data: updateData, error: updateError } = await config.supabaseClient.from('conversations').update({ history: history }).eq('id', convData.id);
+    if (updateError)
+        return c.json({ error: updateError.message }, 500);
+    return c.json({ role: "assistant", content: body.content, sources: body.sources }, 200)
 });
 
 
-export default post_chat_collection;        
+export default chat_collection_post;        

@@ -4,10 +4,17 @@ import { Hono } from "hono";
 
 const documents_get = new Hono();
 
-documents_get.get('/:collection_name/documents', AuthMiddleware, async (c: any) => {
+documents_get.get('/collections/:collection_name/documents', AuthMiddleware, async (c: any) => {
     const user = c.get('user');
+
+    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
+    if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
+        adminsData.find((admin: any) => admin.user_id == user.uid) == undefined
+    )
+        return c.json({ error: "You don't have admin privileges" }, 401);
+
     const { collection_name } = c.req.param();
-    const table_name = user.uid + '_' + collection_name;
+    const table_name = 'global_' + collection_name;
 
     const { data, error } = await config.supabaseClient.schema('vecs').from(table_name).select('*');
     if (data == undefined || data.length == 0)

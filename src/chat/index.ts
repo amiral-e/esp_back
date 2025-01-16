@@ -1,11 +1,11 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
 
-import post_chat from "./chat_post";
-import post_chat_collection from "./chat_collection_post";
+import chat_post from "./chat_post";
+import chat_collection_post from "./chat_collection_post";
+import { Hono } from "hono";
 
-const chat = new OpenAPIHono()
+const chat = new Hono()
 
-chat.route('/', post_chat)
-chat.route('/', post_chat_collection)
+chat.route('/', chat_post)
+chat.route('/', chat_collection_post)
 
 export default chat

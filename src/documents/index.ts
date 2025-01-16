@@ -1,11 +1,13 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "hono";
 
-import document_post from './document_post'
+import document_post from './document_post';
 import document_delete from "./document_delete";
+import documents_get from "./documents_get";
 
-const collections = new OpenAPIHono()
+const documents = new Hono();
 
-collections.route('/', document_post)
-collections.route('/', document_delete)
+documents.route('/', document_post);
+documents.route('/', document_delete);
+documents.route('/', documents_get);
 
-export default collections
+export default documents;

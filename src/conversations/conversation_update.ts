@@ -1,108 +1,24 @@
-import { createClient } from '@supabase/supabase-js'
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import config from "../config";
+import AuthMiddleware from "../auth_middleware";
+import { Hono } from "hono";
 
-const update_conversation = new OpenAPIHono()
-const supabase = createClient(process.env.DATABASE_URL || '', process.env.PUBLIC_API_KEY || '')
+const conversation_update = new Hono();
 
-const route = createRoute({
-    method: 'patch',
-    path: '/:conv_id',
-    tags: ['Conversations'],
-    request: {
-        body: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        name: z.string().min(1),
-                    }),
-                }
-            }
-        },
-        headers: z.object({
-            access_token: z.string().min(1),
-            refresh_token: z.string().min(1),
-        }),
-        params: z.object({
-            conv_id: z.string(),
-        }),
-    },
-    responses: {
-        200: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        message: z.object({}),
-                    }),
-                },
-            },
-            description: 'Updated conversation name',
-        },
-        500: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Internal server error',
-        },
-        401: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Validation error',
-        },
-        404: {
-            content: {
-                'application/json': {
-                    schema: z.object({
-                        error: z.any(),
-                    }),
-                },
-            },
-            description: 'Conversation not found',
-        },
-    },
+conversation_update.patch('/:conv_id', AuthMiddleware, async (c: any) => {
+    const user = c.get('user');
+    const json = await c.req.json();
+    const { conv_id } = c.req.param();
+
+    const { data: convData, error: convError } = await config.supabaseClient.from('conversations').select('*').eq('user_id', user.uid).eq('id', conv_id).single();
+    if (convData == undefined || convData.length == 0)
+        return c.json({ error: "Conversation not found" }, 404);
+    else if (convError != undefined)
+        return c.json({ error: convError.message }, 500);
+
+    const { data: updateData, error: updateError } = await config.supabaseClient.from('conversations').update({ name: json.name }).eq('id', convData.id);
+    if (updateData == undefined || updateError != undefined)
+        return c.json({ error: updateError.message }, 500);
+    return c.json({ message: `Conversation ${convData.id} updated successfully` }, 200);
 })
 
-update_conversation.openapi(route, async (c) => {
-    const { name } = c.req.valid('json')
-    const { conv_id } = c.req.param()
-    const { access_token, refresh_token } = c.req.header()
-
-    let session
-    try {
-        session = await supabase.auth.setSession({
-            access_token,
-            refresh_token
-        })
-    } catch (_) {
-        return c.json({ error: "Invalid credentials" }, 401)
-    }
-
-    const { data: conv, error } = await supabase
-        .from('conversations')
-        .update({ name: name })
-        .eq('user_id', session.data.user?.id)
-        .eq('id', conv_id)
-        .select('*')
-        .single()
-
-    if (conv == undefined || conv.length == 0)
-        return c.json({ error: "Conversation not found" }, 404)
-    else if (error)
-        return c.json({ error: error.message }, 500)
-
-    return c.json({ message: `Conversation ${conv.id}'s name updated to ${name}` }, 200)
-}, (result, c) => {
-    if (!result.success) {
-        return c.json({ error: "Param validation error" }, 401)
-    }
-})
-
-export default update_conversation;
+export default conversation_update;

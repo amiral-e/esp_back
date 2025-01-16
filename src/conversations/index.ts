@@ -1,17 +1,17 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "hono";
 
-import post_conversation from "./conversation_post";
-import get_conversation from "./conversation_get";
-import update_conversation from "./conversation_update";
-import delete_conversation from "./conversation_delete";
-import get_conversations from "./conversations_get";
+import conversation_post from "./conversation_post";
+import conversation_get from "./conversation_get";
+import conversation_update from "./conversation_update";
+import conversation_delete from "./conversation_delete";
+import conversations_get from "./conversations_get";
 
-const conversations = new OpenAPIHono()
+const conversations = new Hono();
 
-conversations.route('/', post_conversation)
-conversations.route('/', get_conversation)
-conversations.route('/', get_conversations)
-conversations.route('/', update_conversation)
-conversations.route('/', delete_conversation)
+conversations.route('/', conversation_post);
+conversations.route('/', conversation_get);
+conversations.route('/', conversation_update);
+conversations.route('/', conversation_delete);
+conversations.route('/', conversations_get);
 
-export default conversations
+export default conversations;
