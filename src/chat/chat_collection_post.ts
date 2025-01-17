@@ -15,6 +15,8 @@ chat_collection_post.post('/conversations/:conv_id/collections/:collec_name', Au
         return c.json({ error: 'Invalid JSON' }, 400);
     }
     const { conv_id, collec_name } = c.req.param();
+    if (!collec_name.startsWith("global_") && !collec_name.startsWith(user.uid + "_"))
+        return c.json({ error: "Invalid collection name" }, 400);
 
     const { data: convData, error: convError } = await config.supabaseClient.from('conversations').select('*').eq('user_id', user.uid).eq('id', conv_id).single();
     if (convData == undefined || convData.length == 0)
@@ -33,7 +35,6 @@ chat_collection_post.post('/conversations/:conv_id/collections/:collec_name', Au
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${config.envVars.BEARER_TOKEN}`,
-                "uid": user.uid,
             },
         });
     } catch (error: any) {
