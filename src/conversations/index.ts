@@ -8,10 +8,10 @@ import conversations_get from "./conversations_get";
 
 const conversations = new Hono();
 
-conversations.route('/', conversation_post);
-conversations.route('/', conversation_get);
-conversations.route('/', conversation_update);
-conversations.route('/', conversation_delete);
-conversations.route('/', conversations_get);
+conversations.route("/", conversation_post);
+conversations.route("/", conversation_get);
+conversations.route("/", conversation_update);
+conversations.route("/", conversation_delete);
+conversations.route("/", conversations_get);
 
 export default conversations;

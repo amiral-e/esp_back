@@ -37,16 +37,21 @@ const AdminMiddleware = async (c: any, next: any) => {
 		);
 		if (error) return c.json({ error: error.message }, 500);
 
-		const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
-		if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
-			adminsData.find((admin: any) => admin.user_id == decoded["uid"]) == undefined
+		const { data: adminsData, error: adminsError } = await config.supabaseClient
+			.from("admins")
+			.select("*");
+		if (
+			adminsData == undefined ||
+			adminsError != undefined ||
+			adminsData.length == 0 ||
+			adminsData.find((admin: any) => admin.user_id == decoded["uid"]) ==
+				undefined
 		)
 			return c.json({ error: "You don't have admin privileges" }, 401);
 
 		c.set("user", decoded);
 		return next();
-	}
-	catch (error) {
+	} catch (error) {
 		return c.json({ error: "Invalid authorization header" }, 401);
 	}
 };

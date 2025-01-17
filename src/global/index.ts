@@ -8,10 +8,10 @@ import documents_get from "./documents_get";
 
 const global = new Hono();
 
-global.route('/', collection_delete);
-global.route('/', collections_get);
-global.route('/', document_delete);
-global.route('/', document_post);
-global.route('/', documents_get);
+global.route("/", collection_delete);
+global.route("/", collections_get);
+global.route("/", document_delete);
+global.route("/", document_post);
+global.route("/", documents_get);
 
 export default global;

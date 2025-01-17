@@ -5,7 +5,7 @@ import admin_insert from "./admin_insert.ts";
 
 const admin = new Hono();
 
-admin.route('/', admin_delete);
-admin.route('/', admin_insert);
+admin.route("/", admin_delete);
+admin.route("/", admin_insert);
 
 export default admin;

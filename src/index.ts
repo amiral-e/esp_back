@@ -53,7 +53,7 @@ app.get("/test", async (c) => {
 });
 
 app.route("/admins", admin);
-app.route('/categories', categories);
+app.route("/categories", categories);
 app.route("/conversations", conversations);
 app.route("/collections", collections);
 app.route("/collections", documents);
