@@ -1,12 +1,15 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
-import insert_categories from "./insert_category.ts";
-import delete_categories from "./delete_category.ts";
-import edit_categories from "./edit_category.ts";
+import { Hono } from "hono";
 
-const categories = new OpenAPIHono()
+import category_post from "./category_post.ts";
+import category_delete from "./category_delete.ts";
+import category_put from "./category_put.ts";
+import categories_get from "./categories_get.ts";
 
-categories.route('/', insert_categories)
-categories.route('/', delete_categories)
-categories.route('/', edit_categories)
+const categories = new Hono();
 
-export default categories
+categories.route('/', category_post)
+categories.route("/", category_delete);
+categories.route('/', category_put)
+categories.route('/', categories_get)
+
+export default categories;

@@ -60,62 +60,6 @@
     },
     {
       "type": "folder",
-      "name": "chat",
-      "items": [
-        {
-          "type": "http",
-          "name": "chat collection",
-          "seq": 2,
-          "request": {
-            "url": "{{server}}/chat/conversations/144/collections/paul",
-            "method": "POST",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "json",
-              "json": "{\n  \"message\": \"Hello world again\"\n}",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        },
-        {
-          "type": "http",
-          "name": "chat",
-          "seq": 1,
-          "request": {
-            "url": "{{server}}/chat/conversations/144",
-            "method": "POST",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "json",
-              "json": "{\n  \"message\": \"Hello world again\"\n}",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "type": "folder",
       "name": "collections",
       "items": [
         {
@@ -170,19 +114,20 @@
     },
     {
       "type": "folder",
-      "name": "documents",
+      "name": "chat",
       "items": [
         {
           "type": "http",
-          "name": "document delete",
+          "name": "chat collection",
           "seq": 2,
           "request": {
-            "url": "{{server}}/collections/test/documents/2ab082ea-b764-43a1-bf85-0aee26f76de3",
-            "method": "DELETE",
+            "url": "{{server}}/chat/conversations/144/collections/global_test",
+            "method": "POST",
             "headers": [],
             "params": [],
             "body": {
-              "mode": "none",
+              "mode": "json",
+              "json": "{\n  \"message\": \"Qui est paul graham ? qu'a t il accompli dans sa vie ?\"\n}",
               "formUrlEncoded": [],
               "multipartForm": []
             },
@@ -198,49 +143,16 @@
         },
         {
           "type": "http",
-          "name": "document ingest",
-          "seq": 3,
+          "name": "chat",
+          "seq": 1,
           "request": {
-            "url": "{{server}}/collections/test/documents",
+            "url": "{{server}}/chat/conversations/144",
             "method": "POST",
             "headers": [],
             "params": [],
             "body": {
-              "mode": "multipartForm",
-              "formUrlEncoded": [],
-              "multipartForm": [
-                {
-                  "type": "file",
-                  "name": "files",
-                  "value": [
-                    "\\\\wsl.localhost\\Ubuntu-24.04\\home\\matteo\\github\\esp_ia\\notebooks\\data_tests\\paul_graham_essay - Copy.txt",
-                    "\\\\wsl.localhost\\Ubuntu-24.04\\home\\matteo\\github\\esp_ia\\notebooks\\data_tests\\paul_graham_essay.txt"
-                  ],
-                  "enabled": true
-                }
-              ]
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        },
-        {
-          "type": "http",
-          "name": "documents list",
-          "seq": 1,
-          "request": {
-            "url": "{{server}}/collections/test/documents",
-            "method": "GET",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "none",
+              "mode": "json",
+              "json": "{\n  \"message\": \"Hello world again\"\n}",
               "formUrlEncoded": [],
               "multipartForm": []
             },
@@ -391,9 +303,202 @@
           }
         }
       ]
+    },
+    {
+      "type": "folder",
+      "name": "documents",
+      "items": [
+        {
+          "type": "http",
+          "name": "document delete",
+          "seq": 2,
+          "request": {
+            "url": "{{server}}/collections/test/documents/2ab082ea-b764-43a1-bf85-0aee26f76de3",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "document ingest",
+          "seq": 3,
+          "request": {
+            "url": "{{server}}/collections/test/documents",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "multipartForm",
+              "formUrlEncoded": [],
+              "multipartForm": [
+                {
+                  "type": "file",
+                  "name": "files",
+                  "value": [
+                    "\\\\wsl.localhost\\Ubuntu-24.04\\home\\matteo\\github\\esp_ia\\notebooks\\data_tests\\paul_graham_essay - Copy.txt",
+                    "\\\\wsl.localhost\\Ubuntu-24.04\\home\\matteo\\github\\esp_ia\\notebooks\\data_tests\\paul_graham_essay.txt"
+                  ],
+                  "enabled": true
+                }
+              ]
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "documents list",
+          "seq": 1,
+          "request": {
+            "url": "{{server}}/collections/test/documents",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "categories",
+      "items": [
+        {
+          "type": "http",
+          "name": "cetegory update",
+          "seq": 1,
+          "request": {
+            "url": "{{server}}/categories/7",
+            "method": "PUT",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"description\": \"new\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "cetegory create",
+          "seq": 2,
+          "request": {
+            "url": "{{server}}/categories",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"yay\",\n  \"description\": \"simple test\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "cetegory delete",
+          "seq": 3,
+          "request": {
+            "url": "{{server}}/categories/7",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "cetegories list",
+          "seq": 4,
+          "request": {
+            "url": "{{server}}/categories",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"yay\",\n  \"description\": \"simple test\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
     }
   ],
-  "activeEnvironmentUid": "6fiV1AFNXwHJ11c4Vy7aQ",
+  "activeEnvironmentUid": "B7WKQJaV7HqjML88m3GAA",
   "environments": [
     {
       "variables": [
