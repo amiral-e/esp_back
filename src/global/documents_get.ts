@@ -1,18 +1,11 @@
 import config from '../config.ts';
-import AuthMiddleware from "../auth_middleware.ts";
+import AdminMiddleware from "../middlewares.ts";
 import { Hono } from "hono";
 
 const documents_get = new Hono();
 
-documents_get.get('/collections/:collection_name/documents', AuthMiddleware, async (c: any) => {
-    const user = c.get('user');
-
-    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
-    if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
-        adminsData.find((admin: any) => admin.user_id == user.uid) == undefined
-    )
-        return c.json({ error: "You don't have admin privileges" }, 401);
-
+documents_get.get('/collections/:collection_name/documents', AdminMiddleware, async (c: any) => {
+    // const user = c.get('user');
     const { collection_name } = c.req.param();
     const table_name = 'global_' + collection_name;
 

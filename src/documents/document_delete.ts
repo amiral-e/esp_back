@@ -1,5 +1,5 @@
 import config from '../config.ts';
-import AuthMiddleware from "../auth_middleware.ts";
+import AuthMiddleware from "../middlewares.ts";
 import { Hono } from "hono";
 
 const document_delete = new Hono();
@@ -14,6 +14,7 @@ document_delete.delete('/:collection_name/documents/:document_id', AuthMiddlewar
         return c.json({ error: 'Document not found' }, 404);
     if (docsError != undefined)
         return c.json({ error: docsError.message }, 500);
+
     const { data, error } = await config.supabaseClient.schema('vecs').from(table_name).delete().eq('metadata->>doc_id', document_id);
     if (error != undefined)
         return c.json({ error: error.message }, 500);

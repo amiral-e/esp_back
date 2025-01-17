@@ -9,7 +9,7 @@ import chat from "./chat/index.ts";
 import global from "./global/index.ts";
 
 import config from "./config.ts";
-import AuthMiddleware from "./auth_middleware.ts";
+import AuthMiddleware from "./middlewares.ts";
 
 import { Hono } from "hono";
 
@@ -53,7 +53,7 @@ app.get("/test", async (c) => {
 });
 
 app.route("/admins", admin);
-// // app.route('/categories', categories);
+app.route('/categories', categories);
 app.route("/conversations", conversations);
 app.route("/collections", collections);
 app.route("/collections", documents);

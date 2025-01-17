@@ -1,18 +1,11 @@
 import config from '../config.ts';
-import AuthMiddleware from "../auth_middleware.ts";
+import AdminMiddleware from "../middlewares.ts";
 import { Hono } from "hono";
 
 const document_delete = new Hono();
 
-document_delete.delete('/collections/:collection_name/documents/:document_id', AuthMiddleware, async (c: any) => {
-    const user = c.get('user');
-
-    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
-    if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
-        adminsData.find((admin: any) => admin.user_id == user.uid) == undefined
-    )
-        return c.json({ error: "You don't have admin privileges" }, 401);
-
+document_delete.delete('/collections/:collection_name/documents/:document_id', AdminMiddleware, async (c: any) => {
+    // const user = c.get('user');
     const { collection_name, document_id } = c.req.param();
     const table_name = 'global_' + collection_name;
 
@@ -21,6 +14,7 @@ document_delete.delete('/collections/:collection_name/documents/:document_id', A
         return c.json({ error: 'Document not found' }, 404);
     if (docsError != undefined)
         return c.json({ error: docsError.message }, 500);
+
     const { data, error } = await config.supabaseClient.schema('vecs').from(table_name).delete().eq('metadata->>doc_id', document_id);
     if (error != undefined)
         return c.json({ error: error.message }, 500);

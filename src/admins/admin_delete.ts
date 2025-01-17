@@ -1,10 +1,10 @@
 import config from '../config.ts';
-import AuthMiddleware from "../auth_middleware.ts";
+import AdminMiddleware from "../middlewares.ts";
 import { Hono } from "hono";
 
 const admin_delete = new Hono();
 
-admin_delete.delete(AuthMiddleware, async (c: any) => {
+admin_delete.delete(AdminMiddleware, async (c: any) => {
     const user = c.get('user');
     let json: any;
     try {
@@ -18,13 +18,11 @@ admin_delete.delete(AuthMiddleware, async (c: any) => {
     if (user.uid == json.user_id)
         return c.json({ error: "You can't remove yourself from admins" }, 401);
 
-    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*');
-    if (adminsData == undefined || adminsError != undefined || adminsData.length == 0 ||
-        adminsData.find((admin: any) => admin.user_id == user.uid) == undefined
-    )
-        return c.json({ error: "You don't have admin privileges" }, 401);
-    if (adminsData.find((admin: any) => admin.user_id == json.user_id) == undefined)
+    const { data: adminsData, error: adminsError } = await config.supabaseClient.from('admins').select('*').eq('user_id', json.user_id).single();
+    if (adminsData == undefined || adminsData.length == 0)
         return c.json({ error: "User is not an admin" }, 401);
+    else if (adminsError != undefined)
+        return c.json({ error: adminsError.message }, 500);
 
     const { data: deletionData, error: deletionError } = await config.supabaseClient.from('admins').delete().eq('user_id', json.user_id).select('*').single();
     if (deletionError != undefined)

@@ -1,5 +1,5 @@
 import config from "../config";
-import AuthMiddleware from "../auth_middleware";
+import AuthMiddleware from "../middlewares";
 import { Hono } from "hono";
 
 const collections_get = new Hono()
