@@ -1,5 +1,4 @@
 import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
 
 import admin from "./admins/index.ts";
 import categories from "./categories/index.ts";
@@ -9,10 +8,8 @@ import documents from "./documents/index.ts";
 import chat from "./chat/index.ts";
 import global from "./global/index.ts";
 
-import { decode, sign, verify } from 'hono/jwt'
-
-import config from './config.ts';
-import AuthMiddleware from './auth_middleware.ts';
+import config from "./config.ts";
+import AuthMiddleware from "./auth_middleware.ts";
 
 import { Hono } from "hono";
 
@@ -40,27 +37,28 @@ app.get("/", (c) => {
 // AuthMiddleware
 // const user = c.get('user');
 
+import { decode, sign, verify } from "hono/jwt";
 
 app.get("/test", async (c) => {
 	const payload = {
-		uid: '83774a5e-285f-4b98-b35a-12b3b753f99e',
-	}
+		uid: "83774a5e-285f-4b98-b35a-12b3b753f99e",
+	};
 	const token = await sign(payload, config.envVars.JWT_SECRET);
 	console.log(token);
 	// const user = c.get('user');
 	return c.json({
 		message: "Hello World",
-    	// user: user,
+		// user: user,
 	});
-})
+});
 
-app.route('/admins', admin);
+app.route("/admins", admin);
 // // app.route('/categories', categories);
-app.route('/conversations', conversations);
-app.route('/collections', collections);
-app.route('/collections', documents);
-app.route('/global', global);
-app.route('/chat', chat);
+app.route("/conversations", conversations);
+app.route("/collections", collections);
+app.route("/collections", documents);
+app.route("/global", global);
+app.route("/chat", chat);
 
 console.log("Server running on port 3000");
 
@@ -68,4 +66,3 @@ export default {
 	port: 3000,
 	fetch: app.fetch,
 };
-
