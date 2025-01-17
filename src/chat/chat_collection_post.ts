@@ -46,6 +46,8 @@ chat_collection_post.post('/conversations/:conv_id/collections/:collec_name', Au
             return c.json({ error: 'Unknown error' }, 500);
         }
     }
+    if (response.status != 200)
+        return c.json({ error: "Error while fetching response from IA" }, 500);
 
     const body = await response.json();
     history.push({ role: "assistant", content: body.content });
@@ -57,4 +59,4 @@ chat_collection_post.post('/conversations/:conv_id/collections/:collec_name', Au
 });
 
 
-export default chat_collection_post;        
+export default chat_collection_post;
