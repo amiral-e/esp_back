@@ -1,12 +1,19 @@
-import config from "../config";
+import config from "../config.ts";
 import AuthMiddleware from "../middlewares/middleware_auth.ts";
 import { Hono } from "hono";
 
-const conversation_update = new Hono();
+const conversation_put = new Hono();
 
-conversation_update.patch("/:conv_id", AuthMiddleware, async (c: any) => {
+conversation_put.put("/:conv_id", AuthMiddleware, async (c: any) => {
 	const user = c.get("user");
-	const json = await c.req.json();
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (!json || json.name == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
 	const { conv_id } = c.req.param();
 
 	const { data: convData, error: convError } = await config.supabaseClient
@@ -24,7 +31,7 @@ conversation_update.patch("/:conv_id", AuthMiddleware, async (c: any) => {
 		.from("conversations")
 		.update({ name: json.name })
 		.eq("id", convData.id);
-	if (updateData == undefined || updateError != undefined)
+	if (updateError != undefined)
 		return c.json({ error: updateError.message }, 500);
 	return c.json(
 		{ message: `Conversation ${convData.id} updated successfully` },
@@ -32,4 +39,4 @@ conversation_update.patch("/:conv_id", AuthMiddleware, async (c: any) => {
 	);
 });
 
-export default conversation_update;
+export default conversation_put;

@@ -28,8 +28,7 @@ category_put.put("/:id", AdminMiddleware, async (c: any) => {
 	const { data: updateData, error: updateError } = await config.supabaseClient
 		.from("categories")
 		.update(json)
-		.eq("id", id)
-		.select();
+		.eq("id", id);
 	if (updateError != undefined)
 		return c.json({ error: updateError.message }, 500);
 	return c.json(
