@@ -4,62 +4,6 @@
   "items": [
     {
       "type": "folder",
-      "name": "admins",
-      "items": [
-        {
-          "type": "http",
-          "name": "admin add",
-          "seq": 1,
-          "request": {
-            "url": "{{server}}/admins",
-            "method": "POST",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "json",
-              "json": "{\n  \"user_id\": \"1a828cfc-e42e-4f3e-b4d9-c9adca7a75f1\"\n}",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        },
-        {
-          "type": "http",
-          "name": "admin remove",
-          "seq": 2,
-          "request": {
-            "url": "{{server}}/admins",
-            "method": "DELETE",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "json",
-              "json": "{\n  \"user_id\": \"1a828cfc-e42e-4f3e-b4d9-c9adca7a75f1\"\n}",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "type": "folder",
       "name": "categories",
       "items": [
         {
@@ -197,7 +141,7 @@
           "name": "chat",
           "seq": 1,
           "request": {
-            "url": "{{server}}/chat/conversations/144",
+            "url": "{{server}}/chat/conversations/164",
             "method": "POST",
             "headers": [],
             "params": [],
@@ -221,8 +165,142 @@
     },
     {
       "type": "folder",
+      "name": "admins",
+      "items": [
+        {
+          "type": "http",
+          "name": "admin add",
+          "seq": 1,
+          "request": {
+            "url": "{{server}}/admins",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"user_id\": \"1a828cfc-e42e-4f3e-b4d9-c9adca7a75f1\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "admin remove",
+          "seq": 2,
+          "request": {
+            "url": "{{server}}/admins",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"user_id\": \"1a828cfc-e42e-4f3e-b4d9-c9adca7a75f1\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "collections",
+      "items": [
+        {
+          "type": "http",
+          "name": "collection delete",
+          "seq": 2,
+          "request": {
+            "url": "{{server}}/collections/test",
+            "method": "DELETE",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "collections list",
+          "seq": 1,
+          "request": {
+            "url": "{{server}}/collections",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
       "name": "conversations",
       "items": [
+        {
+          "type": "http",
+          "name": "conversation create",
+          "seq": 3,
+          "request": {
+            "url": "{{server}}/conversations/yay",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
         {
           "type": "http",
           "name": "conversation delete",
@@ -254,30 +332,6 @@
           "request": {
             "url": "{{server}}/conversations/163",
             "method": "GET",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "none",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        },
-        {
-          "type": "http",
-          "name": "conversation create",
-          "seq": 3,
-          "request": {
-            "url": "{{server}}/conversations/yay",
-            "method": "POST",
             "headers": [],
             "params": [],
             "body": {
@@ -436,60 +490,6 @@
     },
     {
       "type": "folder",
-      "name": "collections",
-      "items": [
-        {
-          "type": "http",
-          "name": "collection delete",
-          "seq": 2,
-          "request": {
-            "url": "{{server}}/collections/test",
-            "method": "DELETE",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "none",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        },
-        {
-          "type": "http",
-          "name": "collections list",
-          "seq": 1,
-          "request": {
-            "url": "{{server}}/collections",
-            "method": "GET",
-            "headers": [],
-            "params": [],
-            "body": {
-              "mode": "none",
-              "formUrlEncoded": [],
-              "multipartForm": []
-            },
-            "script": {},
-            "vars": {},
-            "assertions": [],
-            "tests": "",
-            "docs": "",
-            "auth": {
-              "mode": "inherit"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "type": "folder",
       "name": "global",
       "items": [
         {
@@ -625,13 +625,20 @@
       ]
     }
   ],
-  "activeEnvironmentUid": "aWX7T81HUuVFDttdZ9xhW",
+  "activeEnvironmentUid": "Euha7nQB1QhVc2qyD9NkV",
   "environments": [
     {
       "variables": [
         {
           "name": "server",
           "value": "http://localhost:3000",
+          "enabled": false,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "server",
+          "value": "https://esp-back.fly.dev",
           "enabled": true,
           "secret": false,
           "type": "text"
