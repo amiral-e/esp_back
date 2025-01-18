@@ -1,5 +1,5 @@
 import config from "../config";
-import AuthMiddleware from "../middlewares";
+import AuthMiddleware from "../middlewares/middleware_auth.ts";
 import { Hono } from "hono";
 
 const conversation_delete = new Hono();

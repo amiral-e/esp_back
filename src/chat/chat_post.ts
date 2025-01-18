@@ -1,5 +1,5 @@
 import config from "../config.ts";
-import AuthMiddleware from "../middlewares.ts";
+import AuthMiddleware from "../middlewares/middleware_auth.ts";
 import { Hono } from "hono";
 
 const chat_post = new Hono();

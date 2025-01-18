@@ -1,5 +1,5 @@
 import config from "../config.ts";
-import AdminMiddleware from "../middlewares.ts";
+import AdminMiddleware from "../middlewares/middleware_admin.ts";
 import { Hono } from "hono";
 
 const admin_insert = new Hono();

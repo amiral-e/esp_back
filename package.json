@@ -3,7 +3,7 @@
 	"module": "index.ts",
 	"type": "module",
 	"scripts": {
-		"test": "bun test --coverage src/tests/*.test.ts",
+		"test": "bun test --coverage tests/*.test.ts",
 		"dev": "bun run --hot src/index.ts",
 		"build": "bun build --target=bun src/index.ts --outdir dist",
 		"start": "bun run dist/index.js",

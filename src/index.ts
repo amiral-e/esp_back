@@ -9,7 +9,7 @@ import chat from "./chat/index.ts";
 import global from "./global/index.ts";
 
 import config from "./config.ts";
-import AuthMiddleware from "./middlewares.ts";
+import AuthMiddleware from "./middlewares/middleware_auth.ts";
 
 import { Hono } from "hono";
 
@@ -41,7 +41,7 @@ import { decode, sign, verify } from "hono/jwt";
 
 app.get("/test", async (c) => {
 	const payload = {
-		uid: "83774a5e-285f-4b98-b35a-12b3b753f99e",
+		uid: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 	};
 	const token = await sign(payload, config.envVars.JWT_SECRET);
 	console.log(token);
