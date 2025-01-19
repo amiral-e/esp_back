@@ -21,7 +21,7 @@ category_delete.delete("/:id", AdminMiddleware, async (c: any) => {
 		.from("categories")
 		.delete()
 		.eq("id", id)
-		.select();
+		.select("*");
 	if (delError != undefined) return c.json({ error: delError.message }, 500);
 	return c.json(
 		{ response: `Category ${categData.name} deleted successfully` },

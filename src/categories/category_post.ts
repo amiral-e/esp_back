@@ -17,7 +17,7 @@ category_post.post("/", AdminMiddleware, async (c) => {
 	const { data, error } = await config.supabaseClient
 		.from("categories")
 		.insert(json)
-		.select();
+		.select("*");
 	if (error != undefined) return c.json({ error: error.message }, 500);
 	return c.json(
 		{ response: `Category ${json.name} created successfully` },

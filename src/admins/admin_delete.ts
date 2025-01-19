@@ -18,6 +18,15 @@ admin_delete.delete(AdminMiddleware, async (c: any) => {
 	if (user.uid == json.user_id)
 		return c.json({ error: "You can't remove yourself from admins" }, 401);
 
+	const { data, error } = await config.supabaseClient.rpc(
+		"check_uid_exists",
+		{ user_id: json.user_id },
+	);
+	if (data != undefined && data === false)
+		return c.json({ error: "User not found" }, 401);
+	else if (error)
+		return c.json({ error: error.message }, 500);
+
 	const { data: adminsData, error: adminsError } = await config.supabaseClient
 		.from("admins")
 		.select("*")
@@ -25,8 +34,6 @@ admin_delete.delete(AdminMiddleware, async (c: any) => {
 		.single();
 	if (adminsData == undefined || adminsData.length == 0)
 		return c.json({ error: "User is not an admin" }, 401);
-	else if (adminsError != undefined)
-		return c.json({ error: adminsError.message }, 500);
 
 	const { data: deletionData, error: deletionError } =
 		await config.supabaseClient

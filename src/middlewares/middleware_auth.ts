@@ -10,11 +10,16 @@ const AuthMiddleware = async (c: any, next: any) => {
 		const decoded = await verify(bearer, config.envVars.JWT_SECRET);
 		if (!decoded || !decoded["uid"])
 			return c.json({ error: "Invalid authorization header" }, 401);
+
 		const { data, error } = await config.supabaseClient.rpc(
 			"check_uid_exists",
-			{ uid: decoded["uid"] },
+			{ user_id: decoded["uid"] },
 		);
-		if (error) return c.json({ error: error.message }, 500);
+		if (data != undefined && data === false)
+			return c.json({ error: "User not found" }, 401);
+		else if (error)
+			return c.json({ error: error.message }, 500);
+
 		c.set("user", decoded);
 		return next();
 	} catch (error) {
