@@ -20,8 +20,11 @@ documents_get.get(
 			return c.json({ error: "Collection not found" }, 404);
 		else if (error) return c.json({ error: error.message }, 500);
 
-		const doc_ids = [...new Set(data.map((x: any) => x.metadata.doc_id))];
-		return c.json({ response: { doc_ids: doc_ids } }, 200);
+		const docs = data.map((x: any) => ({ doc_id: x.metadata.doc_id, filename: x.metadata.filename }));
+		const uniqueDocs = docs.filter((doc: any, index: any, self: any) =>
+			index === self.findIndex((t: any) => (t.doc_id === doc.doc_id))
+		);
+		return c.json({ response: { docs: uniqueDocs } }, 200);
 	},
 );
 
