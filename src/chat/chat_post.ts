@@ -1,10 +1,106 @@
+import { Hono } from "hono";
+import { describeRoute } from "hono-openapi";
+
 import config from "../config.ts";
 import AuthMiddleware from "../middlewares/middleware_auth.ts";
-import { Hono } from "hono";
 
 const chat_post = new Hono();
 
-chat_post.post("/conversations/:conv_id", AuthMiddleware, async (c: any) => {
+chat_post.post(
+	"/conversations/:conv_id",
+	describeRoute({
+		summary: "Send a message to assistant",
+		description: "Send a message to assistant",
+		tags: ["chat"],
+		parameters: [
+			{
+				name: "conv_id",
+				in: "path",
+				required: true,
+				schema: {
+					type: "string",
+				},
+			}
+		],
+		requestBody: {
+			content: {
+				"application/json": {
+					schema: {
+						type: "object",
+						properties: {
+							message: {
+								type: "string",
+								default: "Hello world",
+								description: "Message to send to assistant",
+							},
+						},
+						required: ["message"],
+					},
+				},
+			},
+			required: true,
+		},
+		responses: {
+			200: {
+				description: "Message sent to assistant",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								role: {
+									type: "string",
+									default: "assistant",
+									description: "Role of the message",
+								},
+								content: {
+									type: "string",
+									default: "Response from the assistant",
+									description: "Content of the message",
+								},
+							},
+							required: ["role", "content"],
+						},
+					},
+				},
+			},
+			404: {
+				description: 'Not found',
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								error: {
+									type: 'string',
+									default: ['Uid not found', 'Conversation not found'],
+									description: 'The error message (one of the possible errors)',
+								},
+							},
+						},
+					},
+				},
+			},
+			500: {
+				description: 'Internal server error',
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								error: {
+									type: 'string',
+									default: 'Internal server error',
+									description: 'The error message',
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}),
+	AuthMiddleware, async (c: any) => {
 	const user = c.get("user");
 	let json: any;
 	try {
@@ -48,6 +144,8 @@ chat_post.post("/conversations/:conv_id", AuthMiddleware, async (c: any) => {
 			return c.json({ error: "Unknown error" }, 500);
 		}
 	}
+	if (response.status != 200)
+		return c.json({ error: "Error while fetching response from AI" }, 500);
 
 	const body = await response.json();
 	history.push({ role: "assistant", content: body.content });
