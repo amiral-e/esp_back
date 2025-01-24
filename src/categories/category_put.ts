@@ -105,7 +105,7 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: 'string',
-									default: ['Category not found', 'User not found'],
+									default: ['Uid not found', 'Category not found'],
 									description: 'The error message (one of the possible errors)',
 								},
 							},

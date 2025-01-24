@@ -90,8 +90,8 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: 'string',
-									default: 'User not found',
-									description: 'The error message',
+									default: ['Uid not found', 'User not found'],
+									description: 'The error message (one of the possible errors)',
 								},
 							},
 						},

@@ -73,8 +73,8 @@ categories_get.get("/",
 							properties: {
 								error: {
 									type: 'string',
-									default: 'No categories found',
-									description: 'The error message',
+									default: ['Uid not found', 'No categories found'],
+									description: 'The error message (one of the possible errors)',
 								},
 							},
 						},

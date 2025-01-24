@@ -85,6 +85,23 @@ category_post.post("/",
 					},
 				},
 			},
+			404: {
+				description: 'Not found',
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								error: {
+									type: 'string',
+									default: 'Uid not found',
+									description: 'The error message',
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: 'Internal server error',
 				content: {
