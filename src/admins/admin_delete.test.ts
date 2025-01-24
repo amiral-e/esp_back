@@ -42,9 +42,9 @@ describe('DELETE /admins (without privileges)', () => {
       headers: { 'Authorization': `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
     })
     expect(await res.json()).toEqual({
-      error: 'User not found',
+      error: 'Uid not found',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(404)
   })
 
   it('correct authorization header', async () => {
@@ -84,7 +84,7 @@ describe('DELETE /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'You can\'t remove yourself from admins',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(400)
   })
 
   it('non-user', async () => {
@@ -96,7 +96,7 @@ describe('DELETE /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'User not found',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(404)
   })
 
   it('non-admin user', async () => {
@@ -108,7 +108,7 @@ describe('DELETE /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'User is not an admin',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(400)
   })
 
   it('admin user', async () => {

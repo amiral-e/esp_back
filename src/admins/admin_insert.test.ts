@@ -42,9 +42,9 @@ describe('POST /admins (without privileges)', () => {
       headers: { 'Authorization': `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
     })
     expect(await res.json()).toEqual({
-      error: 'User not found',
+      error: 'Uid not found',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(404)
   })
 
   it('correct authorization header', async () => {
@@ -85,7 +85,7 @@ describe('POST /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'You can\'t add yourself to admins',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(400)
   })
 
   it('non-user', async () => {
@@ -98,7 +98,7 @@ describe('POST /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'User not found',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(404)
   })
 
   it('admin user', async () => {
@@ -111,7 +111,7 @@ describe('POST /admins (with privileges)', () => {
     expect(await res.json()).toEqual({
       error: 'User is already an admin',
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(400)
   })
 
   it('non-admin user', async () => {
