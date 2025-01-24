@@ -7,7 +7,7 @@ import collections from "./collections/index.ts";
 import documents from "./documents/index.ts";
 import chat from "./chat/index.ts";
 import global from "./global/index.ts";
-
+import forum from "./forum/index.ts";
 import config from "./config.ts";
 import AuthMiddleware from "./middlewares/middleware_auth.ts";
 
@@ -58,6 +58,7 @@ app.route("/conversations", conversations);
 app.route("/collections", collections);
 app.route("/collections", documents);
 app.route("/global", global);
+app.route("/forum", forum);
 app.route("/chat", chat);
 
 console.log("Server running on port 3000");
