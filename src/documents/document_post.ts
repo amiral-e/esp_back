@@ -42,6 +42,8 @@ document_post.post(
 				return c.json({ error: "Unknown error" }, 500);
 			}
 		}
+		if (response.status != 200)
+			return c.json({ error: "Error while fetching response from AI" }, 500);
 
 		const body = await response.json();
 		return c.json({ response: body.message }, 200);
