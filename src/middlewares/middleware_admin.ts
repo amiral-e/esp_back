@@ -13,10 +13,10 @@ const AdminMiddleware = async (c: any, next: any) => {
 
 		const { data, error } = await config.supabaseClient.rpc(
 			"check_uid_exists",
-			{ user_id : decoded["uid"] },
+			{ user_id: decoded["uid"] },
 		);
 		if (data != undefined && data === false)
-			return c.json({ error: "User not found" }, 401);
+			return c.json({ error: "Uid not found" }, 404);
 		else if (error)
 			return c.json({ error: error.message }, 500);
 

@@ -1,4 +1,5 @@
-import { swaggerUI } from "@hono/swagger-ui";
+import { Hono } from "hono";
+import { openAPISpecs } from "hono-openapi";
 
 import admin from "./admins/index.ts";
 import categories from "./categories/index.ts";
@@ -8,47 +9,14 @@ import documents from "./documents/index.ts";
 import chat from "./chat/index.ts";
 import global from "./global/index.ts";
 import forum from "./forum/index.ts";
+import test from "./test/index.ts";
 import config from "./config.ts";
-import AuthMiddleware from "./middlewares/middleware_auth.ts";
-
-import { Hono } from "hono";
 
 const app = new Hono();
-
-// app.doc("/doc", {
-// 	openapi: "3.0.0",
-// 	info: {
-// 		version: "1.0.0",
-// 		title: "My API",
-// 	},
-// });
-
-// app.get("/docs", swaggerUI({ url: "/doc" }));
 
 app.get("/", (c) => {
 	return c.json({
 		message: "Hello World",
-		supabaseClient: config.supabaseClient != null,
-	});
-});
-
-// const temp = new OpenAPIHono();
-
-// AuthMiddleware
-// const user = c.get('user');
-
-import { decode, sign, verify } from "hono/jwt";
-
-app.get("/test", async (c) => {
-	const payload = {
-		uid: "80c3da89-a585-4876-aa94-d1588d50ceb4",
-	};
-	const token = await sign(payload, config.envVars.JWT_SECRET);
-	console.log(token);
-	// const user = c.get('user');
-	return c.json({
-		message: "Hello World",
-		// user: user,
 	});
 });
 
@@ -60,6 +28,52 @@ app.route("/collections", documents);
 app.route("/global", global);
 app.route("/forum", forum);
 app.route("/chat", chat);
+app.route("/test", test);
+
+
+app.get(
+	'/openapi',
+	openAPISpecs(app, {
+		documentation: {
+			info: { title: 'Hono API', version: '1.0.0', description: 'Hono API Documentation' },
+			servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
+			components: {
+				securitySchemes: {
+					bearerAuth: {
+						type: 'http',
+						scheme: 'bearer',
+						bearerFormat: 'JWT',
+					},
+				},
+				schemas: {
+					Error: {
+						type: 'object',
+						properties: {
+							error: {
+								type: 'string',
+							},
+						},
+					}
+				},
+			},
+			security: [
+				{
+					bearerAuth: [],
+				},
+			],
+		},
+	})
+);
+
+import { apiReference } from "@scalar/hono-api-reference";
+
+app.get(
+	'/docs',
+	apiReference({
+		theme: 'saturn',
+		spec: { url: '/openapi' },
+	})
+);
 
 console.log("Server running on port 3000");
 

@@ -11,8 +11,9 @@
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "^0.4.1",
-		"@hono/zod-openapi": "^0.16.0",
+		"@scalar/hono-api-reference": "^0.5.168",
 		"@supabase/supabase-js": "^2.45.4",
+		"hono-openapi": "^0.4.3",
 		"hono": "^4.5.10"
 	},
 	"devDependencies": {
