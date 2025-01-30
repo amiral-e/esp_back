@@ -5,16 +5,15 @@ import envVars from '../../config_test';
 import { deleteAdmin, insertAdmin } from '../../admins/utils';
   
 afterAll(async () => {
-    await deleteAdmin(envVars.DUMMY_ID);
-    await deleteAdmin(envVars.DUMMY_ID_2);
+    await config.supabaseClient
+      .from("responses")
+      .delete()
+      .neq('id', 0);
   });
   
 
 describe('POST /response/', () => {
 
-    beforeEach(async () => {
-        await insertAdmin(envVars.DUMMY_ID);
-      })
     
     describe('Response creation tests', () => {
         it('invalid JSON body', async () => {
@@ -55,9 +54,7 @@ describe('POST /response/', () => {
     
             expect(res.status).toBe(200);
             const data = await res.json();
-            console.log(data)
-            // expect(data).toHaveProperty('message');
-            // expect(data.message).toContain(testMessage);
+            expect(data).toHaveProperty('message');
         });
     });
     

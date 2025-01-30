@@ -14,17 +14,14 @@ response_post.post("/", AuthMiddleware, async (c: any) => {
             return c.json({ error: "Message is required" }, 400);
         }
 
-        console.log("insertion dans la réponse", user)
         const { data, error } = await config.supabaseClient
             .from("responses")
             .insert({
                 message: message,
-                user_id: user.uuid
+                user_id: user.uid
             })
             .select()
             .single();
-            console.log("Fin de l'insertion", error)
-
         if (data == undefined || error != undefined) {
             return c.json({ error: error.message }, 500);
         }
