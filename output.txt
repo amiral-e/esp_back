@@ -1,0 +1,57 @@
+bun test v1.1.29 (6d43b366)
+
+src/config_test.ts:
+
+src/admins/admin_delete.test.ts:
+(pass) DELETE /admins (without privileges) > missing authorization header [2.93ms]
+(pass) DELETE /admins (without privileges) > invalid authorization header [1.07ms]
+(pass) DELETE /admins (without privileges) > non-user authorization header [57.83ms]
+(pass) DELETE /admins (without privileges) > correct authorization header [122.51ms]
+(pass) DELETE /admins (with privileges) > invalid JSON [92.72ms]
+(pass) DELETE /admins (with privileges) > yourself [83.38ms]
+(pass) DELETE /admins (with privileges) > non-user [136.97ms]
+(pass) DELETE /admins (with privileges) > non-admin user [192.43ms]
+(pass) DELETE /admins (with privileges) > admin user [326.45ms]
+
+src/admins/admin_insert.test.ts:
+(pass) POST /admins (without privileges) > missing authorization header [0.45ms]
+(pass) POST /admins (without privileges) > invalid authorization header [0.95ms]
+(pass) POST /admins (without privileges) > non-user authorization header [46.12ms]
+(pass) POST /admins (without privileges) > correct authorization header [162.27ms]
+(pass) POST /admins (with privileges) > invalid JSON [93.16ms]
+(pass) POST /admins (with privileges) > yourself [84.16ms]
+(pass) POST /admins (with privileges) > non-user [210.63ms]
+(pass) POST /admins (with privileges) > admin user [295.01ms]
+(pass) POST /admins (with privileges) > non-admin user [207.70ms]
+
+src/forum/response/response_post.test.ts:
+(pass) POST /response/ > Response creation tests > invalid JSON body [39.20ms]
+(pass) POST /response/ > Response creation tests > missing message in body [62.75ms]
+insertion dans la réponse {
+  uid: "80c3da89-a585-4876-aa94-d1588d50ceb4",
+}
+Fin de l'insertion {
+  code: "23502",
+  details: "Failing row contains (4, Test response message, null).",
+  hint: null,
+  message: "null value in column \"user_id\" of relation \"responses\" violates not-null constraint",
+}
+51 |                     'Content-Type': 'application/json'
+52 |                 },
+53 |                 body: JSON.stringify({ message: testMessage })
+54 |             });
+55 | 
+56 |             expect(res.status).toBe(200);
+                                    ^
+error: expect(received).toBe(expected)
+
+Expected: 200
+Received: 500
+
+      at /home/sybtra/epitech/ESP/esp_back/src/forum/response/response_post.test.ts:56:32
+(fail) POST /response/ > Response creation tests > successful response creation [81.61ms]
+
+ 20 pass
+ 1 fail
+ 41 expect() calls
+Ran 21 tests across 4 files. [4.55s]

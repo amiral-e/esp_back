@@ -4,25 +4,41 @@ import { Hono } from "hono";
 
 const response_post = new Hono();
 
-response_post.post("/:id", AuthMiddleware, async (c: any) => {
+response_post.post("/", AuthMiddleware, async (c: any) => {
     const user = c.get("user");
-    const { id } = c.req.param();
-    const { message } = await c.req.json();
 
-    const { data, error } = await config.supabaseClient
-        .from("responses")
-        .insert({ 
-            id,
-            message,
-            user_id: user.uid 
-        })
-        .select()
-        .single();
-
-    if (data == undefined || error != undefined)
-        return c.json({ error: error.message }, 500);
+    try {
+        const { message } = await c.req.json();
         
-    return c.json(data, 200);
+        if (!message) {
+            return c.json({ error: "Message is required" }, 400);
+        }
+
+        console.log("insertion dans la réponse", user)
+        const { data, error } = await config.supabaseClient
+            .from("responses")
+            .insert({
+                message: message,
+                user_id: user.uuid
+            })
+            .select()
+            .single();
+            console.log("Fin de l'insertion", error)
+
+        if (data == undefined || error != undefined) {
+            return c.json({ error: error.message }, 500);
+        }
+
+        return c.json(
+            {
+                message: `Response of ${user.uuid} created successfully with id ${data.id}`,
+            },
+            200
+        );
+    } catch (error) {
+        // Handle JSON parsing errors
+        return c.json({ error: "Invalid JSON body" }, 400);
+    }
 });
 
 export default response_post;
