@@ -3,18 +3,9 @@ import responses from '..';
 import config from '../../config';
 import envVars from '../../config_test';
 import { deleteAdmin, insertAdmin } from '../../admins/utils';
-  
-afterAll(async () => {
-    await config.supabaseClient
-      .from("responses")
-      .delete()
-      .neq('id', 0);
-  });
-  
 
 describe('POST /response/', () => {
 
-    
     describe('Response creation tests', () => {
         it('invalid JSON body', async () => {
             const res = await responses.request(`/`, {
@@ -54,7 +45,14 @@ describe('POST /response/', () => {
     
             expect(res.status).toBe(200);
             const data = await res.json();
-            expect(data).toHaveProperty('message');
+            expect(data).toHaveProperty('id');
+            expect(data?.message).toBe(testMessage);
+            expect(data?.user_id).toBe(envVars.DUMMY_ID);
+            // delete response for dynamique id
+            await config.supabaseClient
+            .from("responses")
+            .delete()
+            .eq('id', data.id);
         });
     });
     

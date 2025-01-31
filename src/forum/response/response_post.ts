@@ -26,12 +26,7 @@ response_post.post("/", AuthMiddleware, async (c: any) => {
             return c.json({ error: error.message }, 500);
         }
 
-        return c.json(
-            {
-                message: `Response of ${user.uuid} created successfully with id ${data.id}`,
-            },
-            200
-        );
+        return c.json(data, 200);
     } catch (error) {
         // Handle JSON parsing errors
         return c.json({ error: "Invalid JSON body" }, 400);
