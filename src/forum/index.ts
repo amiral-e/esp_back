@@ -2,8 +2,8 @@ import { Hono } from "hono";
 
 import response_post from "./response/response_post";
 
-const responses = new Hono();
+const forum = new Hono();
 
-responses.route("/", response_post);
+forum.route("/", response_post);
 
-export default responses;
+export default forum;
