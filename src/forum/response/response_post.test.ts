@@ -8,7 +8,7 @@ describe('POST /response/', () => {
 
     describe('Response creation tests', () => {
         it('invalid JSON body', async () => {
-            const res = await responses.request(`/`, {
+            const res = await responses.request(`/response`,  {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` }
             });
@@ -18,7 +18,7 @@ describe('POST /response/', () => {
         });
     
         it('missing message in body', async () => {
-            const res = await responses.request(`/`, {
+            const res = await responses.request(`/response`,  {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
@@ -34,7 +34,7 @@ describe('POST /response/', () => {
         it('successful response creation', async () => {
             const testMessage = 'Test response message';
             
-            const res = await responses.request(`/`, {
+            const res = await responses.request(`/response`,  {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
