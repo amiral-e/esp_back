@@ -29,30 +29,33 @@ app.route("/global", global);
 app.route("/chat", chat);
 app.route("/test", test);
 
-
 app.get(
-	'/openapi',
+	"/openapi",
 	openAPISpecs(app, {
 		documentation: {
-			info: { title: 'Hono API', version: '1.0.0', description: 'Hono API Documentation' },
-			servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
+			info: {
+				title: "Hono API",
+				version: "1.0.0",
+				description: "Hono API Documentation",
+			},
+			servers: [{ url: "http://localhost:3000", description: "Local Server" }],
 			components: {
 				securitySchemes: {
 					bearerAuth: {
-						type: 'http',
-						scheme: 'bearer',
-						bearerFormat: 'JWT',
+						type: "http",
+						scheme: "bearer",
+						bearerFormat: "JWT",
 					},
 				},
 				schemas: {
 					Error: {
-						type: 'object',
+						type: "object",
 						properties: {
 							error: {
-								type: 'string',
+								type: "string",
 							},
 						},
-					}
+					},
 				},
 			},
 			security: [
@@ -61,17 +64,17 @@ app.get(
 				},
 			],
 		},
-	})
+	}),
 );
 
 import { apiReference } from "@scalar/hono-api-reference";
 
 app.get(
-	'/docs',
+	"/docs",
 	apiReference({
-		theme: 'saturn',
-		spec: { url: '/openapi' },
-	})
+		theme: "saturn",
+		spec: { url: "/openapi" },
+	}),
 );
 
 console.log("Server running on port 3000");

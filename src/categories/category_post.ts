@@ -8,118 +8,128 @@ const category_post = new Hono();
 
 category_post.post("/",
 	describeRoute({
-		summary: 'Create category',
-		description: 'This route creates a category',
-		tags: ['categories'],
+		summary: "Create Category",
+		description: "Creates a new category in the database. Admin privileges are required.",
+		tags: ["categories"],
 		requestBody: {
+			required: true,
 			content: {
-				'application/json': {
+				"application/json": {
 					schema: {
-						type: 'object',
+						type: "object",
 						properties: {
 							name: {
-								type: 'string',
-								default: 'name',
-								description: 'The name of the category',
+								type: "string",
+								description: "The name of the category",
+								default: "New Category"
 							},
 							description: {
-								type: 'string',
-								default: 'this is a description',
-								description: 'The description of the category',
-							},
+								type: "string",
+								description: "The description of the category",
+								default: "Description of new category"
+							}
 						},
-					},
-				},
-			},
-			required: true,
+						required: ["name", "description"]
+					}
+				}
+			}
 		},
 		responses: {
 			200: {
-				description: 'OK',
+				description: "Successfully created category",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								message: {
-									type: 'string',
-									default: 'Category name created successfully',
-									description: 'The message',
-								},
+									type: "string",
+									description: "The success message",
+									default: "Category created successfully"
+								}
 							},
-						},
-					},
-				},
+							required: ["message"]
+						}
+					}
+				}
 			},
 			400: {
-				description: 'Bad request',
+				description: "Invalid request",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Invalid JSON',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Invalid JSON"
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			401: {
-				description: 'Unauthorized',
+				description: "Unauthorized",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header', 'You don\'t have admin privileges'],
-									description: 'The error message (one of the possible errors)',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"You don't have admin privileges"
+									]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			404: {
-				description: 'Not found',
+				description: "Not Found",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Uid not found',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Uid not found"
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			500: {
-				description: 'Internal server error',
+				description: "Internal server error",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Internal server error"
+								}
 							},
-						},
-					},
-				},
-			},
-		},
+							required: ["error"]
+						}
+					}
+				}
+			}
+		}
 	}),
 	AdminMiddleware, async (c) => {
 		let json: any;
@@ -136,10 +146,7 @@ category_post.post("/",
 			.insert(json)
 			.select("*");
 		if (error != undefined) return c.json({ error: error.message }, 500);
-		return c.json(
-			{ message: `Category ${json.name} created successfully` },
-			200,
-		);
+		return c.json({ message: 'Category created successfully' }, 200);
 	});
 
 export default category_post;
