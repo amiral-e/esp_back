@@ -23,7 +23,7 @@ collection_delete.delete(
 			}
 		],
 		responses: {
-			"200": {
+			200: {
 				description: "Collection deleted successfully",
 				content: {
 					"application/json": {
@@ -39,7 +39,7 @@ collection_delete.delete(
 					}
 				}
 			},
-			"404": {
+			404: {
 				description: "Collection not found",
 				content: {
 					"application/json": {
@@ -55,7 +55,7 @@ collection_delete.delete(
 					}
 				}
 			},
-			"500": {
+			500: {
 				description: "Internal server error",
 				content: {
 					"application/json": {

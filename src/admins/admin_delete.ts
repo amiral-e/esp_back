@@ -94,7 +94,7 @@ admin_delete.delete(
 				},
 			},
 			404: {
-				description: "User not found",
+				description: "Resource not found",
 				content: {
 					"application/json": {
 						schema: {

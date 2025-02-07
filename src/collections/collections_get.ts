@@ -35,11 +35,15 @@ collections_get.get(
 				}
 			},
 			404: {
-				description: "No collections found",
+				description: "Resource not found",
 				schema: {
 					type: "object",
 					properties: {
-						error: { type: "string", example: "No collections found" }
+						error: {
+							type: "string",
+							description: "The error message (one of the possible errors)",
+							default: ["Uid not found", "No collections found"],
+						}
 					}
 				}
 			},
@@ -48,7 +52,11 @@ collections_get.get(
 				schema: {
 					type: "object",
 					properties: {
-						error: { type: "string" }
+						error: {
+							type: "string",
+							description: "The error message",
+							default: "Internal server error",
+						}
 					}
 				}
 			}
