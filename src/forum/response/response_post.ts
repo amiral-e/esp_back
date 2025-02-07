@@ -112,7 +112,7 @@ response_post.post("/",
 
         try {
             body = await c.req.json();
-            if (!body?.message?.trim()) {
+            if (!body?.message) {
                 return c.json({ error: "Message is required" }, 400);
             }
         } catch (error) {
