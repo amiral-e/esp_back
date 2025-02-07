@@ -2,7 +2,6 @@ import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
-import { isAdmin } from "../../admins/utils.ts";
 
 const response_put = new Hono();
 
@@ -106,8 +105,7 @@ response_put.put("/:id",
             return c.json({ error: "Response not found" }, 404);
         }
 
-        const isUserAdmin = await isAdmin(user.uid);
-        if (existingResponse.user_id !== user.uid && !isUserAdmin) {
+        if (existingResponse.user_id !== user.uid) {
             return c.json({ error: "Not authorized to update this response" }, 403);
         }
 
