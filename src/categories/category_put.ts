@@ -8,129 +8,128 @@ const category_put = new Hono();
 
 category_put.put("/:id",
 	describeRoute({
-		summary: 'Update category',
-		description: 'This route updates a category',
-		tags: ['categories'],
-		parameters: [
-			{
-				in: 'path',
-				name: 'id',
-				description: 'The id of the category to update',
-				required: true,
-				schema: {
-					type: 'string'
-				}
-			}
-		],
+		summary: "Update Category",
+		description: "Updates a specific category in the database. Admin privileges are required.",
+		tags: ["categories"],
 		requestBody: {
+			required: true,
 			content: {
-				'application/json': {
+				"application/json": {
 					schema: {
-						type: 'object',
+						type: "object",
 						properties: {
 							name: {
-								type: 'string',
-								default: 'name',
-								description: 'The name of the category',
+								type: "string",
+								description: "The name of the category",
+								default: "Updated Category"
 							},
 							description: {
-								type: 'string',
-								default: 'this is a description',
-								description: 'The description of the category',
-							},
+								type: "string",
+								description: "The description of the category",
+								default: "Description of updated category"
+							}
 						},
-					},
-				},
-			},
-			required: false,
+						required: ["name", "description"]
+					}
+				}
+			}
 		},
 		responses: {
 			200: {
-				description: 'OK',
+				description: "Successfully updated category",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								message: {
-									type: 'string',
-									default: 'Category name updated successfully',
-									description: 'The message',
-								},
+									type: "string",
+									description: "The success message",
+									default: "Category updated successfully"
+								}
 							},
-						},
-					},
-				},
+							required: ["message"]
+						}
+					}
+				}
 			},
 			400: {
-				description: 'Bad request',
+				description: "Invalid request",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Invalid JSON',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Invalid JSON"
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			401: {
-				description: 'Unauthorized',
+				description: "Unauthorized",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header', 'You don\'t have admin privileges'],
-									description: 'The error message (one of the possible errors)',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"You don't have admin privileges"
+									]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			404: {
-				description: 'Not found',
+				description: "Not Found",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['Uid not found', 'Category not found'],
-									description: 'The error message (one of the possible errors)',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: ["Uid not found", "Category not found"]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			500: {
-				description: 'Internal server error',
+				description: "Internal Server Error",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Internal server error"
+								}
 							},
-						},
-					},
-				},
-			},
-		},
+							required: ["error"]
+						}
+					}
+				}
+			}
+		}
 	}),
 	AdminMiddleware, async (c: any) => {
 		const { id } = await c.req.param();
@@ -160,7 +159,7 @@ category_put.put("/:id",
 		if (updateError != undefined)
 			return c.json({ error: updateError.message }, 500);
 		return c.json(
-			{ message: `Category ${categData.name} updated successfully` },
+			{ message: 'Category updated successfully' },
 			200,
 		);
 	});

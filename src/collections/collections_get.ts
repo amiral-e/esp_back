@@ -8,113 +8,77 @@ const collections_get = new Hono();
 
 collections_get.get(
 	describeRoute({
-		summary: 'Get all collections',
-		description: 'This route returns all collections',
-		tags: ['collections'],
+		summary: "Get all collections",
+		description: "Get all collections for the authenticated user. Auth is required.",
+		tags: ["collections"],
 		responses: {
 			200: {
-				description: 'OK',
-				content: {
-					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								collections: {
-									type: 'array',
-									items: {
-										type: 'object',
-										properties: {
-											table_name: {
-												type: 'string',
-												default: 'table_name',
-												description: 'The table name of the collection',
-											},
-											uid: {
-												type: 'string',
-												default: 'uid',
-												description: 'The unique identifier of the collection',
-											},
-											name: {
-												type: 'string',
-												default: 'name',
-												description: 'The name of the collection',
-											},
-										},
-									},
+				description: "Successfully retrieved collections",
+				schema: {
+					type: "object",
+					properties: {
+						collections: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									collection: { type: "string" },
+									user: { type: "string" },
+									name: { type: "string" }
 								},
-							},
+								required: ["collection", "user", "name"]
+							}
 						},
-					},
-				},
-			},
-			401: {
-				description: 'Unauthorized',
-				content: {
-					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header'],
-									description: 'The error message (one of the possible errors)',
-								},
-							},
-						},
-					},
-				},
+						description: "Array of collection objects",
+						required: true,
+					}
+				}
 			},
 			404: {
-				description: 'Not found',
-				content: {
-					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								error: {
-									type: 'string',
-									default: ['Uid not found', 'No collections found'],
-									description: 'The error message (one of the possible errors)',
-								},
-							},
-						},
-					},
-				},
+				description: "No collections found",
+				schema: {
+					type: "object",
+					properties: {
+						error: { type: "string", example: "No collections found" }
+					}
+				}
 			},
 			500: {
-				description: 'Internal server error',
-				content: {
-					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+				description: "Internal server error",
+				schema: {
+					type: "object",
+					properties: {
+						error: { type: "string" }
+					}
+				}
+			}
+		}
 	}),
 	AuthMiddleware, async (c: any) => {
 		const user = c.get("user");
 
 		const { data, error } = await config.supabaseClient
-			.schema("vecs")
-			.rpc("get_vecs", { name: user.uid + "%" });
+			.from("llamaindex_embedding")
+			.select("collection")
+			.like("collection", user.uid + "_%");
 		if (data == undefined || data.length == 0)
 			return c.json({ error: "No collections found" }, 404);
 		else if (error != undefined) return c.json({ error: error.message }, 500);
 
-		const collections = data.map((item: any) => {
-			const tableName = item.vec_table_name;
-			const name = tableName.replace(user.uid + "_", "");
-			return { table_name: tableName, uid: user.uid, name: name };
-		});
+		const uniqueCollections = data.filter(
+			(collection: any, index: any, self: any) =>
+				index ===
+				self.findIndex((t: any) => t.collection === collection.collection),
+		);
+		const collections = [
+			...new Set(
+				uniqueCollections.map((x: any) => {
+					const collection_id = x.collection;
+					const name = collection_id.replace(user.uid + "_", "");
+					return { collection: collection_id, user: user.uid, name: name };
+				}),
+			),
+		];
 		return c.json({ collections: collections }, 200);
 	});
 

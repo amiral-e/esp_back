@@ -9,114 +9,98 @@ const collection_delete = new Hono();
 collection_delete.delete(
 	"/:collection_name",
 	describeRoute({
-		summary: 'Delete collection',
-		description: 'This route deletes a collection',
-		tags: ['collections'],
+		summary: "Delete a Collection",
+		description: "Deletes a collection and all its embeddings. Auth is required.",
+		tags: ["collections"],
 		parameters: [
 			{
-				in: 'path',
-				name: 'collection_name',
-				description: 'The name of the collection to delete',
+				in: "path",
+				name: "collection_name",
 				required: true,
 				schema: {
-					type: 'string'
+					type: "string"
 				}
 			}
 		],
 		responses: {
-			200: {
-				description: 'OK',
+			"200": {
+				description: "Collection deleted successfully",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								message: {
-									type: 'string',
-									default: 'Collection name deleted successfully',
-									description: 'The message',
-								},
-							},
-						},
-					},
-				},
+									type: "string",
+									example: "Collection my-collection deleted successfully"
+								}
+							}
+						}
+					}
+				}
 			},
-			401: {
-				description: 'Unauthorized',
+			"404": {
+				description: "Collection not found",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header'],
-									description: 'The error message (one of the possible errors)',
-								},
-							},
-						},
-					},
-				},
+									type: "string",
+									example: "Collection not found"
+								}
+							}
+						}
+					}
+				}
 			},
-			404: {
-				description: 'Not found',
+			"500": {
+				description: "Internal server error",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['Uid not found', 'Collection not found'],
-									description: 'The error message (one of the possible errors)',
-								},
-							},
-						},
-					},
-				},
-			},
-			500: {
-				description: 'Internal server error',
-				content: {
-					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+									type: "string",
+									example: "Database error message"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}),
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
 		const { collection_name } = c.req.param();
-		const table_name = user.uid + "_" + collection_name;
+		const collection_id = user.uid + "_" + collection_name;
 
 		const { data: collectionData, error: collectionError } =
 			await config.supabaseClient
-				.schema("vecs")
-				.rpc("get_vecs", { name: user.uid + "_" + collection_name });
+				.from("llamaindex_embedding")
+				.select("id, collection")
+				.eq("collection", collection_id);
 		if (collectionData == undefined || collectionData.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
 		else if (collectionError != undefined)
 			return c.json({ error: collectionError.message }, 500);
 
-		const { data: deletedCollection, error: deleteError } =
-			await config.supabaseClient
-				.schema("vecs")
-				.rpc("drop_table_if_exists", { table_name: table_name });
-		if (deleteError != undefined)
-			return c.json({ error: deleteError.message }, 500);
+		for (const item of collectionData) {
+			const { data: deletedCollection, error: deleteError } =
+				await config.supabaseClient
+					.from("llamaindex_embedding")
+					.delete()
+					.eq("id", item.id);
+			if (deleteError != undefined)
+				return c.json({ error: deleteError.message }, 500);
+		}
+
 		return c.json(
-			{ message: `Collection ${table_name} deleted successfully` },
+			{ message: `Collection ${collection_name} deleted successfully` },
 			200,
 		);
 	},

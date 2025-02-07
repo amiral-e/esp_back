@@ -4,168 +4,161 @@ import { describeRoute } from "hono-openapi";
 import config from "../config.ts";
 import AuthMiddleware from "../middlewares/middleware_auth.ts";
 
+import {
+	// Document,
+	// storageContextFromDefaults,
+	VectorStoreIndex,
+	// PromptTemplate,
+} from "llamaindex";
+
+import add_context_to_query from "./utils.ts";
+
 const chat_collection_post = new Hono();
+
+
+function get_context_prompt(texts: string, query: string): string {
+	const context_prompt = `Context information is below.
+---------------------
+${texts}
+---------------------
+Given the context information and not prior knowledge, answer the query.
+Your answer should be in the same language as the query.
+You can't return the full context directly, but you can summarize it, or use it to answer the query.
+
+Query: ${query}
+Answer:`;
+
+	return context_prompt;
+}
 
 chat_collection_post.post(
 	"/conversations/:conv_id/collections/:collec_name",
 	describeRoute({
-		summary: 'Chat with a collection',
-		description: 'This route chats with a collection',
-		tags: ['chat'],
-		parameters: [
-			{
-				in: 'path',
-				name: 'conv_id',
-				description: 'The id of the conversation',
-				required: true,
-				schema: {
-					type: 'string'
-				},
-			},
-			{
-				in: 'path',
-				name: 'collec_name',
-				description: 'The name of the collection',
-				required: true,
-				schema: {
-					type: 'string'
-				},
-			}
-		],
+		summary: "Post a message to a collection conversation",
+		description: "Posts a user message to a specific collection conversation, gets AI response, and updates conversation history",
+		tags: ["chat"],
 		requestBody: {
+			required: true,
 			content: {
-				'application/json': {
+				"application/json": {
 					schema: {
-						type: 'object',
+						type: "object",
 						properties: {
 							message: {
-								type: 'string',
-								default: 'Hello world',
-								description: 'The message to send',
-							},
+								type: "string",
+								description: "The message to be sent in the conversation",
+								default: "Hello"
+							}
 						},
-					},
-				},
-			},
-			required: true,
+						required: ["message"]
+					}
+				}
+			}
 		},
 		responses: {
 			200: {
-				description: 'OK',
+				description: "Successfully processed message and got response",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								role: {
-									type: 'string',
-									default: 'assistant',
-									description: 'The role of the message',
+									type: "string",
+									description: "The role of the responder",
+									default: "assistant"
 								},
 								content: {
-									type: 'string',
-									default: 'Response from the assistant',
-									description: 'The content of the message',
+									type: "string",
+									description: "The response content",
+									default: "Hello user, how can I help you?"
 								},
 								sources: {
-									type: 'array',
-									items: {
-										type: 'object',
-										properties: {
-											uid: {
-												type: 'string',
-												default: 'global',
-												description: 'The unique identifier of the source'
-											},
-											filename: {
-												type: 'string',
-												default: '',
-												description: 'The filename of the source'
-											}
-										}
-									},
-									default: [
-										{
-											uid: 'uid',
-											filename: 'paul_graham_essay.txt'
-										}
-									],
-									description: 'The sources of the message'
-								},
+									type: "array",
+									description: "Sources used for the response"
+								}
 							},
-						},
-					},
-				},
+							required: ["role", "content"]
+						}
+					}
+				}
 			},
 			400: {
-				description: 'Bad request',
+				description: "Invalid request",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Invalid JSON',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: ["Invalid JSON", "Invalid collection name"]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			401: {
-				description: 'Unauthorized',
+				description: "Unauthorized",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header'],
-									description: 'The error message (one of the possible errors)',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: [
+										"No authorization header found",
+										"Invalid authorization header"
+									]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			404: {
-				description: 'Not found',
+				description: "Collection not found",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['Uid not found', 'Conversation not found', 'Collection not found'],
-									description: 'The error message (one of the possible errors)',
-								},
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: ["Uid not found", "Collection not found", "Conversation not found"]
+								}
 							},
-						},
-					},
-				},
+							required: ["error"]
+						}
+					}
+				}
 			},
 			500: {
-				description: 'Internal server error',
+				description: "Internal server error",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
-								},
+									type: "string",
+									description: "The error message",
+									default: "Internal server error"
+								}
 							},
-						},
-					},
-				},
-			},
-		},
+							required: ["error"]
+						}
+					}
+				}
+			}
+		}
 	}),
 	AuthMiddleware,
 	async (c: any) => {
@@ -173,7 +166,7 @@ chat_collection_post.post(
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.message == undefined)
+			if (!json || json.message == undefined || json.message == "")
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
@@ -185,15 +178,6 @@ chat_collection_post.post(
 		)
 			return c.json({ error: "Invalid collection name" }, 400);
 
-		const { data: collectionData, error: collectionError } =
-			await config.supabaseClient
-				.schema("vecs")
-				.rpc("get_vecs", { name: collec_name });
-		if (collectionData == undefined || collectionData.length == 0)
-			return c.json({ error: "Collection not found" }, 404);
-		else if (collectionError != undefined)
-			return c.json({ error: collectionError.message }, 500);
-
 		const { data: convData, error: convError } = await config.supabaseClient
 			.from("conversations")
 			.select("*")
@@ -204,41 +188,58 @@ chat_collection_post.post(
 			return c.json({ error: "Conversation not found" }, 404);
 		else if (convError) return c.json({ error: convError.message }, 500);
 
-		var history = convData.history;
-		history.push({ role: "user", content: json.message });
+		const res = await add_context_to_query(convData.history, json.message);
+
+		config.pgvs.setCollection(collec_name);
+		const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
+
+		const retriever = index.asRetriever({
+			similarityTopK: 3,
+		});
+		const docs = await retriever.retrieve({ query: res });
+		if (docs.length == 0)
+			return c.json({ error: "No answer found" }, 404);
+
+		let texts = '';
+		for (const doc of docs) {
+			texts += doc.node.metadata.doc_file;
+			texts += ': ';
+			// @ts-ignore
+			texts += doc.node.text;
+			texts += '\n';
+		}
 
 		let response: any;
 		try {
-			response = await fetch(`${config.envVars.IA_URL}/chat/${collec_name}`, {
-				method: "POST",
-				body: JSON.stringify(history),
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${config.envVars.BEARER_TOKEN}`,
-				},
-			});
+			response = await config.llm.chat({ 'messages': [{ role: 'user', content: get_context_prompt(texts, res) }] });
+			console.log(response.message.content);
 		} catch (error: any) {
-			if (error instanceof Error) {
-				console.error("Fetch failed with error:", error.message);
-				return c.json({ error: error.message }, 500);
-			} else {
-				console.error("Fetch failed with unknown error:", error);
-				return c.json({ error: "Unknown error" }, 500);
-			}
+			console.error("LLM Error:", error instanceof Error ? error.message : error);
+			if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
+				console.log("Hit rate limit. Consider implementing retry logic.");
 		}
-		if (response.status != 200)
-			return c.json({ error: "Error while fetching response from AI" }, 500);
 
-		const body = await response.json();
-		history.push({ role: "assistant", content: body.content });
+		const sources_details = docs.map((x: any) => {
+			return {
+				part: x.node.id_,
+				metadata: x.node.metadata,
+				score: x.score,
+			};
+		});
+		const sources = [...new Set(sources_details.map((x: any) => {
+			return x.metadata.doc_file;
+		}))];
+
+		convData.history.push({ role: "user", content: json.message });
+		convData.history.push({ role: "assistant", content: response.message.content, sources: sources });
 
 		const { data: updateData, error: updateError } = await config.supabaseClient
 			.from("conversations")
-			.update({ history: history })
+			.update({ history: convData.history })
 			.eq("id", convData.id);
 		if (updateError) return c.json({ error: updateError.message }, 500);
 		return c.json(
-			{ role: "assistant", content: body.content, sources: body.sources },
+			{ role: "assistant", content: response.message.content, sources: sources_details },
 			200,
 		);
 	},

@@ -1,6 +1,8 @@
+import { Hono } from "hono";
+import { describeRoute } from "hono-openapi";
+
 import config from "../config.ts";
 import AdminMiddleware from "../middlewares/middleware_admin.ts";
-import { Hono } from "hono";
 
 const documents_get = new Hono();
 
@@ -8,20 +10,24 @@ documents_get.get(
 	"/collections/:collection_name/documents",
 	AdminMiddleware,
 	async (c: any) => {
-		// const user = c.get('user');
 		const { collection_name } = c.req.param();
-		const table_name = "global_" + collection_name;
+		const collection_id = "global_" + collection_name;
 
 		const { data, error } = await config.supabaseClient
-			.schema("vecs")
-			.from(table_name)
-			.select("*");
+			.from("llamaindex_embedding")
+			.select("id, collection, metadata")
+			.eq("collection", collection_id);
 		if (data == undefined || data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
-		else if (error) return c.json({ error: error.message }, 500);
+		else if (error != undefined) return c.json({ error: error.message }, 500);
 
-		const doc_ids = [...new Set(data.map((x: any) => x.metadata.doc_id))];
-		return c.json({ response: { doc_ids: doc_ids } }, 200);
+		const docs = data.reduce((acc: any[], x: any) => {
+			if (!acc.some((y) => y.doc_id === x.metadata.doc_id)) {
+				acc.push({ doc_id: x.metadata.doc_id, doc_file: x.metadata.doc_file });
+			}
+			return acc;
+		}, []);
+		return c.json({ documents: docs }, 200);
 	},
 );
 

@@ -1,4 +1,4 @@
-import { decode, sign, verify } from "hono/jwt";
+import { verify } from "hono/jwt";
 import config from "../config.ts";
 
 const AdminMiddleware = async (c: any, next: any) => {
@@ -17,15 +17,18 @@ const AdminMiddleware = async (c: any, next: any) => {
 		);
 		if (data != undefined && data === false)
 			return c.json({ error: "Uid not found" }, 404);
-		else if (error)
-			return c.json({ error: error.message }, 500);
+		else if (error) return c.json({ error: error.message }, 500);
 
 		const { data: adminsData, error: adminsError } = await config.supabaseClient
 			.from("admins")
 			.select("*")
 			.eq("user_id", decoded["uid"])
 			.single();
-		if (adminsData == undefined || adminsData.length == 0 || adminsError != undefined)
+		if (
+			adminsData == undefined ||
+			adminsData.length == 0 ||
+			adminsError != undefined
+		)
 			return c.json({ error: "You don't have admin privileges" }, 401);
 
 		c.set("user", decoded);

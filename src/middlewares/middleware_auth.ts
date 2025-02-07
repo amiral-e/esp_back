@@ -17,8 +17,7 @@ const AuthMiddleware = async (c: any, next: any) => {
 		);
 		if (data != undefined && data === false)
 			return c.json({ error: "Uid not found" }, 404);
-		else if (error)
-			return c.json({ error: error.message }, 500);
+		else if (error) return c.json({ error: error.message }, 500);
 
 		c.set("user", decoded);
 		return next();

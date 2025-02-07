@@ -8,116 +8,131 @@ const admin_insert = new Hono();
 
 admin_insert.post(
 	describeRoute({
-		summary: 'Add user to admins',
-		description: 'This route adds a user to the admins list',
-		tags: ['admins'],
+		summary: "Add Admin",
+		description: "Adds a user to the admins list. Admin privileges are required.",
+		tags: ["admins"],
 		requestBody: {
+			required: true,
 			content: {
-				'application/json': {
+				"application/json": {
 					schema: {
-						type: 'object',
+						type: "object",
 						properties: {
 							user_id: {
-								type: 'string',
-								default: 'uid',
-								description: 'The user id',
+								type: "string",
+								description: "The user ID to add as admin",
+								default: "123",
 							},
 						},
-						required: ['user_id'],
+						required: ["user_id"],
 					},
 				},
 			},
-			required: true,
 		},
 		responses: {
 			200: {
-				description: 'OK',
+				description: "Successfully added user to admins",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								message: {
-									type: 'string',
-									default: 'User uid added to admins',
-									description: 'The message',
+									type: "string",
+									description:
+										"The message indicating that the user was added to admins",
+									default: "User added to admins",
 								},
 							},
+							required: ["message"],
 						},
 					},
 				},
 			},
 			400: {
-				description: 'Bad request',
+				description: "Invalid request",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['Invalid JSON', 'User is already an admin', 'You can\'t add yourself to admins'],
-									description: 'The error message (one of the possible errors)',
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: [
+										"Invalid JSON",
+										"You can't add yourself to admins",
+										"User is already an admin",
+									],
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
 			401: {
-				description: 'Unauthorized',
+				description: "Unauthorized",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['No authorization header found', 'Invalid authorization header', 'You don\'t have admin privileges'],
-									description: 'The error message (one of the possible errors)',
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"You don't have admin privileges",
+									],
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
 			404: {
-				description: 'Not found',
+				description: "User not found",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: ['Uid not found', 'User not found'],
-									description: 'The error message (one of the possible errors)',
+									type: "string",
+									description: "The error message (one of the possible errors)",
+									default: ["Uid not found", "User not found"],
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
 			500: {
-				description: 'Internal server error',
+				description: "Internal server error",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								error: {
-									type: 'string',
-									default: 'Internal server error',
-									description: 'The error message',
+									type: "string",
+									description: "The error message",
+									default: "Internal server error",
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
 		},
 	}),
-	AdminMiddleware, async (c: any) => {
+	AdminMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 		let json: any;
 		try {
@@ -133,12 +148,13 @@ admin_insert.post(
 
 		const { data, error } = await config.supabaseClient.rpc(
 			"check_uid_exists",
-			{ user_id: json.user_id },
+			{
+				user_id: json.user_id,
+			},
 		);
 		if (data != undefined && data === false)
 			return c.json({ error: "User not found" }, 404);
-		else if (error)
-			return c.json({ error: error.message }, 500);
+		else if (error) return c.json({ error: error.message }, 500);
 
 		const { data: adminsData, error: adminsError } = await config.supabaseClient
 			.from("admins")
@@ -156,7 +172,8 @@ admin_insert.post(
 				.single();
 		if (insertionError != undefined)
 			return c.json({ error: insertionError.message }, 500);
-		return c.json({ message: `User ${json.user_id} added to admins` }, 200);
-	});
+		return c.json({ message: `User added to admins` }, 200);
+	},
+);
 
 export default admin_insert;
