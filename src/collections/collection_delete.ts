@@ -12,16 +12,6 @@ collection_delete.delete(
 		summary: "Delete a Collection",
 		description: "Deletes a collection and all its embeddings. Auth is required.",
 		tags: ["collections"],
-		parameters: [
-			{
-				in: "path",
-				name: "collection_name",
-				required: true,
-				schema: {
-					type: "string"
-				}
-			}
-		],
 		responses: {
 			200: {
 				description: "Collection deleted successfully",

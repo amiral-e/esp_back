@@ -8,6 +8,92 @@ const documents_get = new Hono();
 
 documents_get.get(
 	"/:collection_name/documents",
+	describeRoute({
+		summary: "Get documents",
+		description: "Get a list of documents in the specified collection. Auth is required.",
+		tags: ["documents"],
+		responses: {
+			200: {
+				description: "Documents retrieved successfully",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								documents: {
+									type: "array",
+									items: {
+										type: "object",
+										properties: {
+											doc_id: {
+												type: "string",
+												description: "The document ID",
+											},
+											doc_file: {
+												type: "string",
+												description: "The document file name",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			401: {
+				description: "Unauthorized",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: ["No authorization header found", "Invalid authorization header"],
+								},
+							},
+						},
+					},
+				},
+			},
+			404: {
+				description: "Resource not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: ["Uid not found", "Collection not found"],
+								},
+							},
+						},
+					},
+				},
+			},
+			500: {
+				description: "Internal Server Error",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									example: "Internal server error",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}),
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
