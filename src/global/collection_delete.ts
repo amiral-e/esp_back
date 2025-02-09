@@ -8,6 +8,61 @@ const collection_delete = new Hono();
 
 collection_delete.delete(
 	"/collections/:collection_name",
+	describeRoute({
+		summary: "Delete a Collection",
+		description: "Deletes a global collection and all its embeddings. Admin privileges are required.",
+		tags: ["global"],
+		responses: {
+			200: {
+				description: "Collection deleted successfully",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								message: {
+									type: "string",
+									example: "Collection my-collection deleted successfully"
+								}
+							}
+						}
+					}
+				}
+			},
+			404: {
+				description: "Collection not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									example: "Collection not found"
+								}
+							}
+						}
+					}
+				}
+			},
+			500: {
+				description: "Internal server error",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									example: "Database error message"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}),
 	AdminMiddleware,
 	async (c: any) => {
 		const user = c.get("user");

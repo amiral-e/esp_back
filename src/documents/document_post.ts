@@ -16,7 +16,7 @@ document_post.post(
 	"/:collection_name/documents",
 	describeRoute({
 		summary: "Create a document",
-		description: "Creates a new document in the specified collection. Auth is required.",
+		description: "Ingest documents in the specified collection. Auth is required.",
 		tags: ["documents"],
 		responses: {
 			200: {

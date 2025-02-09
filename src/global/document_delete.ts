@@ -8,9 +8,83 @@ const document_delete = new Hono();
 
 document_delete.delete(
 	"/collections/:collection_name/documents/:document_id",
+	describeRoute({
+		summary: "Delete a document",
+		description: "Deletes a document from the specified collection. Admin privileges are required.",
+		tags: ["global"],
+		responses: {
+			200: {
+				description: "Document deleted successfully",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								message: {
+									type: "string",
+									description: "Success message",
+									example: "Document deleted successfully",
+								},
+							},
+						},
+					},
+				},
+			},
+			401: {
+				description: "Unauthorized",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: ["No authorization header found", "Invalid authorization header"]
+								}
+							}
+						}
+					}
+				}
+			},
+			404: {
+				description: "Resource not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: ["Uid not found", "Document not found"]
+								}
+							}
+						}
+					}
+				}
+			},
+			500: {
+				description: "Internal Server Error",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									example: "Internal server error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+	}),
 	AdminMiddleware,
 	async (c: any) => {
-		// const user = c.get("user");
 		const { collection_name, document_id } = c.req.param();
 		const collection_id = "global_" + collection_name;
 

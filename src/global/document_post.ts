@@ -14,6 +14,98 @@ const document_post = new Hono();
 
 document_post.post(
 	"/collections/:collection_name/documents",
+	describeRoute({
+		summary: "Create a document",
+		description: "Ingest documents in the specified collection. Admin privileges are required.",
+		tags: ["global"],
+		responses: {
+			200: {
+				description: "Document created successfully",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								message: {
+									type: "string",
+									description: "Success message",
+									example: "You have ingested X documents into the collection Y",
+								},
+							},
+						},
+					},
+				},
+			},
+			400: {
+				description: "Bad Request",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									example: "Invalid JSON"
+								}
+							}
+						}
+					}
+				}
+			},
+			401: {
+				description: "Unauthorized",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: ["No authorization header found", "Invalid authorization header"]
+								}
+							}
+						}
+					}
+				}
+			},
+			404: {
+				description: "Resource not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									default: "Uid not found"
+								}
+							}
+						}
+					}
+				}
+			},
+			500: {
+				description: "Internal Server Error",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									description: "The error message",
+									example: "Internal server error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+	}),
 	AdminMiddleware,
 	async (c: any) => {
 		const { collection_name } = c.req.param();
@@ -35,6 +127,7 @@ document_post.post(
 					new Document({
 						text: fileContents,
 						metadata: {
+							// @ts-ignore
 							doc_id: Bun.randomUUIDv7(),
 							doc_file: file.name,
 							user: "global",
