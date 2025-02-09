@@ -3,9 +3,9 @@ import { describeRoute } from "hono-openapi";
 
 import AuthMiddleware from "../middlewares/middleware_auth.ts";
 
-const user_uid_get = new Hono();
+const user_get = new Hono();
 
-user_uid_get.get(
+user_get.get(
 	"/",
 	describeRoute({
 		summary: "Get connected user",
@@ -44,10 +44,10 @@ user_uid_get.get(
 	async (c: any) => {
 		const user = c.get("user");
 		return c.json({
-			message: "Here is your uid",
+			message: "Here is your infos",
 			user: user,
 		});
 	},
 );
 
-export default user_uid_get;
+export default user_get;

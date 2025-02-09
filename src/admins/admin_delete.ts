@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import AuthMiddleware from "../middlewares/middleware_auth.ts";
+
+import { getUser } from "../middlewares/utils.ts";
 
 const admin_delete = new Hono();
 
@@ -20,8 +22,7 @@ admin_delete.delete(
 						properties: {
 							user_id: {
 								type: "string",
-								description: "The user ID to remove from admins",
-								default: "123",
+								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
 						},
 						required: ["user_id"],
@@ -31,7 +32,7 @@ admin_delete.delete(
 		},
 		responses: {
 			200: {
-				description: "Successfully removed user from admins",
+				description: "User removed from admins",
 				content: {
 					"application/json": {
 						schema: {
@@ -39,18 +40,15 @@ admin_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									description:
-										"The message indicating that the user was removed from admins",
 									default: "User removed from admins",
 								},
 							},
-							required: ["message"],
 						},
 					},
 				},
 			},
 			400: {
-				description: "Invalid request",
+				description: "Invalid request, you can't remove yourself from admins, or user is not an admin",
 				content: {
 					"application/json": {
 						schema: {
@@ -58,7 +56,6 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
 									default: [
 										"Invalid JSON",
 										"You can't remove yourself from admins",
@@ -66,13 +63,12 @@ admin_delete.delete(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
-			401: {
-				description: "Unauthorized",
+			403: {
+				description: "Forbidden (admin privileges required)",
 				content: {
 					"application/json": {
 						schema: {
@@ -80,21 +76,15 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: [
-										"No authorization header found",
-										"Invalid authorization header",
-										"You don't have admin privileges",
-									],
+									default: "Forbidden",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
 			404: {
-				description: "Resource not found",
+				description: "User not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -102,11 +92,9 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "User not found"],
+									default: "User not found",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -120,59 +108,49 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error",
+									default: "Error message",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		let json: any;
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
+		let request_uid = "";
 		try {
-			json = await c.req.json();
-			if (!json || json.user_id == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
+			const json = await c.req.json();
+			if (!json || !json.user_id || typeof json.user_id !== "string")
+				throw new Error();
+			request_uid = json.user_id;
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		if (user.uid == json.user_id)
+		if (user.uid == request_uid)
 			return c.json({ error: "You can't remove yourself from admins" }, 400);
 
-		const { data, error } = await config.supabaseClient.rpc(
-			"check_uid_exists",
-			{
-				user_id: json.user_id,
-			},
-		);
-		if (data != undefined && data === false)
+		const request_user = await getUser(request_uid);
+		if (!request_user || !request_user.valid)
 			return c.json({ error: "User not found" }, 404);
-		else if (error) return c.json({ error: error.message }, 500);
-
-		const { data: adminsData, error: adminsError } = await config.supabaseClient
-			.from("admins")
-			.select("*")
-			.eq("user_id", json.user_id)
-			.single();
-		if (adminsData == undefined || adminsData.length == 0)
+		else if (!request_user.admin)
 			return c.json({ error: "User is not an admin" }, 400);
 
-		const { data: deletionData, error: deletionError } =
+		const deletion =
 			await config.supabaseClient
 				.from("admins")
 				.delete()
-				.eq("user_id", json.user_id)
+				.eq("uid", request_uid)
 				.select("*")
 				.single();
-		if (deletionError != undefined)
-			return c.json({ error: deletionError.message }, 500);
+		if (deletion.error != undefined)
+			return c.json({ error: deletion.error.message }, 500);
 		return c.json({ message: "User removed from admins" }, 200);
 	},
 );

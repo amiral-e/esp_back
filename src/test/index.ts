@@ -1,11 +1,34 @@
 import { Hono } from "hono";
 
-import user_uid_get from "./user_uid_get.ts";
+import { verify } from "hono/jwt";
+import config from "../config.ts";
+
+import user_get from "./user_get.ts";
 import user_jwt_gen from "./user_jwt_gen.ts";
+import { describeRoute } from "hono-openapi";
 
-const admin = new Hono();
+import AuthMiddleware from "../middlewares/middleware_auth.ts";
 
-admin.route("/", user_uid_get);
-admin.route("/", user_jwt_gen);
+const test = new Hono();
 
-export default admin;
+test.route("/", user_get);
+test.route("/", user_jwt_gen);
+
+test.get("/check_uid",
+    describeRoute({
+        summary: "Check UID",
+        description: "Check the UID of the user",
+        tags: ["debug"],
+        responses: {
+            '200': { description: 'Success' },
+            '401': { description: 'Unauthorized' },
+        },
+    }),
+    AuthMiddleware,
+    async (c: any) => {
+        const user = c.get("user");
+        return c.json({ user: user });
+    }
+);
+
+export default test;

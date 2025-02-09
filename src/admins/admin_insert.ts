@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import AuthMiddleware from "../middlewares/middleware_auth.ts";
+
+import { getUser } from "../middlewares/utils.ts";
 
 const admin_insert = new Hono();
 
@@ -20,8 +22,7 @@ admin_insert.post(
 						properties: {
 							user_id: {
 								type: "string",
-								description: "The user ID to add as admin",
-								default: "123",
+								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
 						},
 						required: ["user_id"],
@@ -31,7 +32,7 @@ admin_insert.post(
 		},
 		responses: {
 			200: {
-				description: "Successfully added user to admins",
+				description: "User added to admins",
 				content: {
 					"application/json": {
 						schema: {
@@ -39,18 +40,15 @@ admin_insert.post(
 							properties: {
 								message: {
 									type: "string",
-									description:
-										"The message indicating that the user was added to admins",
 									default: "User added to admins",
 								},
 							},
-							required: ["message"],
 						},
 					},
 				},
 			},
 			400: {
-				description: "Invalid request",
+				description: "Invalid request, you can't add yourself to admins, or user is already an admin",
 				content: {
 					"application/json": {
 						schema: {
@@ -58,7 +56,6 @@ admin_insert.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
 									default: [
 										"Invalid JSON",
 										"You can't add yourself to admins",
@@ -66,13 +63,12 @@ admin_insert.post(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
-			401: {
-				description: "Unauthorized",
+			403: {
+				description: "Forbidden (admin privileges required)",
 				content: {
 					"application/json": {
 						schema: {
@@ -80,15 +76,9 @@ admin_insert.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: [
-										"No authorization header found",
-										"Invalid authorization header",
-										"You don't have admin privileges",
-									],
+									default: "Forbidden",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -102,11 +92,9 @@ admin_insert.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "User not found"],
+									default: "User not found",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -120,58 +108,48 @@ admin_insert.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error",
+									default: "Error message",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		let json: any;
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
+		let request_uid = "";
 		try {
-			json = await c.req.json();
-			if (!json || json.user_id == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
+			const json = await c.req.json();
+			if (!json || !json.user_id || typeof json.user_id !== "string")
+				throw new Error();
+			request_uid = json.user_id;
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		if (user.uid == json.user_id)
+		if (user.uid == request_uid)
 			return c.json({ error: "You can't add yourself to admins" }, 400);
 
-		const { data, error } = await config.supabaseClient.rpc(
-			"check_uid_exists",
-			{
-				user_id: json.user_id,
-			},
-		);
-		if (data != undefined && data === false)
+		const request_user = await getUser(request_uid);
+		if (!request_user || !request_user.valid)
 			return c.json({ error: "User not found" }, 404);
-		else if (error) return c.json({ error: error.message }, 500);
-
-		const { data: adminsData, error: adminsError } = await config.supabaseClient
-			.from("admins")
-			.select("*")
-			.eq("user_id", json.user_id)
-			.single();
-		if (adminsData != undefined)
+		else if (request_user.admin)
 			return c.json({ error: "User is already an admin" }, 400);
 
-		const { data: insertionData, error: insertionError } =
+		const update =
 			await config.supabaseClient
 				.from("admins")
-				.insert({ user_id: json.user_id })
+				.insert({ uid: request_uid })
 				.select("*")
 				.single();
-		if (insertionError != undefined)
-			return c.json({ error: insertionError.message }, 500);
+		if (update.error != undefined)
+			return c.json({ error: update.error.message }, 500);
 		return c.json({ message: `User added to admins` }, 200);
 	},
 );
