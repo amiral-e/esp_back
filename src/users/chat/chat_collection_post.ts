@@ -8,7 +8,7 @@ import {
 	VectorStoreIndex,
 } from "llamaindex";
 
-import add_context_to_query from "./utils.ts";
+import { add_context_to_query } from "./utils.ts";
 
 const chat_collection_post = new Hono();
 
@@ -205,7 +205,6 @@ chat_collection_post.post(
 		let response: any;
 		try {
 			response = await config.llm.chat({ 'messages': [{ role: 'user', content: get_context_prompt(texts, res) }] });
-			console.log(response.message.content);
 		} catch (error: any) {
 			console.error("LLM Error:", error instanceof Error ? error.message : error);
 			if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
