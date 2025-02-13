@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const collection_delete = new Hono();
 
@@ -41,6 +41,7 @@ collection_delete.delete(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},
@@ -89,30 +90,27 @@ collection_delete.delete(
 		const { collection_name } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
 
-		const { data: collectionData, error: collectionError } =
+		const collection =
 			await config.supabaseClient
 				.from("llamaindex_embedding")
 				.select("id, collection")
 				.eq("collection", collection_id);
-		if (collectionData == undefined || collectionData.length == 0)
+		if (collection.data == undefined || collection.data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
-		else if (collectionError != undefined)
-			return c.json({ error: collectionError.message }, 500);
+		else if (collection.error != undefined)
+			return c.json({ error: collection.error.message }, 500);
 
-		for (const item of collectionData) {
-			const { data: deletedCollection, error: deleteError } =
+		for (const item of collection.data) {
+			const deletion =
 				await config.supabaseClient
 					.from("llamaindex_embedding")
 					.delete()
 					.eq("id", item.id);
-			if (deleteError != undefined)
-				return c.json({ error: deleteError.message }, 500);
+			if (deletion.error != undefined)
+				return c.json({ error: deletion.error.message }, 500);
 		}
 
-		return c.json(
-			{ message: `Collection ${collection_name} deleted successfully` },
-			200,
-		);
+		return c.json({ message: `Collection deleted successfully` }, 200);
 	},
 );
 

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const category_post = new Hono();
 
@@ -81,6 +81,7 @@ category_post.post("/",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},

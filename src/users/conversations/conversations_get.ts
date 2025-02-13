@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversations_get = new Hono();
 
@@ -13,7 +13,7 @@ conversations_get.get(
 		tags: ["users-conversations"],
 		responses: {
 			200: {
-				description: "Successfully retrieved conversations",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -80,16 +80,20 @@ conversations_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user"
+									],
+								},
+							},
+							required: ["error"],
+						},
+					},
+				},
 			},
 			404: {
-				description: "Not Found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -97,16 +101,15 @@ conversations_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "No conversations found"],
+									default: "No conversation found",
 								},
-							}
-						}
-					}
-				}
+							},
+						},
+					},
+				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -114,27 +117,28 @@ conversations_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error",
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
 		}
 	}),
 	AuthMiddleware, async (c: any) => {
 		const user = c.get("user");
 
-		const { data, error } = await config.supabaseClient
+		const conversations = await config.supabaseClient
 			.from("conversations")
 			.select("*")
 			.eq("user_id", user.uid);
-		if (data == undefined || data.length == 0)
+		if (conversations.data == undefined || conversations.data.length == 0)
 			return c.json({ error: "No conversations found" }, 404);
-		else if (error != undefined) return c.json({ error: error.message }, 500);
-		return c.json({ conversations: data }, 200);
+		else if (conversations.error != undefined)
+			return c.json({ error: conversations.error.message }, 500);
+		
+		return c.json({ conversations: conversations.data }, 200);
 	});
 
 export default conversations_get;

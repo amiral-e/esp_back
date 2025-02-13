@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const documents_get = new Hono();
 
@@ -14,7 +14,7 @@ documents_get.get(
 		tags: ["users-documents"],
 		responses: {
 			200: {
-				description: "Documents retrieved successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -50,16 +50,20 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user"
+									],
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
 			404: {
-				description: "Resource not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -67,8 +71,7 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["Uid not found", "Collection not found"],
+									default: "Collection not found",
 								},
 							},
 						},
@@ -76,7 +79,7 @@ documents_get.get(
 				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -84,8 +87,7 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error",
+									default: "Error message",
 								},
 							},
 						},
@@ -100,18 +102,17 @@ documents_get.get(
 		const { collection_name } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
 
-		const { data, error } = await config.supabaseClient
+		const documents = await config.supabaseClient
 			.from("llamaindex_embedding")
 			.select("id, collection, metadata")
 			.eq("collection", collection_id);
-		if (data == undefined || data.length == 0)
+		if (documents.data == undefined || documents.data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
-		else if (error != undefined) return c.json({ error: error.message }, 500);
+		else if (documents.error != undefined) return c.json({ error: documents.error.message }, 500);
 
-		const docs = data.reduce((acc: any[], x: any) => {
-			if (!acc.some((y) => y.doc_id === x.metadata.doc_id)) {
+		const docs = documents.data.reduce((acc: any[], x: any) => {
+			if (!acc.some((y) => y.doc_id === x.metadata.doc_id))
 				acc.push({ doc_id: x.metadata.doc_id, doc_file: x.metadata.doc_file });
-			}
 			return acc;
 		}, []);
 		return c.json({ documents: docs }, 200);

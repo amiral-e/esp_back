@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_post = new Hono();
 
@@ -31,7 +31,7 @@ conversation_post.post("/",
 		},
 		responses: {
 			200: {
-				description: "Successfully created conversation",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -39,8 +39,7 @@ conversation_post.post("/",
 							properties: {
 								message: {
 									type: "string",
-									description: "Success message",
-									example: "Conversation Test created successfully with id 123"
+									example: "Conversation test created successfully with id 123"
 								}
 							}
 						}
@@ -48,7 +47,7 @@ conversation_post.post("/",
 				}
 			},
 			400: {
-				description: "Invalid request",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -56,7 +55,6 @@ conversation_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
 									default: "Invalid JSON"
 								}
 							}
@@ -74,7 +72,7 @@ conversation_post.post("/",
 								error: {
 									type: "string",
 									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"]
 								}
 							}
 						}
@@ -90,8 +88,7 @@ conversation_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error"
+									default: "Error message"
 								}
 							}
 						}
@@ -112,19 +109,15 @@ conversation_post.post("/",
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const { data, error } = await config.supabaseClient
+		const creation = await config.supabaseClient
 			.from("conversations")
 			.insert({ history: [], name: json.name, user_id: user.uid })
 			.select("*")
 			.single();
-		if (data == undefined || error != undefined)
-			return c.json({ error: error.message }, 500);
-		return c.json(
-			{
-				message: `Conversation ${json.name} created successfully with id ${data.id}`,
-			},
-			200,
-		);
+		if (creation.data == undefined || creation.error != undefined)
+			return c.json({ error: creation.error.message }, 500);
+
+		return c.json({ message: `Conversation ${json.name} created successfully with id ${creation.data.id}` }, 200);
 	});
 
 export default conversation_post;

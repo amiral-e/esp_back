@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const collections_get = new Hono();
 
@@ -47,6 +47,7 @@ collections_get.get(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},
