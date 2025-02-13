@@ -77,6 +77,73 @@ response_put.put("/:id",
                         }
                     }
                 }
+            },
+            400: {
+                description: 'Bad request',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'string',
+                                    enum: ['Invalid JSON body', 'Message is required'],
+                                    description: 'The error message'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            401: {
+                description: 'Unauthorized',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'string',
+                                    enum: ['No authorization header found', 'Invalid authorization header'],
+                                    description: 'The error message'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            404: {
+                description: 'Not Found',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'string',
+                                    enum: ['Response not found', 'Uid not found'],
+                                    description: 'The error message'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            500: {
+                description: 'Internal server error',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'string',
+                                    description: 'The error message'
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }),
