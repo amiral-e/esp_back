@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const conversations_get = new Hono();
 
 conversations_get.get(
 	describeRoute({
-		summary: "Get all conversations for authenticated user",
+		summary: "Get all conversations",
 		description: "Returns all conversations for the authenticated user. Auth is required.",
-		tags: ["conversations"],
+		tags: ["users-conversations"],
 		responses: {
 			200: {
 				description: "Successfully retrieved conversations",

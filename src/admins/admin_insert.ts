@@ -22,6 +22,7 @@ admin_insert.post(
 						properties: {
 							user_id: {
 								type: "string",
+								description: "The ID of the user to add as an admin.",
 								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
 						},
@@ -32,7 +33,7 @@ admin_insert.post(
 		},
 		responses: {
 			200: {
-				description: "User added to admins",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -48,7 +49,7 @@ admin_insert.post(
 				},
 			},
 			400: {
-				description: "Invalid request, you can't add yourself to admins, or user is already an admin",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -67,8 +68,24 @@ admin_insert.post(
 					},
 				},
 			},
+			401: {
+				description: "Unauthorized",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+								},
+							},
+						},
+					},
+				},
+			},
 			403: {
-				description: "Forbidden (admin privileges required)",
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -84,7 +101,7 @@ admin_insert.post(
 				},
 			},
 			404: {
-				description: "User not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {

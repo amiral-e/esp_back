@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const chat_post = new Hono();
 
 chat_post.post("/conversations/:conv_id",
 	describeRoute({
 		summary: "Post a message to a conversation",
-		description: "Posts a user message to a conversation, gets AI response, and updates conversation history",
-		tags: ["chat"],
+		description: "Posts a user message to a conversation, gets AI response, and updates conversation history. Auth is required.",
+		tags: ["users-chat"],
 		requestBody: {
 			required: true,
 			content: {
@@ -31,7 +31,7 @@ chat_post.post("/conversations/:conv_id",
 		},
 		responses: {
 			200: {
-				description: "Successfully processed message and got response",
+				description: "Sucess",
 				content: {
 					"application/json": {
 						schema: {
@@ -54,7 +54,7 @@ chat_post.post("/conversations/:conv_id",
 				}
 			},
 			400: {
-				description: "Invalid request",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -62,8 +62,7 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Invalid JSON"
+									default: ["Invalid JSON", "Invalid collection name"]
 								}
 							},
 							required: ["error"]
@@ -80,20 +79,19 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-									]
-								}
+									],
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
 			404: {
-				description: "Conversation not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -101,8 +99,7 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "Conversation not found"]
+									default: "Conversation not found"
 								}
 							},
 							required: ["error"]
@@ -119,20 +116,19 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error"
-								}
+									default: "Error message",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
-			}
+						},
+					},
+				},
+			},
 		}
 	}),
 	AuthMiddleware, async (c: any) => {
 		const user = c.get("user");
 		let json: any;
+
 		try {
 			json = await c.req.json();
 			if (!json || json.message == undefined)
@@ -142,21 +138,20 @@ chat_post.post("/conversations/:conv_id",
 		}
 		const { conv_id } = c.req.param();
 
-		const { data: convData, error: convError } = await config.supabaseClient
+		const conversation = await config.supabaseClient
 			.from("conversations")
 			.select("*")
 			.eq("user_id", user.uid)
 			.eq("id", conv_id)
 			.single();
-		if (convData == undefined || convData.length == 0)
+		if (conversation.data == undefined || conversation.data.length == 0)
 			return c.json({ error: "Conversation not found" }, 404);
-		else if (convError) return c.json({ error: convError.message }, 500);
+		else if (conversation.error)
+			return c.json({ error: conversation.error.message }, 500);
 
-		// const prompt = 'You are a helpful chat assistant. You are given a chat history and a new user message. You need to generate a response to the user message based on the chat history. Try to keep the response short and concise. If the user message is not related to the chat history, respond with "I\'m sorry, I don\'t understand. Can you rephrase your question?"';
 		var history = [];
-		// history.push({ role: "system", content: prompt });
-		if (convData.history != undefined)
-			history.push(...convData.history);
+		if (conversation.data.history != undefined)
+			history.push(...conversation.data.history);
 		history.push({ role: "user", content: json.message });
 
 		let response: any;
@@ -174,13 +169,14 @@ chat_post.post("/conversations/:conv_id",
 		}
 
 		history.push({ role: "assistant", content: response.message.content });
-		// history.shift();
 
 		const { data: updateData, error: updateError } = await config.supabaseClient
 			.from("conversations")
 			.update({ history: history })
-			.eq("id", convData.id);
-		if (updateError) return c.json({ error: updateError.message }, 500);
+			.eq("id", conversation.data.id);
+		if (updateError)
+			return c.json({ error: updateError.message }, 500);
+
 		return c.json({ role: "assistant", content: response.message.content }, 200);
 	});
 

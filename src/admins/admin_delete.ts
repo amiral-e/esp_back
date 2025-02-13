@@ -22,6 +22,7 @@ admin_delete.delete(
 						properties: {
 							user_id: {
 								type: "string",
+								description: "The ID of the user to remove from the admins list.",
 								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
 						},
@@ -32,7 +33,7 @@ admin_delete.delete(
 		},
 		responses: {
 			200: {
-				description: "User removed from admins",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -48,7 +49,7 @@ admin_delete.delete(
 				},
 			},
 			400: {
-				description: "Invalid request, you can't remove yourself from admins, or user is not an admin",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -67,8 +68,24 @@ admin_delete.delete(
 					},
 				},
 			},
+			401: {
+				description: "Unauthorized",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+								},
+							},
+						},
+					},
+				},
+			},
 			403: {
-				description: "Forbidden (admin privileges required)",
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -84,7 +101,7 @@ admin_delete.delete(
 				},
 			},
 			404: {
-				description: "User not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {

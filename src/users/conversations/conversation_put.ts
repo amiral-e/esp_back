@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const conversation_put = new Hono();
 
 conversation_put.put("/:conv_id",
 	describeRoute({
-		summary: "Update a conversation",
+		summary: "Update a conversation by ID",
 		description: "Updates an existing conversation for the authenticated user. Auth is required.",
-		tags: ["conversations"],
+		tags: ["users-conversations"],
 		requestBody: {
 			required: true,
 			content: {

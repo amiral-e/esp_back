@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const categories_get = new Hono();
 
@@ -11,14 +11,14 @@ categories_get.get(
 	describeRoute({
 		summary: "Get Categories",
 		description: "Retrieves all categories from the database. Auth is not required.",
-		tags: ["categories"],
+		tags: ["users-categories"],
 		requestBody: {
 			required: false,
 			content: {},
 		},
 		responses: {
 			200: {
-				description: "Successfully retrieved categories",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -62,29 +62,8 @@ categories_get.get(
 					},
 				},
 			},
-			401: {
-				description: "Unauthorized",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: [
-										"No authorization header found",
-										"Invalid authorization header",
-									],
-								},
-							},
-							required: ["error"],
-						},
-					},
-				},
-			},
 			404: {
-				description: "No categories found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -92,11 +71,9 @@ categories_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "No categories found"],
+									default: "No category found",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -110,11 +87,9 @@ categories_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error",
+									default: "Error message",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -122,13 +97,15 @@ categories_get.get(
 		},
 	}),
 	async (c) => {
-		const { data, error } = await config.supabaseClient
+		const categories = await config.supabaseClient
 			.from("categories")
 			.select("*");
-		if (data == undefined || data.length == 0)
+		if (categories.data == undefined || categories.data.length == 0)
 			return c.json({ error: "No categories found" }, 404);
-		else if (error != undefined) return c.json({ error: error.message }, 500);
-		return c.json({ categories: data }, 200);
+		else if (categories.error != undefined)
+			return c.json({ error: categories.error.message }, 500);
+
+		return c.json({ categories: categories.data }, 200);
 	},
 );
 

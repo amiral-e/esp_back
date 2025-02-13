@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const collection_delete = new Hono();
 
@@ -11,10 +11,10 @@ collection_delete.delete(
 	describeRoute({
 		summary: "Delete a Collection",
 		description: "Deletes a collection and all its embeddings. Auth is required.",
-		tags: ["collections"],
+		tags: ["users-collections"],
 		responses: {
 			200: {
-				description: "Collection deleted successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -22,15 +22,15 @@ collection_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									example: "Collection my-collection deleted successfully"
+									default: "Collection my-collection deleted successfully"
 								}
 							}
 						}
 					}
 				}
 			},
-			404: {
-				description: "Collection not found",
+			401: {
+				description: "Unauthorized",
 				content: {
 					"application/json": {
 						schema: {
@@ -38,12 +38,32 @@ collection_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									example: "Collection not found"
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+									],
+								},
+							},
+							required: ["error"],
+						},
+					},
+				},
+			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Collection not found",
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal server error",
@@ -54,13 +74,13 @@ collection_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									example: "Database error message"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
 		}
 	}),
 	AuthMiddleware,

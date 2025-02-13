@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const conversation_get = new Hono();
 
@@ -10,7 +10,7 @@ conversation_get.get("/:conv_id",
 	describeRoute({
 		summary: "Get a single conversation by ID",
 		description: "Returns the details of a single conversation for the authenticated user. Auth is required.",
-		tags: ["conversations"],
+		tags: ["users-conversations"],
 		responses: {
 			200: {
 				description: "Successfully retrieved conversation",
@@ -22,7 +22,7 @@ conversation_get.get("/:conv_id",
 								name: {
 									type: "string",
 									description: "The name of the conversation",
-									example: "My conversation"
+									default: "My conversation"
 								},
 								history: {
 									type: "array",
@@ -32,12 +32,12 @@ conversation_get.get("/:conv_id",
 											message: {
 												type: "string",
 												description: "The message content",
-												example: "Hello, how are you?"
+												default: "Hello, how are you?"
 											},
 											role: {
 												type: "string",
 												description: "The role of the user who sent the message",
-												example: "user"
+												default: "user"
 											},
 										},
 										required: ["message", "role"]
@@ -46,7 +46,7 @@ conversation_get.get("/:conv_id",
 								id: {
 									type: "string",
 									description: "The conversation ID",
-									example: "123"
+									default: "123"
 								}
 							}
 						}
@@ -62,16 +62,19 @@ conversation_get.get("/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+									],
+								},
+							},
+							required: ["error"],
+						},
+					},
+				},
 			},
 			404: {
-				description: "Not Found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -79,16 +82,15 @@ conversation_get.get("/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "Conversation not found"],
+									default: "No conversation found",
 								},
-							}
-						}
-					}
-				}
+							},
+						},
+					},
+				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -96,14 +98,13 @@ conversation_get.get("/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
 		}
 	}),
 	AuthMiddleware, async (c: any) => {

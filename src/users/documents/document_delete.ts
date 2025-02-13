@@ -1,17 +1,17 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const document_delete = new Hono();
 
 document_delete.delete(
-	"/collections/:collection_name/documents/:document_id",
+	"/:collection_name/documents/:document_id",
 	describeRoute({
 		summary: "Delete a document",
-		description: "Deletes a document from the specified collection. Admin privileges are required.",
-		tags: ["global"],
+		description: "Deletes a document from the specified collection. Auth is required.",
+		tags: ["users-documents"],
 		responses: {
 			200: {
 				description: "Document deleted successfully",
@@ -83,10 +83,11 @@ document_delete.delete(
 			}
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
+		const user = c.get("user");
 		const { collection_name, document_id } = c.req.param();
-		const collection_id = "global_" + collection_name;
+		const collection_id = user.uid + "_" + collection_name;
 
 		const { data: docsData, error: docsError } = await config.supabaseClient
 			.from("llamaindex_embedding")
@@ -107,7 +108,7 @@ document_delete.delete(
 		}
 
 		return c.json(
-			{ response: `Document ${document_id} deleted successfully` },
+			{ message: `Document ${document_id} deleted successfully` },
 			200,
 		);
 	},

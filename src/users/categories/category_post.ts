@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const category_post = new Hono();
 
@@ -10,7 +10,7 @@ category_post.post("/",
 	describeRoute({
 		summary: "Create Category",
 		description: "Creates a new category in the database. Admin privileges are required.",
-		tags: ["categories"],
+		tags: ["users-categories"],
 		requestBody: {
 			required: true,
 			content: {
@@ -36,7 +36,7 @@ category_post.post("/",
 		},
 		responses: {
 			200: {
-				description: "Successfully created category",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -44,7 +44,6 @@ category_post.post("/",
 							properties: {
 								message: {
 									type: "string",
-									description: "The success message",
 									default: "Category created successfully"
 								}
 							},
@@ -54,7 +53,7 @@ category_post.post("/",
 				}
 			},
 			400: {
-				description: "Invalid request",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -62,7 +61,6 @@ category_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
 									default: "Invalid JSON"
 								}
 							},
@@ -80,21 +78,19 @@ category_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"You don't have admin privileges"
-									]
-								}
+									],
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
-			404: {
-				description: "Not Found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -102,14 +98,12 @@ category_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Uid not found"
-								}
+									default: "Forbidden",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal server error",
@@ -120,18 +114,21 @@ category_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error"
-								}
+									default: "Error message",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
-			}
+						},
+					},
+				},
+			},
 		}
 	}),
-	AdminMiddleware, async (c) => {
+	AuthMiddleware,
+	async (c: any) => {
+		const user = c.get("user");
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
 		let json: any;
 		try {
 			json = await c.req.json();
@@ -145,7 +142,9 @@ category_post.post("/",
 			.from("categories")
 			.insert(json)
 			.select("*");
-		if (error != undefined) return c.json({ error: error.message }, 500);
+		if (error != undefined)
+			return c.json({ error: error.message }, 500);
+
 		return c.json({ message: 'Category created successfully' }, 200);
 	});
 

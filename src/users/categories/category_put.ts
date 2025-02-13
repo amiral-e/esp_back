@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AdminMiddleware from "../../middlewares/middleware_admin.ts";
 
 const category_put = new Hono();
 
@@ -10,7 +10,7 @@ category_put.put("/:id",
 	describeRoute({
 		summary: "Update Category",
 		description: "Updates a specific category in the database. Admin privileges are required.",
-		tags: ["categories"],
+		tags: ["users-categories"],
 		requestBody: {
 			required: true,
 			content: {
@@ -36,7 +36,7 @@ category_put.put("/:id",
 		},
 		responses: {
 			200: {
-				description: "Successfully updated category",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -44,7 +44,6 @@ category_put.put("/:id",
 							properties: {
 								message: {
 									type: "string",
-									description: "The success message",
 									default: "Category updated successfully"
 								}
 							},
@@ -54,7 +53,7 @@ category_put.put("/:id",
 				}
 			},
 			400: {
-				description: "Invalid request",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -62,7 +61,6 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
 									default: "Invalid JSON"
 								}
 							},
@@ -80,21 +78,19 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"You don't have admin privileges"
-									]
-								}
+									],
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
-			404: {
-				description: "Not Found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -102,17 +98,15 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "Category not found"]
-								}
+									default: "Forbidden",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+						},
+					},
+				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -120,18 +114,17 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error"
-								}
+									default: "Error message",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
-			}
+						},
+					},
+				},
+			},
 		}
 	}),
-	AdminMiddleware, async (c: any) => {
+	AdminMiddleware,
+	async (c: any) => {
 		const { id } = await c.req.param();
 		let json: any;
 		try {
@@ -158,10 +151,8 @@ category_put.put("/:id",
 			.eq("id", id);
 		if (updateError != undefined)
 			return c.json({ error: updateError.message }, 500);
-		return c.json(
-			{ message: 'Category updated successfully' },
-			200,
-		);
+
+		return c.json({ message: 'Category updated successfully' }, 200);
 	});
 
 export default category_put;

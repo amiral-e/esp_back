@@ -1,20 +1,19 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const documents_get = new Hono();
 
 documents_get.get(
-	"/:collection_name/documents",
 	describeRoute({
 		summary: "Get documents",
-		description: "Get a list of documents in the specified collection. Auth is required.",
-		tags: ["documents"],
+		description: "Get a list of documents in the specified collection. Admin privileges are required.",
+		tags: ["admins-documents"],
 		responses: {
 			200: {
-				description: "Documents retrieved successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -25,14 +24,8 @@ documents_get.get(
 									items: {
 										type: "object",
 										properties: {
-											doc_id: {
-												type: "string",
-												description: "The document ID",
-											},
-											doc_file: {
-												type: "string",
-												description: "The document file name",
-											},
+											doc_id: { type: "string", default: "0194ec0d-4975-7000-8f3b-cde53ce18ef8" },
+											doc_file: { type: "string", default: "example.md" },
 										},
 									},
 								},
@@ -50,8 +43,23 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"],
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+								},
+							},
+						},
+					},
+				},
+			},
+			403: {
+				description: "Forbidden",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Forbidden",
 								},
 							},
 						},
@@ -59,7 +67,7 @@ documents_get.get(
 				},
 			},
 			404: {
-				description: "Resource not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -67,8 +75,7 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["Uid not found", "Collection not found"],
+									default: "Collection not found",
 								},
 							},
 						},
@@ -76,7 +83,7 @@ documents_get.get(
 				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -84,8 +91,7 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error",
+									default: "Error message",
 								},
 							},
 						},
@@ -97,24 +103,27 @@ documents_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		const { collection_name } = c.req.param();
-		const collection_id = user.uid + "_" + collection_name;
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
 
-		const { data, error } = await config.supabaseClient
+		const { collection_name } = c.req.param();
+		const collection_id = "global_" + collection_name;
+
+		const documents = await config.supabaseClient
 			.from("llamaindex_embedding")
 			.select("id, collection, metadata")
 			.eq("collection", collection_id);
-		if (data == undefined || data.length == 0)
+		if (documents.data == undefined || documents.data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
-		else if (error != undefined) return c.json({ error: error.message }, 500);
+		else if (documents.error != undefined)
+			return c.json({ error: documents.error.message }, 500);
 
-		const docs = data.reduce((acc: any[], x: any) => {
-			if (!acc.some((y) => y.doc_id === x.metadata.doc_id)) {
+		const uniqueDocuments = documents.data.reduce((acc: any[], x: any) => {
+			if (!acc.some((y) => y.doc_id === x.metadata.doc_id))
 				acc.push({ doc_id: x.metadata.doc_id, doc_file: x.metadata.doc_file });
-			}
 			return acc;
 		}, []);
-		return c.json({ documents: docs }, 200);
+		return c.json({ documents: uniqueDocuments }, 200);
 	},
 );
 

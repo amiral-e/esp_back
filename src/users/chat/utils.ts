@@ -1,4 +1,4 @@
-import config from "../config.ts";
+import config from "../../config.ts";
 
 
 function get_prompt(history: any[], query: string): string {

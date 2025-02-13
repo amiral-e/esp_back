@@ -1,17 +1,17 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const documents_get = new Hono();
 
 documents_get.get(
-	"/collections/:collection_name/documents",
+	"/:collection_name/documents",
 	describeRoute({
 		summary: "Get documents",
-		description: "Get a list of documents in the specified collection. Admin privileges are required.",
-		tags: ["global"],
+		description: "Get a list of documents in the specified collection. Auth is required.",
+		tags: ["users-documents"],
 		responses: {
 			200: {
 				description: "Documents retrieved successfully",
@@ -94,10 +94,11 @@ documents_get.get(
 			},
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
+		const user = c.get("user");
 		const { collection_name } = c.req.param();
-		const collection_id = "global_" + collection_name;
+		const collection_id = user.uid + "_" + collection_name;
 
 		const { data, error } = await config.supabaseClient
 			.from("llamaindex_embedding")

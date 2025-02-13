@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 const category_delete = new Hono();
 
@@ -11,10 +11,10 @@ category_delete.delete(
 	describeRoute({
 		summary: "Delete Category",
 		description: "Deletes a specific category from the database. Admin privileges are required.",
-		tags: ["categories"],
+		tags: ["users-categories"],
 		responses: {
 			200: {
-				description: "Successfully deleted category",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -22,7 +22,6 @@ category_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									description: "The success message",
 									default: "Category deleted successfully",
 								},
 							},
@@ -40,11 +39,9 @@ category_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"You don't have admin privileges",
 									],
 								},
 							},
@@ -53,8 +50,8 @@ category_delete.delete(
 					},
 				},
 			},
-			404: {
-				description: "Not Found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -62,17 +59,31 @@ category_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message (one of the possible errors)",
-									default: ["Uid not found", "Category not found"],
+									default: "Forbidden",
 								},
 							},
-							required: ["error"],
+						},
+					},
+				},
+			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Category not found",
+								},
+							},
 						},
 					},
 				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -80,19 +91,21 @@ category_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Internal server error",
+									default: "Error message",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
 			},
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
+		const user = c.get("user");
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
 		const { id } = await c.req.param();
 
 		const { data: categData, error: categError } = await config.supabaseClient
@@ -110,7 +123,9 @@ category_delete.delete(
 			.delete()
 			.eq("id", id)
 			.select("*");
-		if (delError != undefined) return c.json({ error: delError.message }, 500);
+		if (delError != undefined)
+			return c.json({ error: delError.message }, 500);
+
 		return c.json({ message: "Category deleted successfully" }, 200);
 	},
 );

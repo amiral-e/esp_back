@@ -1,26 +1,36 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import config from "../../config.ts";
 
 import {
 	Document,
 	storageContextFromDefaults,
 	VectorStoreIndex,
 } from "llamaindex";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
-const document_post = new Hono();
+const documents_post = new Hono();
 
-document_post.post(
-	"/:collection_name/documents",
+documents_post.post(
 	describeRoute({
-		summary: "Create a document",
-		description: "Ingest documents in the specified collection. Auth is required.",
-		tags: ["documents"],
+		summary: "Ingest documents",
+		description: "Ingest documents in the specified collection. Admin privileges are required.",
+		tags: ["admins-documents"],
+		requestBody: {
+			required: true,
+			description: "Files to ingest",
+			content: {
+				"multipart/form-data": {
+					schema: {
+						type: "object",
+					},
+				},
+			},
+		},
 		responses: {
 			200: {
-				description: "Document created successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -28,8 +38,7 @@ document_post.post(
 							properties: {
 								message: {
 									type: "string",
-									description: "Success message",
-									example: "You have ingested X documents into the collection Y",
+									default: "You have ingested 1 documents into the collection example",
 								},
 							},
 						},
@@ -37,7 +46,7 @@ document_post.post(
 				},
 			},
 			400: {
-				description: "Bad Request",
+				description: "Bad request",
 				content: {
 					"application/json": {
 						schema: {
@@ -45,13 +54,12 @@ document_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Invalid JSON"
-								}
-							}
-						}
-					}
-				}
+									default: ["Invalid JSON", "No files provided", "Please provide a single file at a time"],
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -62,16 +70,15 @@ document_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
-								}
-							}
-						}
-					}
-				}
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+								},
+							},
+						},
+					},
+				},
 			},
-			404: {
-				description: "Resource not found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -79,16 +86,15 @@ document_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: "Uid not found"
-								}
-							}
-						}
-					}
-				}
+									default: "Forbidden",
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -96,19 +102,21 @@ document_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}),
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
 		const { collection_name } = c.req.param();
 
 		let json: any;
@@ -130,29 +138,24 @@ document_post.post(
 							// @ts-ignore
 							doc_id: Bun.randomUUIDv7(),
 							doc_file: file.name,
-							user: user.uid,
+							user: "global",
 						},
 					}),
 				);
 			} else if (file instanceof Array)
-				return c.json({ error: `Please provide a single file in ${key}` }, 400);
-			else return c.json({ error: "Invalid JSON" }, 400);
+				return c.json({ error: `Please provide a single file at a time` }, 400);
+			else
+				return c.json({ error: "Invalid JSON" }, 400);
 		}
-		if (docs.length == 0) return c.json({ error: "No files provided" }, 400);
+		if (docs.length == 0)
+			return c.json({ error: "No files provided" }, 400);
 
-		config.pgvs.setCollection(user.uid + "_" + collection_name);
+		config.pgvs.setCollection("global_" + collection_name);
 
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
-		const index = await VectorStoreIndex.fromDocuments(docs, {
-			storageContext: ctx,
-		});
-		return c.json(
-			{
-				message: `You have ingested ${docs.length} documents into the collection ${collection_name}`,
-			},
-			200,
-		);
+		const index = await VectorStoreIndex.fromDocuments(docs, { storageContext: ctx });
+		return c.json({ message: `You have ingested ${docs.length} documents into the collection ${collection_name}`, }, 200);
 	},
 );
 
-export default document_post;
+export default documents_post;

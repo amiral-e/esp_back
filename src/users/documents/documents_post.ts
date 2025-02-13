@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AdminMiddleware from "../middlewares/middleware_admin.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/middleware_auth.ts";
 
 import {
 	Document,
@@ -10,14 +10,14 @@ import {
 	VectorStoreIndex,
 } from "llamaindex";
 
-const document_post = new Hono();
+const documents_post = new Hono();
 
-document_post.post(
-	"/collections/:collection_name/documents",
+documents_post.post(
+	"/:collection_name/documents",
 	describeRoute({
-		summary: "Create a document",
-		description: "Ingest documents in the specified collection. Admin privileges are required.",
-		tags: ["global"],
+		summary: "Ingest documents",
+		description: "Ingest documents in the specified collection. Auth is required.",
+		tags: ["users-documents"],
 		responses: {
 			200: {
 				description: "Document created successfully",
@@ -106,8 +106,9 @@ document_post.post(
 			}
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
+		const user = c.get("user");
 		const { collection_name } = c.req.param();
 
 		let json: any;
@@ -122,7 +123,6 @@ document_post.post(
 			const file = json[key];
 			if (file instanceof File) {
 				const fileContents = await file.text();
-				// @ts-ignore
 				docs.push(
 					new Document({
 						text: fileContents,
@@ -130,7 +130,7 @@ document_post.post(
 							// @ts-ignore
 							doc_id: Bun.randomUUIDv7(),
 							doc_file: file.name,
-							user: "global",
+							user: user.uid,
 						},
 					}),
 				);
@@ -140,20 +140,14 @@ document_post.post(
 		}
 		if (docs.length == 0) return c.json({ error: "No files provided" }, 400);
 
-		config.pgvs.clearCollection();
-		config.pgvs.setCollection("global_" + collection_name);
+		config.pgvs.setCollection(user.uid + "_" + collection_name);
 
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
 		const index = await VectorStoreIndex.fromDocuments(docs, {
 			storageContext: ctx,
 		});
-		return c.json(
-			{
-				message: `You have ingested ${docs.length} documents into the collection ${collection_name}`,
-			},
-			200,
-		);
+		return c.json({ message: `You have ingested ${docs.length} documents into the collection ${collection_name}`, }, 200);
 	},
 );
 
-export default document_post;
+export default documents_post;
