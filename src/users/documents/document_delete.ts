@@ -2,19 +2,19 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const document_delete = new Hono();
 
 document_delete.delete(
 	"/:collection_name/documents/:document_id",
 	describeRoute({
-		summary: "Delete a document",
+		summary: "Delete a document by doc_id",
 		description: "Deletes a document from the specified collection. Auth is required.",
 		tags: ["users-documents"],
 		responses: {
 			200: {
-				description: "Document deleted successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -22,7 +22,6 @@ document_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									description: "Success message",
 									example: "Document deleted successfully",
 								},
 							},
@@ -39,16 +38,20 @@ document_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user"
+									],
+								},
+							},
+							required: ["error"],
+						},
+					},
+				},
 			},
 			404: {
-				description: "Resource not found",
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -56,16 +59,15 @@ document_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["Uid not found", "Document not found"]
-								}
-							}
-						}
-					}
-				}
+									default: "Document not found",
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -73,14 +75,13 @@ document_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}),
 	AuthMiddleware,
@@ -89,28 +90,26 @@ document_delete.delete(
 		const { collection_name, document_id } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
 
-		const { data: docsData, error: docsError } = await config.supabaseClient
+		const document_parts = await config.supabaseClient
 			.from("llamaindex_embedding")
 			.select("id, collection, metadata")
 			.eq("collection", collection_id)
 			.eq("metadata->>doc_id", document_id);
-		if (docsData == undefined || docsData.length == 0)
+		if (document_parts.data == undefined || document_parts.data.length == 0)
 			return c.json({ error: "Document not found" }, 404);
-		if (docsError != undefined)
-			return c.json({ error: docsError.message }, 500);
+		if (document_parts.error != undefined)
+			return c.json({ error: document_parts.error.message }, 500);
 
-		for (const item of docsData) {
-			const { data, error } = await config.supabaseClient
+		for (const item of document_parts.data) {
+			const deletion = await config.supabaseClient
 				.from("llamaindex_embedding")
 				.delete()
 				.eq("id", item.id);
-			if (error != undefined) return c.json({ error: error.message }, 500);
+			if (deletion.error != undefined)
+				return c.json({ error: deletion.error.message }, 500);
 		}
 
-		return c.json(
-			{ message: `Document ${document_id} deleted successfully` },
-			200,
-		);
+		return c.json({ message: `Document deleted successfully` }, 200);
 	},
 );
 

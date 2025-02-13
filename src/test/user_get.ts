@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import AuthMiddleware from "../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../middlewares/auth.ts";
 
 const user_get = new Hono();
 

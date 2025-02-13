@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_delete = new Hono();
 
@@ -40,6 +40,7 @@ conversation_delete.delete("/:conv_id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},

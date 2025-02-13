@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 import {
 	VectorStoreIndex,
@@ -108,6 +108,7 @@ chat_collection_post.post(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},
@@ -163,6 +164,7 @@ chat_collection_post.post(
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
+
 		const { conv_id, collec_name } = c.req.param();
 		if (
 			!collec_name.startsWith("global_") &&
@@ -226,12 +228,12 @@ chat_collection_post.post(
 		conversation.data.history.push({ role: "user", content: json.message });
 		conversation.data.history.push({ role: "assistant", content: response.message.content, sources: sources });
 
-		const { data: updateData, error: updateError } = await config.supabaseClient
+		const update = await config.supabaseClient
 			.from("conversations")
 			.update({ history: conversation.data.history })
 			.eq("id", conversation.data.id);
-		if (updateError)
-			return c.json({ error: updateError.message }, 500);
+		if (update.error)
+			return c.json({ error: update.error.message }, 500);
 
 		return c.json(
 			{ role: "assistant", content: response.message.content, sources: sources_details },

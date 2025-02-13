@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_get = new Hono();
 
@@ -65,6 +65,7 @@ conversation_get.get("/:conv_id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},
@@ -82,7 +83,7 @@ conversation_get.get("/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									default: "No conversation found",
+									default: "Conversation not found",
 								},
 							},
 						},
@@ -111,16 +112,18 @@ conversation_get.get("/:conv_id",
 		const user = c.get("user");
 		const { conv_id } = c.req.param();
 
-		const { data, error } = await config.supabaseClient
+		const conversation = await config.supabaseClient
 			.from("conversations")
 			.select("*")
 			.eq("user_id", user.uid)
 			.eq("id", conv_id)
 			.single();
-		if (data == undefined || data.length == 0)
+		if (conversation.data == undefined || conversation.data.length == 0)
 			return c.json({ error: "Conversation not found" }, 404);
-		else if (error != undefined) return c.json({ error: error.message }, 500);
-		return c.json({ name: data.name, history: data.history, id: data.id }, 200);
+		else if (conversation.error != undefined)
+			return c.json({ error: conversation.error.message }, 500);
+
+		return c.json({ name: conversation.data.name, history: conversation.data.history, id: conversation.data.id }, 200);
 	});
 
 export default conversation_get;

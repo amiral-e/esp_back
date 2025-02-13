@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AdminMiddleware from "../../middlewares/middleware_admin.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const collection_delete = new Hono();
 
@@ -95,7 +95,7 @@ collection_delete.delete(
 			},
 		},
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
 		if (!user.admin)

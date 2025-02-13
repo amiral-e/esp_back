@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AdminMiddleware from "../../middlewares/middleware_admin.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const category_put = new Hono();
 
@@ -81,6 +81,7 @@ category_put.put("/:id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user"
 									],
 								},
 							},
@@ -123,9 +124,14 @@ category_put.put("/:id",
 			},
 		}
 	}),
-	AdminMiddleware,
+	AuthMiddleware,
 	async (c: any) => {
+		const user = c.get("user");
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
 		const { id } = await c.req.param();
+
 		let json: any;
 		try {
 			json = await c.req.json();
@@ -135,22 +141,22 @@ category_put.put("/:id",
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const { data: categData, error: categError } = await config.supabaseClient
+		const categorie = await config.supabaseClient
 			.from("categories")
 			.select("name")
 			.eq("id", id)
 			.single();
-		if (categData == undefined || categData.length == 0)
+		if (categorie.data == undefined || categorie.data.length == 0)
 			return c.json({ error: "Category not found" }, 404);
-		else if (categError != undefined)
-			return c.json({ error: categError.message }, 500);
+		else if (categorie.error != undefined)
+			return c.json({ error: categorie.error.message }, 500);
 
-		const { data: updateData, error: updateError } = await config.supabaseClient
+		const update = await config.supabaseClient
 			.from("categories")
 			.update(json)
 			.eq("id", id);
-		if (updateError != undefined)
-			return c.json({ error: updateError.message }, 500);
+		if (update.error != undefined)
+			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: 'Category updated successfully' }, 200);
 	});

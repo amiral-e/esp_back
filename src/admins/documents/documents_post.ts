@@ -8,7 +8,7 @@ import {
 	storageContextFromDefaults,
 	VectorStoreIndex,
 } from "llamaindex";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 const documents_post = new Hono();
 

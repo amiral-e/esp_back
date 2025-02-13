@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/middleware_auth.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
 import {
 	Document,
@@ -20,7 +20,7 @@ documents_post.post(
 		tags: ["users-documents"],
 		responses: {
 			200: {
-				description: "Document created successfully",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -28,8 +28,7 @@ documents_post.post(
 							properties: {
 								message: {
 									type: "string",
-									description: "Success message",
-									example: "You have ingested X documents into the collection Y",
+									default: "You have ingested X documents into the collection Y",
 								},
 							},
 						},
@@ -45,8 +44,7 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Invalid JSON"
+									default: "Invalid JSON"
 								}
 							}
 						}
@@ -62,25 +60,7 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header"]
-								}
-							}
-						}
-					}
-				}
-			},
-			404: {
-				description: "Resource not found",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									description: "The error message",
-									default: "Uid not found"
+									default: ["No authorization header found", "Invalid authorization header", "Invalid user"]
 								}
 							}
 						}
@@ -96,8 +76,7 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
-									example: "Internal server error"
+									default: "Internal server error"
 								}
 							}
 						}
