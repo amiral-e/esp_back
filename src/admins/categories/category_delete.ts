@@ -11,7 +11,7 @@ category_delete.delete(
 	describeRoute({
 		summary: "Delete Category",
 		description: "Deletes a specific category from the database. Admin privileges are required.",
-		tags: ["users-categories"],
+		tags: ["admins-categories"],
 		responses: {
 			200: {
 				description: "Success",

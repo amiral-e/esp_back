@@ -10,7 +10,7 @@ category_put.put("/:id",
 	describeRoute({
 		summary: "Update Category",
 		description: "Updates a specific category in the database. Admin privileges are required.",
-		tags: ["users-categories"],
+		tags: ["admins-categories"],
 		requestBody: {
 			required: true,
 			content: {

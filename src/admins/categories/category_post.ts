@@ -10,7 +10,7 @@ category_post.post("/",
 	describeRoute({
 		summary: "Create Category",
 		description: "Creates a new category in the database. Admin privileges are required.",
-		tags: ["users-categories"],
+		tags: ["admins-categories"],
 		requestBody: {
 			required: true,
 			content: {
