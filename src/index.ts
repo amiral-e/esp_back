@@ -8,7 +8,6 @@ import collections from "./users/collections/index.ts";
 import documents from "./users/documents/index.ts";
 import chat from "./users/chat/index.ts";
 import test from "./test/index.ts";
-
 import config from "./config.ts";
 
 const app = new Hono();
@@ -24,6 +23,7 @@ app.route("/categories", categories);
 app.route("/conversations", conversations);
 app.route("/collections", collections);
 app.route("/collections", documents);
+app.route("/forum", forum);
 app.route("/chat", chat);
 app.route("/test", test);
 
