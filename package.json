@@ -13,8 +13,11 @@
 		"@hono/swagger-ui": "^0.4.1",
 		"@scalar/hono-api-reference": "^0.5.168",
 		"@supabase/supabase-js": "^2.45.4",
+		"hono": "^4.5.10",
 		"hono-openapi": "^0.4.3",
-		"hono": "^4.5.10"
+		"llamaindex": "^0.8.31",
+		"pg": "^8.13.1",
+		"pgvector": "^0.2.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
