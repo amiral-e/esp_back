@@ -13,10 +13,10 @@ import {
 const documents_post = new Hono();
 
 documents_post.post(
-	"/:collection_name/documents",
 	describeRoute({
 		summary: "Ingest documents",
-		description: "Ingest documents in the specified collection. Auth is required.",
+		description:
+			"Ingest documents in the specified collection. Auth is required.",
 		tags: ["users-documents"],
 		responses: {
 			200: {
@@ -28,7 +28,8 @@ documents_post.post(
 							properties: {
 								message: {
 									type: "string",
-									default: "You have ingested X documents into the collection Y",
+									default:
+										"You have ingested X documents into the collection Y",
 								},
 							},
 						},
@@ -44,12 +45,12 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON"
-								}
-							}
-						}
-					}
-				}
+									default: "Invalid JSON",
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -60,12 +61,16 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal Server Error",
@@ -76,13 +81,13 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Internal server error"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Internal server error",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}),
 	AuthMiddleware,
@@ -125,7 +130,12 @@ documents_post.post(
 		const index = await VectorStoreIndex.fromDocuments(docs, {
 			storageContext: ctx,
 		});
-		return c.json({ message: `You have ingested ${docs.length} documents into the collection ${collection_name}`, }, 200);
+		return c.json(
+			{
+				message: `You have ingested ${docs.length} documents into the collection ${collection_name}`,
+			},
+			200,
+		);
 	},
 );
 

@@ -10,7 +10,8 @@ document_delete.delete(
 	"/:document_id",
 	describeRoute({
 		summary: "Delete a document",
-		description: "Deletes a document from the specified collection. Admin privileges are required.",
+		description:
+			"Deletes a document from the specified collection. Admin privileges are required.",
 		tags: ["admins-documents"],
 		responses: {
 			200: {
@@ -38,7 +39,11 @@ document_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
 								},
 							},
 						},
@@ -98,18 +103,16 @@ document_delete.delete(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { collection_name, document_id } = c.req.param();
 		const collection_id = "global_" + collection_name;
 
-		const documents =
-			await config.supabaseClient
-				.from("llamaindex_embedding")
-				.select("id, collection, metadata")
-				.eq("collection", collection_id)
-				.eq("metadata->>doc_id", document_id);
+		const documents = await config.supabaseClient
+			.from("llamaindex_embedding")
+			.select("id, collection, metadata")
+			.eq("collection", collection_id)
+			.eq("metadata->>doc_id", document_id);
 		if (documents.data == undefined || documents.data.length == 0)
 			return c.json({ error: "Document not found" }, 404);
 		if (documents.error != undefined)
@@ -120,8 +123,7 @@ document_delete.delete(
 				.from("llamaindex_embedding")
 				.delete()
 				.eq("id", item.id);
-			if (error != undefined)
-				return c.json({ error: error.message }, 500);
+			if (error != undefined) return c.json({ error: error.message }, 500);
 		}
 
 		return c.json({ response: `Document deleted successfully` }, 200);

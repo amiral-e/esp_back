@@ -7,7 +7,6 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const collections_get = new Hono();
 
 collections_get.get(
-	"/",
 	describeRoute({
 		summary: "Get all collections",
 		description: "Get all global collections. Auth is required.",
@@ -45,7 +44,11 @@ collections_get.get(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
 								},
 							},
 						},
@@ -101,17 +104,24 @@ collections_get.get(
 
 		const uniqueCollections = collections.data.filter(
 			(collection: any, index: any, self: any) =>
-				index === self.findIndex((t: any) => t.collection === collection.collection)
+				index ===
+				self.findIndex((t: any) => t.collection === collection.collection),
 		);
-		return c.json({
-			collections: [
-				...new Set(uniqueCollections.map((x: any) => {
-					const collection_id = x.collection;
-					const name = collection_id.replace("global_", "");
-					return { collection: collection_id, user: "global", name: name };
-				})),
-			]
-		}, 200);
-	});
+		return c.json(
+			{
+				collections: [
+					...new Set(
+						uniqueCollections.map((x: any) => {
+							const collection_id = x.collection;
+							const name = collection_id.replace("global_", "");
+							return { collection: collection_id, user: "global", name: name };
+						}),
+					),
+				],
+			},
+			200,
+		);
+	},
+);
 
 export default collections_get;

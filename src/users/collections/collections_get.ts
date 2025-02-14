@@ -9,7 +9,8 @@ const collections_get = new Hono();
 collections_get.get(
 	describeRoute({
 		summary: "Get all collections",
-		description: "Get all collections for the authenticated user. Auth is required.",
+		description:
+			"Get all collections for the authenticated user. Auth is required.",
 		tags: ["users-collections"],
 		responses: {
 			200: {
@@ -47,7 +48,7 @@ collections_get.get(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -88,9 +89,10 @@ collections_get.get(
 					},
 				},
 			},
-		}
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 
 		const { data, error } = await config.supabaseClient
@@ -116,6 +118,7 @@ collections_get.get(
 			),
 		];
 		return c.json({ collections: collections }, 200);
-	});
+	},
+);
 
 export default collections_get;

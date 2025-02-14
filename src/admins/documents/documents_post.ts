@@ -15,7 +15,8 @@ const documents_post = new Hono();
 documents_post.post(
 	describeRoute({
 		summary: "Ingest documents",
-		description: "Ingest documents in the specified collection. Admin privileges are required.",
+		description:
+			"Ingest documents in the specified collection. Admin privileges are required.",
 		tags: ["admins-documents"],
 		requestBody: {
 			required: true,
@@ -38,7 +39,8 @@ documents_post.post(
 							properties: {
 								message: {
 									type: "string",
-									default: "You have ingested 1 documents into the collection example",
+									default:
+										"You have ingested 1 documents into the collection example",
 								},
 							},
 						},
@@ -54,7 +56,11 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: ["Invalid JSON", "No files provided", "Please provide a single file at a time"],
+									default: [
+										"Invalid JSON",
+										"No files provided",
+										"Please provide a single file at a time",
+									],
 								},
 							},
 						},
@@ -70,7 +76,11 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
 								},
 							},
 						},
@@ -114,8 +124,7 @@ documents_post.post(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { collection_name } = c.req.param();
 
@@ -144,17 +153,22 @@ documents_post.post(
 				);
 			} else if (file instanceof Array)
 				return c.json({ error: `Please provide a single file at a time` }, 400);
-			else
-				return c.json({ error: "Invalid JSON" }, 400);
+			else return c.json({ error: "Invalid JSON" }, 400);
 		}
-		if (docs.length == 0)
-			return c.json({ error: "No files provided" }, 400);
+		if (docs.length == 0) return c.json({ error: "No files provided" }, 400);
 
 		config.pgvs.setCollection("global_" + collection_name);
 
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
-		const index = await VectorStoreIndex.fromDocuments(docs, { storageContext: ctx });
-		return c.json({ message: `You have ingested ${docs.length} documents into the collection ${collection_name}`, }, 200);
+		const index = await VectorStoreIndex.fromDocuments(docs, {
+			storageContext: ctx,
+		});
+		return c.json(
+			{
+				message: `You have ingested ${docs.length} documents into the collection ${collection_name}`,
+			},
+			200,
+		);
 	},
 );
 

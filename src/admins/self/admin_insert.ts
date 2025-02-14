@@ -4,13 +4,16 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const category_put = new Hono();
+import { getUser } from "../../middlewares/utils.ts";
 
-category_put.put("/:id",
+const admin_insert = new Hono();
+
+admin_insert.post(
 	describeRoute({
-		summary: "Update Category",
-		description: "Updates a specific category in the database. Admin privileges are required.",
-		tags: ["admins-categories"],
+		summary: "Add Admin",
+		description:
+			"Adds a user to the admins list. Admin privileges are required.",
+		tags: ["admins"],
 		requestBody: {
 			required: true,
 			content: {
@@ -18,21 +21,16 @@ category_put.put("/:id",
 					schema: {
 						type: "object",
 						properties: {
-							name: {
+							user_id: {
 								type: "string",
-								description: "The name of the category",
-								default: "Updated Category"
+								description: "The ID of the user to add as an admin.",
+								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
-							description: {
-								type: "string",
-								description: "The description of the category",
-								default: "Description of updated category"
-							}
 						},
-						required: ["name", "description"]
-					}
-				}
-			}
+						required: ["user_id"],
+					},
+				},
+			},
 		},
 		responses: {
 			200: {
@@ -44,13 +42,12 @@ category_put.put("/:id",
 							properties: {
 								message: {
 									type: "string",
-									default: "Category updated successfully"
-								}
+									default: "User added to admins",
+								},
 							},
-							required: ["message"]
-						}
-					}
-				}
+						},
+					},
+				},
 			},
 			400: {
 				description: "Bad request",
@@ -61,13 +58,16 @@ category_put.put("/:id",
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON"
-								}
+									default: [
+										"Invalid JSON",
+										"You can't add yourself to admins",
+										"User is already an admin",
+									],
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -81,11 +81,10 @@ category_put.put("/:id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -100,6 +99,22 @@ category_put.put("/:id",
 								error: {
 									type: "string",
 									default: "Forbidden",
+								},
+							},
+						},
+					},
+				},
+			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "User not found",
 								},
 							},
 						},
@@ -122,43 +137,41 @@ category_put.put("/:id",
 					},
 				},
 			},
-		}
+		},
 	}),
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const { id } = await c.req.param();
-
-		let json: any;
+		let request_uid = "";
 		try {
-			json = await c.req.json();
-			if (!json || (json.name == undefined && json.description == undefined))
-				return c.json({ error: "Invalid JSON" }, 400);
+			const json = await c.req.json();
+			if (!json || !json.user_id || typeof json.user_id !== "string")
+				throw new Error();
+			request_uid = json.user_id;
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const categorie = await config.supabaseClient
-			.from("categories")
-			.select("name")
-			.eq("id", id)
-			.single();
-		if (categorie.data == undefined || categorie.data.length == 0)
-			return c.json({ error: "Category not found" }, 404);
-		else if (categorie.error != undefined)
-			return c.json({ error: categorie.error.message }, 500);
+		if (user.uid == request_uid)
+			return c.json({ error: "You can't add yourself to admins" }, 400);
+
+		const request_user = await getUser(request_uid);
+		if (!request_user || !request_user.valid)
+			return c.json({ error: "User not found" }, 404);
+		else if (request_user.admin)
+			return c.json({ error: "User is already an admin" }, 400);
 
 		const update = await config.supabaseClient
-			.from("categories")
-			.update(json)
-			.eq("id", id);
+			.from("admins")
+			.insert({ uid: request_uid })
+			.select("*")
+			.single();
 		if (update.error != undefined)
 			return c.json({ error: update.error.message }, 500);
+		return c.json({ message: `User added to admins` }, 200);
+	},
+);
 
-		return c.json({ message: 'Category updated successfully' }, 200);
-	});
-
-export default category_put;
+export default admin_insert;

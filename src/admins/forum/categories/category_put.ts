@@ -1,16 +1,18 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/auth.ts";
+import config from "../../../config.ts";
+import AuthMiddleware from "../../../middlewares/auth.ts";
 
-const category_post = new Hono();
+const category_put = new Hono();
 
-category_post.post("/",
+category_put.put(
+	"/:id",
 	describeRoute({
-		summary: "Create Category",
-		description: "Creates a new category in the database. Admin privileges are required.",
-		tags: ["admins-categories"],
+		summary: "Update Category",
+		description:
+			"Updates a specific category in the database. Admin privileges are required.",
+		tags: ["admins-forum-categories"],
 		requestBody: {
 			required: true,
 			content: {
@@ -21,18 +23,18 @@ category_post.post("/",
 							name: {
 								type: "string",
 								description: "The name of the category",
-								default: "New Category"
+								default: "Updated Category",
 							},
 							description: {
 								type: "string",
 								description: "The description of the category",
-								default: "Description of new category"
-							}
+								default: "Description of updated category",
+							},
 						},
-						required: ["name", "description"]
-					}
-				}
-			}
+						required: ["name", "description"],
+					},
+				},
+			},
 		},
 		responses: {
 			200: {
@@ -44,13 +46,13 @@ category_post.post("/",
 							properties: {
 								message: {
 									type: "string",
-									default: "Category created successfully"
-								}
+									default: "Category updated successfully",
+								},
 							},
-							required: ["message"]
-						}
-					}
-				}
+							required: ["message"],
+						},
+					},
+				},
 			},
 			400: {
 				description: "Bad request",
@@ -61,13 +63,13 @@ category_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON"
-								}
+									default: "Invalid JSON",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -81,7 +83,7 @@ category_post.post("/",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -122,31 +124,43 @@ category_post.post("/",
 					},
 				},
 			},
-		}
+		},
 	}),
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+		const { id } = await c.req.param();
 
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.name == undefined || json.description == undefined)
+			if (!json || (json.name == undefined && json.description == undefined))
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const { data, error } = await config.supabaseClient
+		const categorie = await config.supabaseClient
 			.from("categories")
-			.insert(json)
-			.select("*");
-		if (error != undefined)
-			return c.json({ error: error.message }, 500);
+			.select("name")
+			.eq("id", id)
+			.single();
+		if (categorie.data == undefined || categorie.data.length == 0)
+			return c.json({ error: "Category not found" }, 404);
+		else if (categorie.error != undefined)
+			return c.json({ error: categorie.error.message }, 500);
 
-		return c.json({ message: 'Category created successfully' }, 200);
-	});
+		const update = await config.supabaseClient
+			.from("categories")
+			.update(json)
+			.eq("id", id);
+		if (update.error != undefined)
+			return c.json({ error: update.error.message }, 500);
 
-export default category_post;
+		return c.json({ message: "Category updated successfully" }, 200);
+	},
+);
+
+export default category_put;

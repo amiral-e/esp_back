@@ -7,10 +7,11 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const document_delete = new Hono();
 
 document_delete.delete(
-	"/:collection_name/documents/:document_id",
+	"/:document_id",
 	describeRoute({
 		summary: "Delete a document by doc_id",
-		description: "Deletes a document from the specified collection. Auth is required.",
+		description:
+			"Deletes a document from the specified collection. Auth is required.",
 		tags: ["users-documents"],
 		responses: {
 			200: {
@@ -41,7 +42,7 @@ document_delete.delete(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},

@@ -1,18 +1,17 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/auth.ts";
+import config from "../../../config.ts";
+import AuthMiddleware from "../../../middlewares/auth.ts";
 
-const conversation_put = new Hono();
+const category_post = new Hono();
 
-conversation_put.put(
-	"/:conv_id",
+category_post.post(
 	describeRoute({
-		summary: "Update a conversation by ID",
+		summary: "Create Category",
 		description:
-			"Updates an existing conversation for the authenticated user. Auth is required.",
-		tags: ["users-conversations"],
+			"Creates a new category in the database. Admin privileges are required.",
+		tags: ["admins-forum-categories"],
 		requestBody: {
 			required: true,
 			content: {
@@ -22,17 +21,23 @@ conversation_put.put(
 						properties: {
 							name: {
 								type: "string",
-								default: "Updated conversation name",
+								description: "The name of the category",
+								default: "New Category",
+							},
+							description: {
+								type: "string",
+								description: "The description of the category",
+								default: "Description of new category",
 							},
 						},
-						required: ["name"],
+						required: ["name", "description"],
 					},
 				},
 			},
 		},
 		responses: {
 			200: {
-				description: "Successfully updated conversation",
+				description: "Success",
 				content: {
 					"application/json": {
 						schema: {
@@ -40,9 +45,10 @@ conversation_put.put(
 							properties: {
 								message: {
 									type: "string",
-									default: "Conversation updated successfully",
+									default: "Category created successfully",
 								},
 							},
+							required: ["message"],
 						},
 					},
 				},
@@ -59,6 +65,7 @@ conversation_put.put(
 									default: "Invalid JSON",
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
@@ -79,12 +86,13 @@ conversation_put.put(
 									],
 								},
 							},
+							required: ["error"],
 						},
 					},
 				},
 			},
-			404: {
-				description: "Not found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -92,7 +100,7 @@ conversation_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Conversation not found",
+									default: "Forbidden",
 								},
 							},
 						},
@@ -100,7 +108,7 @@ conversation_put.put(
 				},
 			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -120,37 +128,25 @@ conversation_put.put(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		let json: any;
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
+		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.name == undefined)
+			if (!json || json.name == undefined || json.description == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
-		const { conv_id } = c.req.param();
 
-		const conversation = await config.supabaseClient
-			.from("conversations")
-			.select("*")
-			.eq("user_id", user.uid)
-			.eq("id", conv_id)
-			.single();
-		if (conversation.data == undefined || conversation.data.length == 0)
-			return c.json({ error: "Conversation not found" }, 404);
-		else if (conversation.error != undefined)
-			return c.json({ error: conversation.error.message }, 500);
+		const { data, error } = await config.supabaseClient
+			.from("categories")
+			.insert(json)
+			.select("*");
+		if (error != undefined) return c.json({ error: error.message }, 500);
 
-		const update = await config.supabaseClient
-			.from("conversations")
-			.update({ name: json.name })
-			.eq("id", conversation.data.id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
-
-		return c.json({ message: `Conversation updated successfully` }, 200);
+		return c.json({ message: "Category created successfully" }, 200);
 	},
 );
 
-export default conversation_put;
+export default category_post;

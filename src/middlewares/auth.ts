@@ -20,8 +20,7 @@ const AuthMiddleware = async (c: any, next: any) => {
 	}
 
 	const user = await getUser(uid);
-	if (!user.valid)
-		return c.json({ error: "Invalid user" }, 401);
+	if (!user.valid) return c.json({ error: "Invalid user" }, 401);
 
 	c.set("user", {
 		uid: uid,

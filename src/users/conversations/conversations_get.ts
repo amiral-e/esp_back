@@ -9,7 +9,8 @@ const conversations_get = new Hono();
 conversations_get.get(
 	describeRoute({
 		summary: "Get all conversations",
-		description: "Returns all conversations for the authenticated user. Auth is required.",
+		description:
+			"Returns all conversations for the authenticated user. Auth is required.",
 		tags: ["users-conversations"],
 		responses: {
 			200: {
@@ -27,17 +28,17 @@ conversations_get.get(
 											id: {
 												type: "string",
 												description: "The conversation ID",
-												example: "123"
+												example: "123",
 											},
 											user_id: {
 												type: "string",
 												description: "The user ID of the conversation",
-												example: "123"
+												example: "123",
 											},
 											name: {
 												type: "string",
 												description: "The name of the conversation",
-												example: "My conversation"
+												example: "My conversation",
 											},
 											history: {
 												type: "array",
@@ -47,29 +48,31 @@ conversations_get.get(
 														message: {
 															type: "string",
 															description: "The message content",
-															example: "Hello, how are you?"
+															example: "Hello, how are you?",
 														},
 														role: {
 															type: "string",
-															description: "The role of the user who sent the message",
-															example: "user"
+															description:
+																"The role of the user who sent the message",
+															example: "user",
 														},
 													},
-													required: ["message", "role"]
-												}
+													required: ["message", "role"],
+												},
 											},
 											created_at: {
 												type: "string",
-												description: "The timestamp when the conversation was created",
-												example: "2023-03-01T12:00:00.000Z"
+												description:
+													"The timestamp when the conversation was created",
+												example: "2023-03-01T12:00:00.000Z",
 											},
 										},
-									}
-								}
-							}
-						}
-					}
-				}
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -83,7 +86,7 @@ conversations_get.get(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -124,9 +127,10 @@ conversations_get.get(
 					},
 				},
 			},
-		}
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 
 		const conversations = await config.supabaseClient
@@ -137,8 +141,9 @@ conversations_get.get(
 			return c.json({ error: "No conversations found" }, 404);
 		else if (conversations.error != undefined)
 			return c.json({ error: conversations.error.message }, 500);
-		
+
 		return c.json({ conversations: conversations.data }, 200);
-	});
+	},
+);
 
 export default conversations_get;

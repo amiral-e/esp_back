@@ -6,10 +6,12 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_get = new Hono();
 
-conversation_get.get("/:conv_id",
+conversation_get.get(
+	"/:conv_id",
 	describeRoute({
 		summary: "Get a single conversation by ID",
-		description: "Returns the details of a single conversation for the authenticated user. Auth is required.",
+		description:
+			"Returns the details of a single conversation for the authenticated user. Auth is required.",
 		tags: ["users-conversations"],
 		responses: {
 			200: {
@@ -22,7 +24,7 @@ conversation_get.get("/:conv_id",
 								name: {
 									type: "string",
 									description: "The name of the conversation",
-									default: "My conversation"
+									default: "My conversation",
 								},
 								history: {
 									type: "array",
@@ -32,26 +34,27 @@ conversation_get.get("/:conv_id",
 											message: {
 												type: "string",
 												description: "The message content",
-												default: "Hello, how are you?"
+												default: "Hello, how are you?",
 											},
 											role: {
 												type: "string",
-												description: "The role of the user who sent the message",
-												default: "user"
+												description:
+													"The role of the user who sent the message",
+												default: "user",
 											},
 										},
-										required: ["message", "role"]
-									}
+										required: ["message", "role"],
+									},
 								},
 								id: {
 									type: "string",
 									description: "The conversation ID",
-									default: "123"
-								}
-							}
-						}
-					}
-				}
+									default: "123",
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -65,7 +68,7 @@ conversation_get.get("/:conv_id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -106,9 +109,10 @@ conversation_get.get("/:conv_id",
 					},
 				},
 			},
-		}
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 		const { conv_id } = c.req.param();
 
@@ -123,7 +127,15 @@ conversation_get.get("/:conv_id",
 		else if (conversation.error != undefined)
 			return c.json({ error: conversation.error.message }, 500);
 
-		return c.json({ name: conversation.data.name, history: conversation.data.history, id: conversation.data.id }, 200);
-	});
+		return c.json(
+			{
+				name: conversation.data.name,
+				history: conversation.data.history,
+				id: conversation.data.id,
+			},
+			200,
+		);
+	},
+);
 
 export default conversation_get;
