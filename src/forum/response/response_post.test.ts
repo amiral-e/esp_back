@@ -1,14 +1,14 @@
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from 'bun:test';
-import responses from '..';
+import response_post from './response_post';
 import config from '../../config';
 import envVars from '../../config_test';
 import { deleteAdmin, insertAdmin } from '../../admins/utils';
 
-describe('POST /response/', () => {
+describe('POST /forum/response', () => {
 
     describe('Response creation tests', () => {
         it('invalid JSON body', async () => {
-            const res = await responses.request(`/`, {
+            const res = await response_post.request(`/`,  {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` }
             });
@@ -18,7 +18,7 @@ describe('POST /response/', () => {
         });
     
         it('missing message in body', async () => {
-            const res = await responses.request(`/`, {
+            const res = await response_post.request(`/`,  {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
@@ -34,7 +34,7 @@ describe('POST /response/', () => {
         it('successful response creation', async () => {
             const testMessage = 'Test response message';
             
-            const res = await responses.request(`/`, {
+            const res = await response_post.request(`/`,  {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
