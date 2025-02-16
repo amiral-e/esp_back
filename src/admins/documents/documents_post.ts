@@ -12,6 +12,8 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 const documents_post = new Hono();
 
+const ALLOWED_FILE_TYPES = ["md", "txt"];
+
 documents_post.post(
 	describeRoute({
 		summary: "Ingest documents",
@@ -60,6 +62,7 @@ documents_post.post(
 										"Invalid JSON",
 										"No files provided",
 										"Please provide a single file at a time",
+										"File type not allowed"
 									],
 								},
 							},
@@ -139,6 +142,9 @@ documents_post.post(
 		for (const key in json) {
 			const file = json[key];
 			if (file instanceof File) {
+				if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+					return c.json({ error: "File type not allowed" }, 400);
+				}
 				const fileContents = await file.text();
 				docs.push(
 					new Document({
