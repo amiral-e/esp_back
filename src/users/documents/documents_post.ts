@@ -12,6 +12,9 @@ import {
 
 const documents_post = new Hono();
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ["md", "txt"];
+
 documents_post.post(
 	describeRoute({
 		summary: "Ingest documents",
@@ -45,7 +48,13 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON",
+									default: [
+										"Invalid JSON",
+										"No files provided",
+										"Please provide a single file at a time",
+										"File size exceeds limit",
+										"File type not allowed"
+									],
 								},
 							},
 						},
@@ -106,6 +115,12 @@ documents_post.post(
 		for (const key in json) {
 			const file = json[key];
 			if (file instanceof File) {
+				if (file.size > MAX_FILE_SIZE) {
+					return c.json({ error: "File size exceeds limit" }, 400);
+				}
+				if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+					return c.json({ error: "File type not allowed" }, 400);
+				}
 				const fileContents = await file.text();
 				docs.push(
 					new Document({
