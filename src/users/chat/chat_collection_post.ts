@@ -26,11 +26,11 @@ Answer:`;
 }
 
 chat_collection_post.post(
-	"/:conv_id/collections/:collec_name",
+	"/:conv_id/collections",
 	describeRoute({
 		summary: "Post a message to a collection conversation",
 		description:
-			"Posts a user message to a specific collection conversation, gets AI response, and updates conversation history. Auth is required.",
+			"Posts a user message to a conversation using the context from one or more collections. It gets AI's response, and updates conversation history. Auth is required.",
 		tags: ["users-chat"],
 		requestBody: {
 			required: true,
@@ -43,6 +43,14 @@ chat_collection_post.post(
 								type: "string",
 								description: "The message to be sent in the conversation",
 								default: "Hello",
+							},
+							collections: {
+								type: "array",
+								items: {
+									type: "string",
+									description: "The ids of collections to use as context",
+									default: "global_test"
+								},
 							},
 						},
 						required: ["message"],
@@ -71,6 +79,24 @@ chat_collection_post.post(
 								sources: {
 									type: "array",
 									description: "Sources used for the response",
+									items: {
+										type: "object",
+										properties: {
+											collection: {
+												type: "string",
+												description: "Collection used to retrieve documents",
+												default: "global_test",
+											},
+											documents: {
+												type: "array",
+												description: "List of documents retrieved from the collection",
+												items: {
+													type: "string",
+													default: "test.txt",
+												},
+											}
+										},
+									},
 								},
 							},
 							required: ["role", "content"],
@@ -158,18 +184,23 @@ chat_collection_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.message == undefined || json.message == "")
+			if (!json || json.message == undefined || json.message == "" || json.collections == undefined || json.collections.length == 0)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const { conv_id, collec_name } = c.req.param();
-		if (
-			!collec_name.startsWith("global_") &&
-			!collec_name.startsWith(user.uid + "_")
-		)
-			return c.json({ error: "Invalid collection name" }, 400);
+		const { conv_id } = c.req.param();
+		for (const collec_name of json.collections) {
+			if (
+				!collec_name.startsWith("global_") &&
+				!collec_name.startsWith(user.uid + "_")
+			)
+				return c.json({ error: "Invalid collection name" }, 400);
+		}
+
+		if (json.collections.length > 3)
+			return c.json({ error: "Too many collections, 3 collections max" }, 400);
 
 		const conversation = await config.supabaseClient
 			.from("conversations")
@@ -187,22 +218,31 @@ chat_collection_post.post(
 			json.message,
 		);
 
-		config.pgvs.setCollection(collec_name);
-		const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
+		let docs = [];
+		for (const collec_name of json.collections) {
+			config.pgvs.setCollection(collec_name);
+			const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
 
-		const retriever = index.asRetriever({
-			similarityTopK: 3,
-		});
-		const docs = await retriever.retrieve({ query: res });
-		if (docs.length == 0) return c.json({ error: "No answer found" }, 404);
+			const retriever = index.asRetriever({
+				similarityTopK: 3,
+			});
+			docs.push({
+				collection_name: collec_name,
+				sources: await retriever.retrieve({ query: res }),
+
+			});
+		}
+		if (docs.length == 0)
+			return c.json({ error: "No answer found" }, 404);
 
 		let texts = "";
 		for (const doc of docs) {
-			texts += doc.node.metadata.doc_file;
-			texts += ": ";
-			// @ts-ignore
-			texts += doc.node.text;
-			texts += "\n";
+			texts += "collection: " + doc.collection_name + "\n\n";
+			for (const source of doc.sources) {
+				texts += source.node.metadata.doc_file + ":\n";
+				// @ts-ignore
+				texts += source.node.text + "\n\n";
+			}
 		}
 
 		let response: any;
@@ -210,7 +250,6 @@ chat_collection_post.post(
 			response = await config.llm.chat({
 				messages: [{ role: "user", content: get_context_prompt(texts, res) }],
 			});
-			console.log(response.message.content);
 		} catch (error: any) {
 			console.error(
 				"LLM Error:",
@@ -220,33 +259,42 @@ chat_collection_post.post(
 				console.log("Hit rate limit. Consider implementing retry logic.");
 		}
 
-		const sources_details = docs.map((x: any) => {
-			return {
-				part: x.node.id_,
-				metadata: x.node.metadata,
-				score: x.score,
-			};
-		});
-		const sources = [
-			...new Set(
-				sources_details.map((x: any) => {
-					return x.metadata.doc_file;
-				}),
-			),
-		];
+		let sources_details = [];
+		for (const doc of docs) {
+			const details = doc.sources.map((x: any) => {
+				return {
+					part: x.node.id_,
+					metadata: x.node.metadata,
+					score: x.score,
+				};
+			});
+			sources_details.push({
+				collection: doc.collection_name,
+				documents: details,
+			});
+		}
+
+		let source_save = [];
+		for (const source of sources_details) {
+			source_save.push({
+				collection: source.collection,
+				documents: source.documents.map((x) => x.metadata.doc_file),
+			});
+		}
 
 		conversation.data.history.push({ role: "user", content: json.message });
 		conversation.data.history.push({
 			role: "assistant",
 			content: response.message.content,
-			sources: sources,
+			sources: source_save,
 		});
 
 		const update = await config.supabaseClient
 			.from("conversations")
 			.update({ history: conversation.data.history })
 			.eq("id", conversation.data.id);
-		if (update.error) return c.json({ error: update.error.message }, 500);
+		if (update.error)
+			return c.json({ error: update.error.message }, 500);
 
 		return c.json(
 			{
