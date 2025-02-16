@@ -9,7 +9,8 @@ const documents_get = new Hono();
 documents_get.get(
 	describeRoute({
 		summary: "Get documents",
-		description: "Get a list of documents in the specified collection. Admin privileges are required.",
+		description:
+			"Get a list of documents in the specified collection. Admin privileges are required.",
 		tags: ["admins-documents"],
 		responses: {
 			200: {
@@ -24,7 +25,10 @@ documents_get.get(
 									items: {
 										type: "object",
 										properties: {
-											doc_id: { type: "string", default: "0194ec0d-4975-7000-8f3b-cde53ce18ef8" },
+											doc_id: {
+												type: "string",
+												default: "0194ec0d-4975-7000-8f3b-cde53ce18ef8",
+											},
 											doc_file: { type: "string", default: "example.md" },
 										},
 									},
@@ -43,7 +47,11 @@ documents_get.get(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
 								},
 							},
 						},
@@ -103,8 +111,7 @@ documents_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { collection_name } = c.req.param();
 		const collection_id = "global_" + collection_name;

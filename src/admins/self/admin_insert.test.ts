@@ -6,11 +6,11 @@ import {
 	afterAll,
 	beforeEach,
 } from "bun:test";
-import admin from "./index.ts";
+import admin from "../index.ts";
 
-import envVars from "../config_test.ts";
+import envVars from "../../config_test.ts";
 
-import { insertAdmin, deleteAdmin } from "./utils.ts";
+import { insertAdmin, deleteAdmin } from "../utils.ts";
 
 afterAll(async () => {
 	await deleteAdmin(envVars.DUMMY_ID);

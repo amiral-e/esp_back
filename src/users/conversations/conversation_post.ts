@@ -6,10 +6,11 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_post = new Hono();
 
-conversation_post.post("/",
+conversation_post.post(
 	describeRoute({
 		summary: "Create a new conversation",
-		description: "Creates a new conversation for the authenticated user. Auth is required.",
+		description:
+			"Creates a new conversation for the authenticated user. Auth is required.",
 		tags: ["users-conversations"],
 		requestBody: {
 			required: true,
@@ -21,13 +22,13 @@ conversation_post.post("/",
 							name: {
 								type: "string",
 								description: "The name of the conversation",
-								example: "My conversation"
-							}
+								example: "My conversation",
+							},
 						},
-						required: ["name"]
-					}
-				}
-			}
+						required: ["name"],
+					},
+				},
+			},
 		},
 		responses: {
 			200: {
@@ -39,12 +40,12 @@ conversation_post.post("/",
 							properties: {
 								message: {
 									type: "string",
-									example: "Conversation test created successfully with id 123"
-								}
-							}
-						}
-					}
-				}
+									example: "Conversation test created successfully with id 123",
+								},
+							},
+						},
+					},
+				},
 			},
 			400: {
 				description: "Bad request",
@@ -55,12 +56,12 @@ conversation_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON"
-								}
-							}
-						}
-					}
-				}
+									default: "Invalid JSON",
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -72,12 +73,16 @@ conversation_post.post("/",
 								error: {
 									type: "string",
 									description: "The error message",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal Server Error",
@@ -88,16 +93,17 @@ conversation_post.post("/",
 							properties: {
 								error: {
 									type: "string",
-									default: "Error message"
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+									default: "Error message",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 
 		let json: any;
@@ -117,7 +123,13 @@ conversation_post.post("/",
 		if (creation.data == undefined || creation.error != undefined)
 			return c.json({ error: creation.error.message }, 500);
 
-		return c.json({ message: `Conversation ${json.name} created successfully with id ${creation.data.id}` }, 200);
-	});
+		return c.json(
+			{
+				message: `Conversation ${json.name} created successfully with id ${creation.data.id}`,
+			},
+			200,
+		);
+	},
+);
 
 export default conversation_post;

@@ -8,10 +8,10 @@ const user_jwt_gen = new Hono();
 import { decode, sign, verify } from "hono/jwt";
 
 user_jwt_gen.post(
-	"/",
 	describeRoute({
 		summary: "Generate user's JWT",
-		description: "This is a test route, it generates a JWT from a given uid. Auth is not required.",
+		description:
+			"This is a test route, it generates a JWT from a given uid. Auth is not required.",
 		tags: ["debug"],
 		requestBody: {
 			content: {

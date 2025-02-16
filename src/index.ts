@@ -2,14 +2,25 @@ import { Hono } from "hono";
 import { openAPISpecs } from "hono-openapi";
 
 import admin from "./admins/index.ts";
-import categories from "./users/categories/index.ts";
-import conversations from "./users/conversations/index.ts";
-import collections from "./users/collections/index.ts";
-import documents from "./users/documents/index.ts";
-import chat from "./users/chat/index.ts";
 import test from "./test/index.ts";
 
-import config from "./config.ts";
+import chat_post from "./users/chat/chat_post.ts";
+import chat_collection_post from "./users/chat/chat_collection_post.ts";
+
+import collections_get from "./users/collections/collections_get.ts";
+import collection_delete from "./users/collections/collection_delete.ts";
+
+import conversations_get from "./users/conversations/conversations_get.ts";
+import conversation_get from "./users/conversations/conversation_get.ts";
+import conversation_post from "./users/conversations/conversation_post.ts";
+import conversation_delete from "./users/conversations/conversation_delete.ts";
+import conversation_put from "./users/conversations/conversation_put.ts";
+
+import document_delete from "./users/documents/document_delete.ts";
+import documents_get from "./users/documents/documents_get.ts";
+import documents_post from "./users/documents/documents_post.ts";
+
+import forum from "./users/forum/index.ts";
 
 const app = new Hono();
 
@@ -20,12 +31,25 @@ app.get("/", (c) => {
 });
 
 app.route("/admins", admin);
-app.route("/categories", categories);
-app.route("/conversations", conversations);
-app.route("/collections", collections);
-app.route("/collections", documents);
-app.route("/chat", chat);
 app.route("/test", test);
+
+app.route("/conversations", chat_post);
+app.route("/conversations", chat_collection_post);
+
+app.route("/collections", collections_get);
+app.route("/collections", collection_delete);
+
+app.route("/conversations", conversations_get);
+app.route("/conversations", conversation_get);
+app.route("/conversations", conversation_post);
+app.route("/conversations", conversation_put);
+app.route("/conversations", conversation_delete);
+
+app.route("/collections/:collection_name/documents", documents_get);
+app.route("/collections/:collection_name/documents", document_delete);
+app.route("/collections/:collection_name/documents", documents_post);
+
+app.route("/forum", forum);
 
 app.get(
 	"/openapi",

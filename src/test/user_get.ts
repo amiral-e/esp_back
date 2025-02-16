@@ -6,10 +6,10 @@ import AuthMiddleware from "../middlewares/auth.ts";
 const user_get = new Hono();
 
 user_get.get(
-	"/",
 	describeRoute({
 		summary: "Get connected user",
-		description: "This is a test route, it returns the connected user's uid. Auth is required.",
+		description:
+			"This is a test route, it returns the connected user's uid. Auth is required.",
 		tags: ["debug"],
 		responses: {
 			200: {

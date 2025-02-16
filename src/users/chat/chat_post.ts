@@ -6,10 +6,12 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 const chat_post = new Hono();
 
-chat_post.post("/conversations/:conv_id",
+chat_post.post(
+	"/:conv_id",
 	describeRoute({
 		summary: "Post a message to a conversation",
-		description: "Posts a user message to a conversation, gets AI response, and updates conversation history. Auth is required.",
+		description:
+			"Posts a user message to a conversation, gets AI response, and updates conversation history. Auth is required.",
 		tags: ["users-chat"],
 		requestBody: {
 			required: true,
@@ -21,13 +23,13 @@ chat_post.post("/conversations/:conv_id",
 							message: {
 								type: "string",
 								description: "The message to be sent in the conversation",
-								default: "Hello"
-							}
+								default: "Hello",
+							},
 						},
-						required: ["message"]
-					}
-				}
-			}
+						required: ["message"],
+					},
+				},
+			},
 		},
 		responses: {
 			200: {
@@ -40,18 +42,18 @@ chat_post.post("/conversations/:conv_id",
 								role: {
 									type: "string",
 									description: "The role of the responder",
-									default: "assistant"
+									default: "assistant",
 								},
 								content: {
 									type: "string",
 									description: "The response content",
-									default: "Hello user, how can I help you?"
-								}
+									default: "Hello user, how can I help you?",
+								},
 							},
-							required: ["role", "content"]
-						}
-					}
-				}
+							required: ["role", "content"],
+						},
+					},
+				},
 			},
 			400: {
 				description: "Bad request",
@@ -62,13 +64,13 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									default: ["Invalid JSON", "Invalid collection name"]
-								}
+									default: ["Invalid JSON", "Invalid collection name"],
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -82,7 +84,7 @@ chat_post.post("/conversations/:conv_id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -100,13 +102,13 @@ chat_post.post("/conversations/:conv_id",
 							properties: {
 								error: {
 									type: "string",
-									default: "Conversation not found"
-								}
+									default: "Conversation not found",
+								},
 							},
-							required: ["error"]
-						}
-					}
-				}
+							required: ["error"],
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal server error",
@@ -124,9 +126,10 @@ chat_post.post("/conversations/:conv_id",
 					},
 				},
 			},
-		}
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 		let json: any;
 
@@ -158,10 +161,13 @@ chat_post.post("/conversations/:conv_id",
 		let response: any;
 		try {
 			response = await config.llm.chat({
-				messages: JSON.parse(JSON.stringify(history))
+				messages: JSON.parse(JSON.stringify(history)),
 			});
 		} catch (error: any) {
-			console.error("LLM Error:", error instanceof Error ? error.message : error);
+			console.error(
+				"LLM Error:",
+				error instanceof Error ? error.message : error,
+			);
 			if (error.message?.toLowerCase().includes("rate_limit_exceeded")) {
 				console.log("Hit rate limit. Consider implementing retry logic.");
 				return c.json({ error: "Rate limit exceeded" }, 500);
@@ -175,10 +181,13 @@ chat_post.post("/conversations/:conv_id",
 			.from("conversations")
 			.update({ history: history })
 			.eq("id", conversation.data.id);
-		if (update.error)
-			return c.json({ error: update.error.message }, 500);
+		if (update.error) return c.json({ error: update.error.message }, 500);
 
-		return c.json({ role: "assistant", content: response.message.content }, 200);
-	});
+		return c.json(
+			{ role: "assistant", content: response.message.content },
+			200,
+		);
+	},
+);
 
 export default chat_post;

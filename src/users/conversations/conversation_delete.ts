@@ -6,10 +6,12 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 const conversation_delete = new Hono();
 
-conversation_delete.delete("/:conv_id",
+conversation_delete.delete(
+	"/:conv_id",
 	describeRoute({
 		summary: "Delete a conversation by ID",
-		description: "Deletes a specific conversation for the authenticated user. Auth is required.",
+		description:
+			"Deletes a specific conversation for the authenticated user. Auth is required.",
 		tags: ["users-conversations"],
 		responses: {
 			200: {
@@ -21,12 +23,12 @@ conversation_delete.delete("/:conv_id",
 							properties: {
 								message: {
 									type: "string",
-									example: "Conversation deleted successfully"
-								}
-							}
-						}
-					}
-				}
+									example: "Conversation deleted successfully",
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -40,7 +42,7 @@ conversation_delete.delete("/:conv_id",
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -81,9 +83,10 @@ conversation_delete.delete("/:conv_id",
 					},
 				},
 			},
-		}
+		},
 	}),
-	AuthMiddleware, async (c: any) => {
+	AuthMiddleware,
+	async (c: any) => {
 		const user = c.get("user");
 		const { conv_id } = c.req.param();
 
@@ -106,6 +109,7 @@ conversation_delete.delete("/:conv_id",
 			return c.json({ error: deletion.error.message }, 500);
 
 		return c.json({ message: `Conversation deleted successfully` }, 200);
-	});
+	},
+);
 
 export default conversation_delete;

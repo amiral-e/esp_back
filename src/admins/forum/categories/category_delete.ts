@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/auth.ts";
+import config from "../../../config.ts";
+import AuthMiddleware from "../../../middlewares/auth.ts";
 
 const category_delete = new Hono();
 
@@ -10,8 +10,9 @@ category_delete.delete(
 	"/:id",
 	describeRoute({
 		summary: "Delete Category",
-		description: "Deletes a specific category from the database. Admin privileges are required.",
-		tags: ["users-categories"],
+		description:
+			"Deletes a specific category from the database. Admin privileges are required.",
+		tags: ["admins-forum-categories"],
 		responses: {
 			200: {
 				description: "Success",
@@ -42,7 +43,7 @@ category_delete.delete(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -104,8 +105,7 @@ category_delete.delete(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { id } = await c.req.param();
 
@@ -124,8 +124,7 @@ category_delete.delete(
 			.delete()
 			.eq("id", id)
 			.select("*");
-		if (delError != undefined)
-			return c.json({ error: delError.message }, 500);
+		if (delError != undefined) return c.json({ error: delError.message }, 500);
 
 		return c.json({ message: "Category deleted successfully" }, 200);
 	},

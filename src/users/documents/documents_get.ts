@@ -7,10 +7,10 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const documents_get = new Hono();
 
 documents_get.get(
-	"/:collection_name/documents",
 	describeRoute({
 		summary: "Get documents",
-		description: "Get a list of documents in the specified collection. Auth is required.",
+		description:
+			"Get a list of documents in the specified collection. Auth is required.",
 		tags: ["users-documents"],
 		responses: {
 			200: {
@@ -53,7 +53,7 @@ documents_get.get(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -108,7 +108,8 @@ documents_get.get(
 			.eq("collection", collection_id);
 		if (documents.data == undefined || documents.data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
-		else if (documents.error != undefined) return c.json({ error: documents.error.message }, 500);
+		else if (documents.error != undefined)
+			return c.json({ error: documents.error.message }, 500);
 
 		const docs = documents.data.reduce((acc: any[], x: any) => {
 			if (!acc.some((y) => y.doc_id === x.metadata.doc_id))

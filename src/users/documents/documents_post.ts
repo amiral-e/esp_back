@@ -12,11 +12,14 @@ import {
 
 const documents_post = new Hono();
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ["md", "txt"];
+
 documents_post.post(
-	"/:collection_name/documents",
 	describeRoute({
 		summary: "Ingest documents",
-		description: "Ingest documents in the specified collection. Auth is required.",
+		description:
+			"Ingest documents in the specified collection. Auth is required.",
 		tags: ["users-documents"],
 		responses: {
 			200: {
@@ -28,7 +31,8 @@ documents_post.post(
 							properties: {
 								message: {
 									type: "string",
-									default: "You have ingested X documents into the collection Y",
+									default:
+										"You have ingested X documents into the collection Y",
 								},
 							},
 						},
@@ -44,12 +48,18 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid JSON"
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"Invalid JSON",
+										"No files provided",
+										"Please provide a single file at a time",
+										"File size exceeds limit",
+										"File type not allowed"
+									],
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -60,12 +70,16 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"]
-								}
-							}
-						}
-					}
-				}
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
+								},
+							},
+						},
+					},
+				},
 			},
 			500: {
 				description: "Internal Server Error",
@@ -76,13 +90,13 @@ documents_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Internal server error"
-								}
-							}
-						}
-					}
-				}
-			}
+									default: "Internal server error",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}),
 	AuthMiddleware,
@@ -101,6 +115,12 @@ documents_post.post(
 		for (const key in json) {
 			const file = json[key];
 			if (file instanceof File) {
+				if (file.size > MAX_FILE_SIZE) {
+					return c.json({ error: "File size exceeds limit" }, 400);
+				}
+				if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+					return c.json({ error: "File type not allowed" }, 400);
+				}
 				const fileContents = await file.text();
 				docs.push(
 					new Document({
@@ -125,7 +145,12 @@ documents_post.post(
 		const index = await VectorStoreIndex.fromDocuments(docs, {
 			storageContext: ctx,
 		});
-		return c.json({ message: `You have ingested ${docs.length} documents into the collection ${collection_name}`, }, 200);
+		return c.json(
+			{
+				message: `You have ingested ${docs.length} documents into the collection ${collection_name}`,
+			},
+			200,
+		);
 	},
 );
 

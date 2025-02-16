@@ -1,17 +1,18 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../config.ts";
-import AuthMiddleware from "../middlewares/auth.ts";
+import config from "../../config.ts";
+import AuthMiddleware from "../../middlewares/auth.ts";
 
-import { getUser } from "../middlewares/utils.ts";
+import { getUser } from "../../middlewares/utils.ts";
 
 const admin_delete = new Hono();
 
 admin_delete.delete(
 	describeRoute({
 		summary: "Remove Admin",
-		description: "Removes a user from the admins list. Admin privileges are required.",
+		description:
+			"Removes a user from the admins list. Admin privileges are required.",
 		tags: ["admins"],
 		requestBody: {
 			required: true,
@@ -22,7 +23,8 @@ admin_delete.delete(
 						properties: {
 							user_id: {
 								type: "string",
-								description: "The ID of the user to remove from the admins list.",
+								description:
+									"The ID of the user to remove from the admins list.",
 								default: "80c3da89-a585-4876-aa94-d1588d50ceb4",
 							},
 						},
@@ -77,7 +79,11 @@ admin_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No authorization header found", "Invalid authorization header", "Invalid user"],
+									default: [
+										"No authorization header found",
+										"Invalid authorization header",
+										"Invalid user",
+									],
 								},
 							},
 						},
@@ -137,8 +143,7 @@ admin_delete.delete(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		let request_uid = "";
 		try {
@@ -159,13 +164,12 @@ admin_delete.delete(
 		else if (!request_user.admin)
 			return c.json({ error: "User is not an admin" }, 400);
 
-		const deletion =
-			await config.supabaseClient
-				.from("admins")
-				.delete()
-				.eq("uid", request_uid)
-				.select("*")
-				.single();
+		const deletion = await config.supabaseClient
+			.from("admins")
+			.delete()
+			.eq("uid", request_uid)
+			.select("*")
+			.single();
 		if (deletion.error != undefined)
 			return c.json({ error: deletion.error.message }, 500);
 		return c.json({ message: "User removed from admins" }, 200);

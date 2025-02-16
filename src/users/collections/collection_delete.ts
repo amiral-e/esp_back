@@ -10,7 +10,8 @@ collection_delete.delete(
 	"/:collection_name",
 	describeRoute({
 		summary: "Delete a Collection",
-		description: "Deletes a collection and all its embeddings. Auth is required.",
+		description:
+			"Deletes a collection and all its embeddings. Auth is required.",
 		tags: ["users-collections"],
 		responses: {
 			200: {
@@ -22,12 +23,12 @@ collection_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									default: "Collection my-collection deleted successfully"
-								}
-							}
-						}
-					}
-				}
+									default: "Collection my-collection deleted successfully",
+								},
+							},
+						},
+					},
+				},
 			},
 			401: {
 				description: "Unauthorized",
@@ -41,7 +42,7 @@ collection_delete.delete(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
-										"Invalid user"
+										"Invalid user",
 									],
 								},
 							},
@@ -82,7 +83,7 @@ collection_delete.delete(
 					},
 				},
 			},
-		}
+		},
 	}),
 	AuthMiddleware,
 	async (c: any) => {
@@ -90,22 +91,20 @@ collection_delete.delete(
 		const { collection_name } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
 
-		const collection =
-			await config.supabaseClient
-				.from("llamaindex_embedding")
-				.select("id, collection")
-				.eq("collection", collection_id);
+		const collection = await config.supabaseClient
+			.from("llamaindex_embedding")
+			.select("id, collection")
+			.eq("collection", collection_id);
 		if (collection.data == undefined || collection.data.length == 0)
 			return c.json({ error: "Collection not found" }, 404);
 		else if (collection.error != undefined)
 			return c.json({ error: collection.error.message }, 500);
 
 		for (const item of collection.data) {
-			const deletion =
-				await config.supabaseClient
-					.from("llamaindex_embedding")
-					.delete()
-					.eq("id", item.id);
+			const deletion = await config.supabaseClient
+				.from("llamaindex_embedding")
+				.delete()
+				.eq("id", item.id);
 			if (deletion.error != undefined)
 				return c.json({ error: deletion.error.message }, 500);
 		}
