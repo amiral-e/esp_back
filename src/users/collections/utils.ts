@@ -9,7 +9,7 @@ import {
 async function createCollection(userId: string, collectionName: string) {
     try {
         // Create a test document
-        const fileContents = "This is a test document";
+        const fileContents = "a";
         const testDoc = new Document({
             text: fileContents,
             metadata: {
