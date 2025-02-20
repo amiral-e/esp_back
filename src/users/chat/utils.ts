@@ -72,4 +72,4 @@ async function deleteConversation(
 
 
 
-export { add_context_to_query, createConversation, deleteConversation };
+export { add_context_to_query };
