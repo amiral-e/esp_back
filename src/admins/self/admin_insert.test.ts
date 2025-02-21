@@ -49,9 +49,9 @@ describe("POST /admins (without privileges)", () => {
 			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
 		});
 		expect(await res.json()).toEqual({
-			error: "Uid not found",
+			error: "Invalid user",
 		});
-		expect(res.status).toBe(404);
+		expect(res.status).toBe(401);
 	});
 
 	it("correct authorization header", async () => {
@@ -60,9 +60,9 @@ describe("POST /admins (without privileges)", () => {
 			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
 		});
 		expect(await res.json()).toEqual({
-			error: "You don't have admin privileges",
+			error: "Forbidden",
 		});
-		expect(res.status).toBe(401);
+		expect(res.status).toBe(403);
 	});
 });
 
@@ -128,7 +128,7 @@ describe("POST /admins (with privileges)", () => {
 			body: JSON.stringify({ user_id: envVars.DUMMY_ID_2 }),
 		});
 		expect(await res.json()).toEqual({
-			message: `User ${envVars.DUMMY_ID_2} added to admins`,
+			message: `User added to admins`,
 		});
 		expect(res.status).toBe(200);
 	});

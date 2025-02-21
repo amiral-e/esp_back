@@ -6,7 +6,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 import { VectorStoreIndex } from "llamaindex";
 
-import add_context_to_query from "./utils.ts";
+import { add_context_to_query } from "./utils.ts";
 
 const chat_collection_post = new Hono();
 
