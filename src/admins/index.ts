@@ -13,6 +13,9 @@ import documents_get from "./documents/documents_get.ts";
 import category_delete from "./forum/categories/category_delete.ts";
 import category_post from "./forum/categories/category_post.ts";
 import category_put from "./forum/categories/category_put.ts";
+import announcement_post from "./forum/announcements/announcement_post.ts";
+import announcement_put from "./forum/announcements/announcement_put.ts";
+import announcement_delete from "./forum/announcements/announcement_delete.ts";
 
 const admin = new Hono();
 
@@ -29,5 +32,8 @@ admin.route("/collections/:collection_name/documents", document_delete);
 admin.route("/forum/categories", category_post);
 admin.route("/forum/categories", category_put);
 admin.route("/forum/categories", category_delete);
+admin.route("/forum/announcements", announcement_post);
+admin.route("/forum/announcements", announcement_put);
+admin.route("/forum/announcements", announcement_delete);
 
 export default admin;

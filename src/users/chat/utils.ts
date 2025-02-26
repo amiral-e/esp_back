@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+import {
+	Document,
+	storageContextFromDefaults,
+	VectorStoreIndex,
+} from "llamaindex";
+
 function get_prompt(history: any[], query: string): string {
 	const context_prompt = `Chat history is below.
 ---------------------
@@ -34,4 +40,4 @@ async function add_context_to_query(
 	}
 }
 
-export default add_context_to_query;
+export { add_context_to_query };
