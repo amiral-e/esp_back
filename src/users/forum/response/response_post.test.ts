@@ -8,7 +8,7 @@ import {
 } from "bun:test";
 import response_post from "./response_post";
 import config from "../../../config";
-import envVars from "../../../config_test";
+import envVars from "../../../config";
 import { deleteAdmin, insertAdmin } from "../../../admins/utils";
 
 describe("POST /forum/response", () => {

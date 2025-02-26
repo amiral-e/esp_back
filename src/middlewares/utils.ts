@@ -1,5 +1,7 @@
 import config from "../config.ts";
 
+import { decode, sign, verify } from "hono/jwt";
+
 async function getUser(uid: string) {
 	const is_valid = await config.supabaseClient.rpc("is_valid_uid", {
 		user_id: uid,
@@ -17,4 +19,9 @@ async function getUser(uid: string) {
 	};
 }
 
-export { getUser };
+async function generatePayload(id: string) {
+	const token = await sign({ uid: id }, config.envVars.JWT_SECRET);
+	return token;
+}
+
+export { getUser, generatePayload };

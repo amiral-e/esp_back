@@ -9,7 +9,7 @@ const requiredEnvVars = [
 	"ADMIN_ID",
 	"DUMMY_ID",
 	"DUMMY2_ID",
-	"WRONG_ID"
+	"WRONG_ID",
 ];
 
 const missingEnvVars: string[] = [];

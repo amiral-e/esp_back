@@ -46,7 +46,6 @@ document_delete.delete(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},

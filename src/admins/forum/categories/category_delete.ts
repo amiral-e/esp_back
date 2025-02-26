@@ -47,7 +47,6 @@ category_delete.delete(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -109,22 +108,23 @@ category_delete.delete(
 
 		const { id } = await c.req.param();
 
-		const { data: categData, error: categError } = await config.supabaseClient
+		const categories = await config.supabaseClient
 			.from("categories")
 			.select("*")
 			.eq("id", id)
 			.single();
-		if (categData == undefined || categData.length == 0)
+		if (categories.data == undefined || categories.data.length == 0)
 			return c.json({ error: "Category not found" }, 404);
-		if (categError != undefined)
-			return c.json({ error: categError.message }, 500);
+		if (categories.error != undefined)
+			return c.json({ error: categories.error.message }, 500);
 
-		const { data: delData, error: delError } = await config.supabaseClient
+		const deletion = await config.supabaseClient
 			.from("categories")
 			.delete()
 			.eq("id", id)
 			.select("*");
-		if (delError != undefined) return c.json({ error: delError.message }, 500);
+		if (deletion.error != undefined)
+			return c.json({ error: deletion.error.message }, 500);
 
 		return c.json({ message: "Category deleted successfully" }, 200);
 	},
