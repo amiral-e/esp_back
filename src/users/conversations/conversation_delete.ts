@@ -46,7 +46,6 @@ conversation_delete.delete(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},

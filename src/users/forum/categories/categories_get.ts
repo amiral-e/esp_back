@@ -8,9 +8,9 @@ const categories_get = new Hono();
 
 categories_get.get(
 	describeRoute({
-		summary: "Get Categories",
+		summary: "Get categories",
 		description:
-			"Retrieves all categories from the database. Auth is not required.",
+			"Retrieves all categories from the forum. Auth is not required.",
 		tags: ["users-forum-categories"],
 		requestBody: {
 			required: false,
@@ -100,8 +100,9 @@ categories_get.get(
 		const categories = await config.supabaseClient
 			.from("categories")
 			.select("*");
+
 		if (categories.data == undefined || categories.data.length == 0)
-			return c.json({ error: "No categories found" }, 404);
+			return c.json({ error: "No category found" }, 404);
 		else if (categories.error != undefined)
 			return c.json({ error: categories.error.message }, 500);
 

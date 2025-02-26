@@ -72,7 +72,6 @@ conversation_get.get(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},

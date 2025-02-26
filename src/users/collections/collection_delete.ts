@@ -46,7 +46,6 @@ collection_delete.delete(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},

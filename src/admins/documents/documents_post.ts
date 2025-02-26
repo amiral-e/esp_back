@@ -62,7 +62,7 @@ documents_post.post(
 										"Invalid JSON",
 										"No files provided",
 										"Please provide a single file at a time",
-										"File type not allowed"
+										"File type not allowed",
 									],
 								},
 							},

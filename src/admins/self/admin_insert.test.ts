@@ -8,20 +8,19 @@ import {
 } from "bun:test";
 import admin from "../index.ts";
 
-import envVars from "../../config_test.ts";
-
+import config from "../../config.ts";
 import { insertAdmin, deleteAdmin } from "../utils.ts";
+import { generatePayload } from "../../middlewares/utils.ts";
+
+let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
+let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
+let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 afterAll(async () => {
-	await deleteAdmin(envVars.DUMMY_ID);
-	await deleteAdmin(envVars.DUMMY_ID_2);
+	await deleteAdmin(config.envVars.DUMMY_ID);
 });
 
 describe("POST /admins (without privileges)", () => {
-	beforeEach(async () => {
-		await deleteAdmin(envVars.DUMMY_ID);
-	});
-
 	it("missing authorization header", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
@@ -46,7 +45,7 @@ describe("POST /admins (without privileges)", () => {
 	it("non-user authorization header", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
@@ -57,7 +56,7 @@ describe("POST /admins (without privileges)", () => {
 	it("correct authorization header", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Forbidden",
@@ -67,15 +66,10 @@ describe("POST /admins (without privileges)", () => {
 });
 
 describe("POST /admins (with privileges)", () => {
-	beforeEach(async () => {
-		await insertAdmin(envVars.DUMMY_ID);
-		await deleteAdmin(envVars.DUMMY_ID_2);
-	});
-
 	it("invalid JSON", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid JSON",
@@ -86,8 +80,8 @@ describe("POST /admins (with privileges)", () => {
 	it("yourself", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
-			body: JSON.stringify({ user_id: envVars.DUMMY_ID }),
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: JSON.stringify({ user_id: config.envVars.ADMIN_ID }),
 		});
 		expect(await res.json()).toEqual({
 			error: "You can't add yourself to admins",
@@ -96,10 +90,9 @@ describe("POST /admins (with privileges)", () => {
 	});
 
 	it("non-user", async () => {
-		await insertAdmin(envVars.DUMMY_ID_2);
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ user_id: "non-user" }),
 		});
 		expect(await res.json()).toEqual({
@@ -108,28 +101,27 @@ describe("POST /admins (with privileges)", () => {
 		expect(res.status).toBe(404);
 	});
 
-	it("admin user", async () => {
-		await insertAdmin(envVars.DUMMY_ID_2);
-		const res = await admin.request("/", {
-			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
-			body: JSON.stringify({ user_id: envVars.DUMMY_ID_2 }),
-		});
-		expect(await res.json()).toEqual({
-			error: "User is already an admin",
-		});
-		expect(res.status).toBe(400);
-	});
-
 	it("non-admin user", async () => {
 		const res = await admin.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
-			body: JSON.stringify({ user_id: envVars.DUMMY_ID_2 }),
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: JSON.stringify({ user_id: config.envVars.DUMMY_ID }),
 		});
 		expect(await res.json()).toEqual({
 			message: `User added to admins`,
 		});
 		expect(res.status).toBe(200);
+	});
+
+	it("admin user", async () => {
+		const res = await admin.request("/", {
+			method: "POST",
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: JSON.stringify({ user_id: config.envVars.DUMMY_ID }),
+		});
+		expect(await res.json()).toEqual({
+			error: "User is already an admin",
+		});
+		expect(res.status).toBe(400);
 	});
 });

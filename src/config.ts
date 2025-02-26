@@ -4,9 +4,12 @@ const requiredEnvVars = [
 	"POSTGRES_URL",
 	"GROQ_API_KEY",
 	"OPENAI_API_KEY",
-	"IA_URL",
 	"BEARER_TOKEN",
 	"JWT_SECRET",
+	"ADMIN_ID",
+	"DUMMY_ID",
+	"DUMMY2_ID",
+	"WRONG_ID",
 ];
 
 const missingEnvVars: string[] = [];
@@ -26,11 +29,14 @@ const envVars = {
 	SUPABASE_URL: process.env.SUPABASE_URL || "",
 	SUPABASE_KEY: process.env.SUPABASE_KEY || "",
 	POSTGRES_URL: process.env.POSTGRES_URL || "",
-	IA_URL: process.env.IA_URL || "",
-	BEARER_TOKEN: process.env.BEARER_TOKEN || "",
-	JWT_SECRET: process.env.JWT_SECRET || "",
 	GROQ_API_KEY: process.env.GROQ_API_KEY || "",
 	OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+	BEARER_TOKEN: process.env.BEARER_TOKEN || "",
+	JWT_SECRET: process.env.JWT_SECRET || "",
+	ADMIN_ID: process.env.ADMIN_ID || "",
+	DUMMY_ID: process.env.DUMMY_ID || "",
+	DUMMY2_ID: process.env.DUMMY2_ID || "",
+	WRONG_ID: process.env.WRONG_ID || "",
 };
 
 import { createClient } from "@supabase/supabase-js";

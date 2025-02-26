@@ -53,7 +53,7 @@ documents_post.post(
 										"No files provided",
 										"Please provide a single file at a time",
 										"File size exceeds limit",
-										"File type not allowed"
+										"File type not allowed",
 									],
 								},
 							},

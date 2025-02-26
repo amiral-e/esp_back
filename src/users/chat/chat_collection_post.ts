@@ -49,7 +49,7 @@ chat_collection_post.post(
 								items: {
 									type: "string",
 									description: "The ids of collections to use as context",
-									default: "global_test"
+									default: "global_test",
 								},
 							},
 						},
@@ -89,12 +89,13 @@ chat_collection_post.post(
 											},
 											documents: {
 												type: "array",
-												description: "List of documents retrieved from the collection",
+												description:
+													"List of documents retrieved from the collection",
 												items: {
 													type: "string",
 													default: "test.txt",
 												},
-											}
+											},
 										},
 									},
 								},
@@ -116,7 +117,6 @@ chat_collection_post.post(
 									default: ["Invalid JSON", "Invalid collection name"],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -137,7 +137,6 @@ chat_collection_post.post(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -154,7 +153,6 @@ chat_collection_post.post(
 									default: ["Collection not found", "Conversation not found"],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -184,7 +182,13 @@ chat_collection_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.message == undefined || json.message == "" || json.collections == undefined || json.collections.length == 0)
+			if (
+				!json ||
+				json.message == undefined ||
+				json.message == "" ||
+				json.collections == undefined ||
+				json.collections.length == 0
+			)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
@@ -229,11 +233,9 @@ chat_collection_post.post(
 			docs.push({
 				collection_name: collec_name,
 				sources: await retriever.retrieve({ query: res }),
-
 			});
 		}
-		if (docs.length == 0)
-			return c.json({ error: "No answer found" }, 404);
+		if (docs.length == 0) return c.json({ error: "No answer found" }, 404);
 
 		let texts = "";
 		for (const doc of docs) {
@@ -293,8 +295,7 @@ chat_collection_post.post(
 			.from("conversations")
 			.update({ history: conversation.data.history })
 			.eq("id", conversation.data.id);
-		if (update.error)
-			return c.json({ error: update.error.message }, 500);
+		if (update.error) return c.json({ error: update.error.message }, 500);
 
 		return c.json(
 			{

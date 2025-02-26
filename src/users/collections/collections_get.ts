@@ -52,7 +52,6 @@ collections_get.get(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},

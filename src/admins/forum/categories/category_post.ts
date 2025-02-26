@@ -65,7 +65,6 @@ category_post.post(
 									default: "Invalid JSON",
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -86,7 +85,6 @@ category_post.post(
 									],
 								},
 							},
-							required: ["error"],
 						},
 					},
 				},
@@ -139,11 +137,12 @@ category_post.post(
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const { data, error } = await config.supabaseClient
+		const insertion = await config.supabaseClient
 			.from("categories")
 			.insert(json)
 			.select("*");
-		if (error != undefined) return c.json({ error: error.message }, 500);
+		if (insertion.error != undefined)
+			return c.json({ error: insertion.error.message }, 500);
 
 		return c.json({ message: "Category created successfully" }, 200);
 	},
