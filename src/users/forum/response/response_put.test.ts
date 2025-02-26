@@ -8,7 +8,7 @@ import {
 } from "bun:test";
 import responses from "..";
 import config from "../../../config";
-import envVars from "../../../config_test";
+import envVars from "../../../config";
 import response_post from "./response_post";
 import response_put from "./response_put";
 import user_jwt_gen from "../../../test/user_jwt_gen";

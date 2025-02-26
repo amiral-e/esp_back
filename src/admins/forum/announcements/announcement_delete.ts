@@ -4,15 +4,15 @@ import { describeRoute } from "hono-openapi";
 import config from "../../../config.ts";
 import AuthMiddleware from "../../../middlewares/auth.ts";
 
-const category_delete = new Hono();
+const announcement_delete = new Hono();
 
-category_delete.delete(
+announcement_delete.delete(
 	"/:id",
 	describeRoute({
-		summary: "Delete Category",
+		summary: "Delete Announcement",
 		description:
-			"Deletes a specific category from the database. Admin privileges are required.",
-		tags: ["admins-forum-categories"],
+			"Deletes a specific announcement from the forum. Admin privileges are required.",
+		tags: ["admins-forum-announcements"],
 		responses: {
 			200: {
 				description: "Success",
@@ -23,7 +23,7 @@ category_delete.delete(
 							properties: {
 								message: {
 									type: "string",
-									default: "Category deleted successfully",
+									default: "Announcement deleted successfully",
 								},
 							},
 							required: ["message"],
@@ -76,7 +76,7 @@ category_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									default: "Category not found",
+									default: "Announcement not found",
 								},
 							},
 						},
@@ -108,26 +108,26 @@ category_delete.delete(
 
 		const { id } = await c.req.param();
 
-		const categories = await config.supabaseClient
-			.from("categories")
+		const announcement = await config.supabaseClient
+			.from("announcements")
 			.select("*")
 			.eq("id", id)
 			.single();
-		if (categories.data == undefined || categories.data.length == 0)
-			return c.json({ error: "Category not found" }, 404);
-		if (categories.error != undefined)
-			return c.json({ error: categories.error.message }, 500);
+		if (announcement.data == undefined || announcement.data.length == 0)
+			return c.json({ error: "Announcement not found" }, 404);
+		if (announcement.error != undefined)
+			return c.json({ error: announcement.error.message }, 500);
 
 		const deletion = await config.supabaseClient
-			.from("categories")
+			.from("announcements")
 			.delete()
 			.eq("id", id)
 			.select("*");
 		if (deletion.error != undefined)
 			return c.json({ error: deletion.error.message }, 500);
 
-		return c.json({ message: "Category deleted successfully" }, 200);
+		return c.json({ message: "Announcement deleted successfully" }, 200);
 	},
 );
 
-export default category_delete;
+export default announcement_delete;

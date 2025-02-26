@@ -115,20 +115,15 @@ conversation_post.post(
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const creation = await config.supabaseClient
+		const insertion = await config.supabaseClient
 			.from("conversations")
 			.insert({ history: [], name: json.name, user_id: user.uid })
 			.select("*")
 			.single();
-		if (creation.data == undefined || creation.error != undefined)
-			return c.json({ error: creation.error.message }, 500);
+		if (insertion.data == undefined || insertion.error != undefined)
+			return c.json({ error: insertion.error.message }, 500);
 
-		return c.json(
-			{
-				message: `Conversation ${json.name} created successfully with id ${creation.data.id}`,
-			},
-			200,
-		);
+		return c.json({ message: `Conversation created successfully` }, 200);
 	},
 );
 

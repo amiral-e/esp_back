@@ -83,11 +83,11 @@ response_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									enum: [
+									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user",
 									],
-									description: "The error message",
 								},
 							},
 						},
@@ -103,8 +103,7 @@ response_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									enum: ["Response not found", "Uid not found"],
-									description: "The error message",
+									default: "Response not found",
 								},
 							},
 						},
@@ -120,7 +119,7 @@ response_delete.delete(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
+									default: "Error message",
 								},
 							},
 						},

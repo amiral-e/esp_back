@@ -1,18 +1,16 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
+import config from "../../../config";
+import AuthMiddleware from "../../../middlewares/auth";
 
-import config from "../../../config.ts";
-import AuthMiddleware from "../../../middlewares/auth.ts";
+const announcement_post = new Hono();
 
-const category_put = new Hono();
-
-category_put.put(
-	"/:id",
+announcement_post.post(
 	describeRoute({
-		summary: "Update Category",
+		summary: "Create Announcement",
 		description:
-			"Updates a specific category in the database. Admin privileges are required.",
-		tags: ["admins-forum-categories"],
+			"Creates a new announcement for the forum. Admin privileges are required.",
+		tags: ["admins-forum-announcements"],
 		requestBody: {
 			required: true,
 			content: {
@@ -20,18 +18,13 @@ category_put.put(
 					schema: {
 						type: "object",
 						properties: {
-							name: {
+							message: {
 								type: "string",
-								description: "The name of the category",
-								default: "Updated Category",
-							},
-							description: {
-								type: "string",
-								description: "The description of the category",
-								default: "Description of updated category",
+								description: "The message of the announcement",
+								default: "New Announcement",
 							},
 						},
-						required: ["name", "description"],
+						required: ["message"],
 					},
 				},
 			},
@@ -46,7 +39,7 @@ category_put.put(
 							properties: {
 								message: {
 									type: "string",
-									default: "Category updated successfully",
+									default: "Announcement created successfully",
 								},
 							},
 							required: ["message"],
@@ -129,36 +122,25 @@ category_put.put(
 		const user = c.get("user");
 		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const { id } = await c.req.param();
-
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || (json.name == undefined && json.description == undefined))
+			if (!json || json.message == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const categorie = await config.supabaseClient
-			.from("categories")
-			.select("name")
-			.eq("id", id)
+		const insertion = await config.supabaseClient
+			.from("announcements")
+			.insert(json)
+			.select("*")
 			.single();
-		if (categorie.data == undefined || categorie.data.length == 0)
-			return c.json({ error: "Category not found" }, 404);
-		else if (categorie.error != undefined)
-			return c.json({ error: categorie.error.message }, 500);
+		if (insertion.error != undefined)
+			return c.json({ error: insertion.error.message }, 500);
 
-		const update = await config.supabaseClient
-			.from("categories")
-			.update(json)
-			.eq("id", id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
-
-		return c.json({ message: "Category updated successfully" }, 200);
+		return c.json({ message: "Announcement created successfully" }, 200);
 	},
 );
 
-export default category_put;
+export default announcement_post;

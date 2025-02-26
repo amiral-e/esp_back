@@ -4,15 +4,15 @@ import { describeRoute } from "hono-openapi";
 import config from "../../../config.ts";
 import AuthMiddleware from "../../../middlewares/auth.ts";
 
-const category_put = new Hono();
+const announcement_put = new Hono();
 
-category_put.put(
+announcement_put.put(
 	"/:id",
 	describeRoute({
-		summary: "Update Category",
+		summary: "Update Announcement",
 		description:
-			"Updates a specific category in the database. Admin privileges are required.",
-		tags: ["admins-forum-categories"],
+			"Updates a specific announcement of the forum. Admin privileges are required.",
+		tags: ["admins-forum-announcements"],
 		requestBody: {
 			required: true,
 			content: {
@@ -20,18 +20,13 @@ category_put.put(
 					schema: {
 						type: "object",
 						properties: {
-							name: {
+							message: {
 								type: "string",
-								description: "The name of the category",
-								default: "Updated Category",
-							},
-							description: {
-								type: "string",
-								description: "The description of the category",
-								default: "Description of updated category",
+								description: "The message of the announcement",
+								default: "Updated Announcement",
 							},
 						},
-						required: ["name", "description"],
+						required: ["message"],
 					},
 				},
 			},
@@ -46,7 +41,7 @@ category_put.put(
 							properties: {
 								message: {
 									type: "string",
-									default: "Category updated successfully",
+									default: "Announcement updated successfully",
 								},
 							},
 							required: ["message"],
@@ -106,6 +101,22 @@ category_put.put(
 					},
 				},
 			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Announcement not found",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: "Internal server error",
 				content: {
@@ -134,31 +145,33 @@ category_put.put(
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || (json.name == undefined && json.description == undefined))
+			if (!json || json.message == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const categorie = await config.supabaseClient
-			.from("categories")
-			.select("name")
+		const announcement = await config.supabaseClient
+			.from("announcements")
+			.select("*")
 			.eq("id", id)
 			.single();
-		if (categorie.data == undefined || categorie.data.length == 0)
-			return c.json({ error: "Category not found" }, 404);
-		else if (categorie.error != undefined)
-			return c.json({ error: categorie.error.message }, 500);
+		if (announcement.data == undefined || announcement.data.length == 0)
+			return c.json({ error: "Announcement not found" }, 404);
+		else if (announcement.error != undefined)
+			return c.json({ error: announcement.error.message }, 500);
 
 		const update = await config.supabaseClient
-			.from("categories")
+			.from("announcements")
 			.update(json)
-			.eq("id", id);
+			.eq("id", id)
+			.select("*")
+			.single();
 		if (update.error != undefined)
 			return c.json({ error: update.error.message }, 500);
 
-		return c.json({ message: "Category updated successfully" }, 200);
+		return c.json({ message: "Announcement updated successfully" }, 200);
 	},
 );
 
-export default category_put;
+export default announcement_put;
