@@ -22,6 +22,8 @@ import credits_put from "./profile/credits_put.ts";
 import profile_get from "./profile/profile_get.ts";
 import level_put from "./profile/level_put.ts";
 
+import levels_get from "./config/levels_get.ts";
+
 const admin = new Hono();
 
 admin.route("/", admin_delete);
@@ -45,5 +47,7 @@ admin.route("/users", credits_post);
 admin.route("/users", credits_put);
 admin.route("/users", profile_get);
 admin.route("/users", level_put);
+
+admin.route("/config/levels", levels_get);
 
 export default admin;
