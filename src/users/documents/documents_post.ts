@@ -13,7 +13,7 @@ import {
 const documents_post = new Hono();
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
-const ALLOWED_FILE_TYPES = ["md", "txt"];
+const ALLOWED_FILE_TYPES = ["text/markdown", "text/plain;charset=utf-8"];
 
 documents_post.post(
 	describeRoute({
