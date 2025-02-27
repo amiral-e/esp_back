@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "bun test --coverage src/**/**/*.test.ts",
-		"dev": "export NODE_ENV=dev && bun run --hot src/index.ts",
+		"dev": "bun run --hot src/index.ts",
 		"build": "bun build --target=bun src/index.ts --outdir dist",
 		"start": "bun run dist/index.js",
 		"format": "bunx biome format --write **/*.ts",
