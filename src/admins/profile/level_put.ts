@@ -7,11 +7,12 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const level_put = new Hono();
 
 level_put.put(
+	"/:user_id/level",
     describeRoute({
         summary: "Update Level",
         description:
             "Updates user's knowledges level. Auth is required.",
-        tags: ["users-profile"],
+        tags: ["admins-users-profile"],
         requestBody: {
             required: true,
             content: {
@@ -121,6 +122,10 @@ level_put.put(
     AuthMiddleware,
     async (c: any) => {
         const user = c.get("user");
+        if (!user.admin)
+            return c.json({ error: "Forbidden" }, 403);
+
+		const { user_id } = await c.req.param();
 
         let json: any;
 		try {
@@ -145,7 +150,7 @@ level_put.put(
         const profile = await config.supabaseClient
             .from("profiles")
             .select("*")
-            .eq("id", user.uid)
+            .eq("id", user_id)
             .single();
         if (profile.data == undefined)
             return c.json({ error: "No profile found" }, 404);
@@ -155,7 +160,7 @@ level_put.put(
         const update = await config.supabaseClient
             .from("profiles")
             .update({ level: json.level })
-            .eq("id", user.uid)
+            .eq("id", user_id)
             .single();
         if (update.error != undefined)
             return c.json({ error: update.error.message }, 500);

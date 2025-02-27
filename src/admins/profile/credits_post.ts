@@ -11,8 +11,8 @@ credits_post.post(
 	describeRoute({
 		summary: "Grant Credits",
 		description:
-			"Grant credits to user. Admin privileges are required.",
-		tags: ["admins-credits"],
+			"Grant credits to a user. Admin privileges are required.",
+		tags: ["admins-users-profile"],
 		requestBody: {
 			required: true,
 			content: {
@@ -125,6 +125,8 @@ credits_post.post(
 		if (!user.admin)
 			return c.json({ error: "Forbidden" }, 403);
 
+		const { user_id } = await c.req.param();
+
 		let json: any;
 		try {
 			json = await c.req.json();
@@ -137,7 +139,7 @@ credits_post.post(
 		const credits = await config.supabaseClient
 			.from("profiles")
 			.select("credits")
-			.eq("id", user.uid)
+			.eq("id", user_id)
 			.single();
 		if (credits.error != undefined)
 			return c.json({ error: credits.error.message }, 500);
@@ -145,7 +147,7 @@ credits_post.post(
 		const update = await config.supabaseClient
 			.from("profiles")
 			.update({ credits: credits.data.credits + json.credits })
-			.eq("id", user.uid);
+			.eq("id", user_id);
 		if (update.error != undefined)
 			return c.json({ error: update.error.message }, 500);
 
