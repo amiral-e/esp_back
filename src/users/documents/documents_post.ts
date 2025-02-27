@@ -21,6 +21,11 @@ documents_post.post(
 		description:
 			"Ingest documents in the specified collection. Auth is required.",
 		tags: ["users-documents"],
+		"multipart/form-data": {
+			schema: {
+				type: "object",
+			},
+		},
 		responses: {
 			200: {
 				description: "Success",
