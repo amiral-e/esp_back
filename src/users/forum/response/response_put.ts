@@ -75,7 +75,6 @@ response_put.put(
 								error: {
 									type: "string",
 									default: "Not authorized to update this response",
-									description: "The error message",
 								},
 							},
 						},
@@ -91,8 +90,7 @@ response_put.put(
 							properties: {
 								error: {
 									type: "string",
-									enum: ["Invalid JSON body", "Message is required"],
-									description: "The error message",
+									default: "Invalid JSON body",
 								},
 							},
 						},
@@ -108,11 +106,11 @@ response_put.put(
 							properties: {
 								error: {
 									type: "string",
-									enum: [
+									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user",
 									],
-									description: "The error message",
 								},
 							},
 						},
@@ -128,8 +126,7 @@ response_put.put(
 							properties: {
 								error: {
 									type: "string",
-									enum: ["Response not found", "Uid not found"],
-									description: "The error message",
+									default: "Response not found",
 								},
 							},
 						},
@@ -145,7 +142,7 @@ response_put.put(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
+									default: "Error message",
 								},
 							},
 						},
@@ -163,39 +160,34 @@ response_put.put(
 		try {
 			body = await c.req.json();
 			if (!body?.message?.trim()) {
-				return c.json({ error: "Message is required" }, 400);
+				return c.json({ error: "Invalid JSON body" }, 400);
 			}
 		} catch (error) {
 			return c.json({ error: "Invalid JSON body" }, 400);
 		}
 
-		const { data: existingResponse, error: fetchError } =
-			await config.supabaseClient
-				.from("responses")
-				.select("*")
-				.eq("id", id)
-				.single();
+		const response = await config.supabaseClient
+			.from("responses")
+			.select("*")
+			.eq("user_id", user.uid)
+			.eq("id", id)
+			.single();
 
-		if (fetchError || !existingResponse) {
+		if (response.data == undefined || response.data.length == 0)
 			return c.json({ error: "Response not found" }, 404);
-		}
+		else if (response.error != undefined)
+			return c.json({ error: response.error.message }, 500);
 
-		if (existingResponse.user_id !== user.uid) {
-			return c.json({ error: "Not authorized to update this response" }, 403);
-		}
-
-		const { data, error } = await config.supabaseClient
+		const update = await config.supabaseClient
 			.from("responses")
 			.update({ message: body.message })
 			.eq("id", id)
 			.select()
 			.single();
 
-		if (error) {
-			return c.json({ error: error.message }, 500);
-		}
+		if (update.error) return c.json({ error: update.error.message }, 500);
 
-		return c.json(data, 200);
+		return c.json({ message: "Response updated successfully" }, 200);
 	},
 );
 

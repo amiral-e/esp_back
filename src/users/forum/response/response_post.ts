@@ -62,8 +62,7 @@ response_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: ["Invalid JSON body", "Message is required"],
-									description: "The error message",
+									default: "Invalid JSON body",
 								},
 							},
 						},
@@ -82,8 +81,8 @@ response_post.post(
 									default: [
 										"No authorization header found",
 										"Invalid authorization header",
+										"Invalid user",
 									],
-									description: "The error message",
 								},
 							},
 						},
@@ -99,7 +98,7 @@ response_post.post(
 							properties: {
 								error: {
 									type: "string",
-									description: "The error message",
+									default: "Error message",
 								},
 							},
 						},
@@ -122,20 +121,18 @@ response_post.post(
 			return c.json({ error: "Invalid JSON body" }, 400);
 		}
 
-		const { data, error } = await config.supabaseClient
+		const insertion = await config.supabaseClient
 			.from("responses")
-			.insert({
-				message: body.message,
-				user_id: user.uid,
-			})
+			.insert({ message: body.message, user_id: user.uid })
 			.select()
 			.single();
 
-		if (error) {
-			return c.json({ error: error.message }, 500);
-		}
+		if (insertion.error) return c.json({ error: insertion.error.message }, 500);
 
-		return c.json(data, 200);
+		return c.json(
+			{ message: "Response added successfully", id: insertion.data.id },
+			200,
+		);
 	},
 );
 
