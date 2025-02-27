@@ -31,7 +31,10 @@ app.get("/", (c) => {
 });
 
 app.route("/admins", admin);
-app.route("/test", test);
+
+if (process.env.NODE_ENV !== "production") {
+	app.route("/test", test);
+}
 
 app.route("/conversations", chat_post);
 app.route("/conversations", chat_collection_post);
