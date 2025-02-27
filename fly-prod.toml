@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for esp-back on 2024-12-19T11:24:02+01:00
+# fly.toml app configuration file generated for cc-back-prod on 2025-02-27T00:49:35+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'esp-back'
+app = 'cc-back-prod'
 primary_region = 'cdg'
 
 [build]

@@ -1,6 +1,8 @@
 .cache
 
 .env
+.env.dev
+.env.prod
 
 node_modules
 tests
