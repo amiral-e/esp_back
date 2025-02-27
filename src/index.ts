@@ -60,7 +60,7 @@ app.get(
 				version: "1.0.0",
 				description: "Hono API Documentation",
 			},
-			servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+			servers: [{ description: "Server" }],
 			components: {
 				securitySchemes: {
 					bearerAuth: {
