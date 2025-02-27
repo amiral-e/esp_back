@@ -94,7 +94,7 @@ level_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "No profile found",
+									default: ["No level found", "No profile found"],
 								},
 							},
 						},
@@ -140,7 +140,7 @@ level_put.put(
             .from("knowledges")
             .select("id, level");
         if (levels.data == undefined || levels.data.length == 0)
-            return c.json({ error: "No levels found" }, 404);
+            return c.json({ error: "No level found" }, 404);
         else if (levels.error != undefined)
             return c.json({ error: levels.error.message }, 500);
 
