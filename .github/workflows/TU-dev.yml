@@ -56,7 +56,7 @@ jobs:
     if: ${{ needs.run-tests.outputs.success-percent >= 40.00 }}
     permissions:
       contents: read
-      actions: read/write
+      actions: read
     steps:
       - name: Trigger Fly Deploy workflow
         uses: actions/github-script@v6
