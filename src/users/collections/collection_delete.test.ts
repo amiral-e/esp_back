@@ -1,11 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeEach,
-	beforeAll,
-	afterAll,
-} from "bun:test";
+import { describe, expect, it, afterAll, afterEach, beforeAll } from "bun:test";
 import collection_delete from "./collection_delete.ts";
 import { createCollection, deleteCollection } from "./utils.ts";
 
