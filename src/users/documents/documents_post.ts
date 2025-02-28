@@ -16,6 +16,7 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["text/markdown", "text/plain;charset=utf-8"];
 
 documents_post.post(
+	"/:collection_name/documents",
 	describeRoute({
 		summary: "Ingest documents",
 		description:
@@ -123,6 +124,7 @@ documents_post.post(
 				if (file.size > MAX_FILE_SIZE) {
 					return c.json({ error: "File size exceeds limit" }, 400);
 				}
+				console.log(file.type);
 				if (!ALLOWED_FILE_TYPES.includes(file.type)) {
 					return c.json({ error: "File type not allowed" }, 400);
 				}

@@ -2,13 +2,16 @@ import { describe, expect, it, beforeAll, afterAll } from "bun:test";
 import conversation from "./conversation_delete.ts";
 import { createConversation, deleteConversation } from "./utils.ts";
 
-import envVars from "../../config_test.ts";
+import config from "../../config.ts";
+import { generatePayload } from "../../middlewares/utils.ts";
 
-const userId = envVars.DUMMY_ID;
+const userId = config.envVars.DUMMY_ID;
+let dummyPayload = await generatePayload(userId);
+let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 var convId = "";
 
 beforeAll(async () => {
-    convId = await createConversation(envVars.DUMMY_ID, "test_conv");
+    convId = await createConversation(userId, "test_conv");
 });
 
 afterAll(async () => {
@@ -40,7 +43,7 @@ describe("DELETE /users/conversations/:conv_id (unauthorized)", () => {
     it("non-user authorization header", async () => {
         const res = await conversation.request(`/${convId}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+            headers: { Authorization: `Bearer ${wrongPayload}` },
         });
         expect(await res.json()).toEqual({
             error: "Invalid user",
@@ -53,7 +56,7 @@ describe("DELETE /users/conversations/:conv_id (authorized)", () => {
     it("should delete existing conversation", async () => {
         const res = await conversation.request(`/${convId}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+            headers: { Authorization: `Bearer ${dummyPayload}` },
         });
         
         expect(res.status).toBe(200);
@@ -66,7 +69,7 @@ describe("DELETE /users/conversations/:conv_id (authorized)", () => {
     it("should return 404 when conversation not found", async () => {
         const res = await conversation.request(`/nonexistent_conv`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+            headers: { Authorization: `Bearer ${dummyPayload}` },
         });
         
         expect(res.status).toBe(404);

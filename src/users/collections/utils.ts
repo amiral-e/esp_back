@@ -9,12 +9,13 @@ import {
 async function createCollection(userId: string, collectionName: string) {
 	try {
 		// Create a test document
+		// @ts-ignore
+		const doc_id = Bun.randomUUIDv7();
 		const fileContents = "a";
 		const testDoc = new Document({
 			text: fileContents,
 			metadata: {
-				// @ts-ignore
-				doc_id: Bun.randomUUIDv7(),
+				doc_id: doc_id,
 				doc_file: "test.txt",
 				user: userId,
 			},
@@ -28,6 +29,7 @@ async function createCollection(userId: string, collectionName: string) {
 		const index = await VectorStoreIndex.fromDocuments([testDoc], {
 			storageContext: ctx,
 		});
+		return doc_id;
 	} catch (error: any) {
 		console.error("Error creating collection:", error.message);
 		return false;

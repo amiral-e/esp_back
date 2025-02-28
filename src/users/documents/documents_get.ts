@@ -7,6 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const documents_get = new Hono();
 
 documents_get.get(
+	"/:collection_name/documents",
 	describeRoute({
 		summary: "Get documents",
 		description:
@@ -100,6 +101,7 @@ documents_get.get(
 		const user = c.get("user");
 		const { collection_name } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
+		console.log(collection_id);
 
 		const documents = await config.supabaseClient
 			.from("llamaindex_embedding")

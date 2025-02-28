@@ -8,7 +8,12 @@ import {
 } from "bun:test";
 import chat_post from "./chat_post.ts";
 
-import envVars from "../../config.ts";
+import config from "../../config.ts";
+import { generatePayload } from "../../middlewares/utils.ts";
+
+const userId = config.envVars.DUMMY_ID;
+let dummyPayload = await generatePayload(userId);
+let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 import {
 	createConversation,
@@ -18,11 +23,11 @@ import {
 var convId = "";
 
 beforeAll(async () => {
-	convId = await createConversation(envVars.DUMMY_ID, "test_conv");
+	convId = await createConversation(userId, "test_conv");
 });
 
 afterAll(async () => {
-	await deleteConversation(envVars.DUMMY_ID, convId);
+	await deleteConversation(userId, convId);
 });
 
 describe("POST /conversations/:conv_id (unauthorized)", () => {
@@ -52,7 +57,7 @@ describe("POST /conversations/:conv_id (unauthorized)", () => {
 	it("non-user authorization header", async () => {
 		const res = await chat_post.request(`/${convId}`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 			body: JSON.stringify({ message: "test" }),
 		});
 		expect(await res.json()).toEqual({
@@ -66,7 +71,7 @@ describe("POST /conversations/:conv_id (authorized)", () => {
 	it("invalid JSON", async () => {
 		const res = await chat_post.request(`/${convId}`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid JSON",
@@ -77,7 +82,7 @@ describe("POST /conversations/:conv_id (authorized)", () => {
 	it("empty message", async () => {
 		const res = await chat_post.request(`/${convId}`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "" }),
 		});
 		const body = await res.json();
@@ -89,7 +94,7 @@ describe("POST /conversations/:conv_id (authorized)", () => {
 	it("conversation not found", async () => {
 		const res = await chat_post.request(`/invalid_conv_id`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "test" }),
 		});
 		expect(await res.json()).toEqual({
@@ -101,7 +106,7 @@ describe("POST /conversations/:conv_id (authorized)", () => {
 	it("successful post", async () => {
 		const res = await chat_post.request(`/${convId}`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "test" }),
 		});
 		expect(res.status).toBe(200);
