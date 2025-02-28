@@ -22,6 +22,9 @@ import documents_post from "./users/documents/documents_post.ts";
 
 import forum from "./users/forum/index.ts";
 
+import profile_get from "./users/profile/profile_get.ts";
+import level_put from "./users/profile/level_put.ts";
+
 const app = new Hono();
 
 app.get("/", (c) => {
@@ -31,7 +34,10 @@ app.get("/", (c) => {
 });
 
 app.route("/admins", admin);
-app.route("/test", test);
+
+if (process.env.NODE_ENV !== "production") {
+	app.route("/test", test);
+}
 
 app.route("/conversations", chat_post);
 app.route("/conversations", chat_collection_post);
@@ -51,6 +57,9 @@ app.route("/collections/:collection_name/documents", documents_post);
 
 app.route("/forum", forum);
 
+app.route("/profile", profile_get);
+app.route("/profile/level", level_put);
+
 app.get(
 	"/openapi",
 	openAPISpecs(app, {
@@ -60,7 +69,7 @@ app.get(
 				version: "1.0.0",
 				description: "Hono API Documentation",
 			},
-			servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+			servers: [{ description: "Server" }],
 			components: {
 				securitySchemes: {
 					bearerAuth: {

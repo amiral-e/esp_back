@@ -4,14 +4,15 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const conversation_post = new Hono();
+const credits_put = new Hono();
 
-conversation_post.post(
+credits_put.put(
+	"/:user_id/grant",
 	describeRoute({
-		summary: "Create a new conversation",
+		summary: "Update Credits",
 		description:
-			"Creates a new conversation for the authenticated user. Auth is required.",
-		tags: ["users-conversations"],
+			"Update credits of a user. Admin privileges are required.",
+		tags: ["admins-users-profile"],
 		requestBody: {
 			required: true,
 			content: {
@@ -19,13 +20,13 @@ conversation_post.post(
 					schema: {
 						type: "object",
 						properties: {
-							name: {
-								type: "string",
-								description: "The name of the conversation",
-								example: "My conversation",
+							credits: {
+								type: "integer",
+								description: "The new number of credits to set",
+								default: 5,
 							},
 						},
-						required: ["name"],
+						required: ["credits"],
 					},
 				},
 			},
@@ -40,9 +41,10 @@ conversation_post.post(
 							properties: {
 								message: {
 									type: "string",
-									example: "Conversation test created successfully with id 123",
+									default: "Credits updated successfully",
 								},
 							},
+							required: ["message"],
 						},
 					},
 				},
@@ -83,8 +85,24 @@ conversation_post.post(
 					},
 				},
 			},
+			403: {
+				description: "Forbidden",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Forbidden",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
-				description: "Internal Server Error",
+				description: "Internal server error",
 				content: {
 					"application/json": {
 						schema: {
@@ -104,29 +122,29 @@ conversation_post.post(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin)
+			return c.json({ error: "Forbidden" }, 403);
+
+		const { user_id } = await c.req.param();
 
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.name == undefined)
+			if (!json || json.credits == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const insertion = await config.supabaseClient
-			.from("conversations")
-			.insert({ history: [], name: json.name, user_id: user.uid })
-			.select("*")
-			.single();
-		if (insertion.data == undefined || insertion.error != undefined)
-			return c.json({ error: insertion.error.message }, 500);
+		const update = await config.supabaseClient
+			.from("profiles")
+			.update({ credits: json.credits })
+			.eq("id", user_id);
+		if (update.error != undefined)
+			return c.json({ error: update.error.message }, 500);
 
-		return c.json(
-			{ message: `Conversation created successfully`, id: insertion.data.id },
-			200,
-		);
+		return c.json({ message: "Credits updated successfully" }, 200);
 	},
 );
 
-export default conversation_post;
+export default credits_put;

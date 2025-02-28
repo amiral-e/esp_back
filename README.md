@@ -1,20 +1,15 @@
-To install dependencies:
-```sh
-bun install
-```
+## Bun commands
 
-To run:
-```sh
-bun run dev
-```
+- `bun install` install all dependencies
+- `bun run dev` start the development server
+- `bun run build` build the project for production
+- `bun run format ./ ./src/` format the codebase
+- `bun run deploy-dev` deploy the project to development environment
+- `bun run deploy-prod` deploy the project to production environment
+- `bun --env-file=.env ...` execute bun command using custom env file
 
-open http://localhost:3000
+## Docker commands
 
+- `docker build -t cc-back-dev .`
 
-# Build image docker
-
-- docker build -t esp_back .
-
-# Run app with image
-
-docker run -p 3000:3000 --env-file .env -v $(pwd):/app esp_back
+To run the container, be sure to expose port `3000`, set environnement variables or use a specific env file.

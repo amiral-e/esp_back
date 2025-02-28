@@ -50,24 +50,6 @@ response_delete.delete(
 								error: {
 									type: "string",
 									default: "Not authorized to delete this response",
-									description: "The error message",
-								},
-							},
-						},
-					},
-				},
-			},
-			400: {
-				description: "Bad request",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									enum: ["Invalid JSON body", "Message is required"],
-									description: "The error message",
 								},
 							},
 						},
@@ -133,29 +115,24 @@ response_delete.delete(
 		const user = c.get("user");
 		const id = c.req.param("id");
 
-		const { data: existingResponse, error: fetchError } =
-			await config.supabaseClient
-				.from("responses")
-				.select("*")
-				.eq("id", id)
-				.single();
+		const response = await config.supabaseClient
+			.from("responses")
+			.select("*")
+			.eq("user_id", user.uid)
+			.eq("id", id)
+			.single();
 
-		if (fetchError || !existingResponse) {
+		if (response.data == undefined || response.data.length == 0)
 			return c.json({ error: "Response not found" }, 404);
-		}
+		else if (response.error != undefined)
+			return c.json({ error: response.error.message }, 500);
 
-		if (existingResponse.user_id !== user.uid) {
-			return c.json({ error: "Not authorized to delete this response" }, 403);
-		}
-
-		const { error } = await config.supabaseClient
+		const deletion = await config.supabaseClient
 			.from("responses")
 			.delete()
 			.eq("id", id);
 
-		if (error) {
-			return c.json({ error: error.message }, 500);
-		}
+		if (deletion.error) return c.json({ error: deletion.error.message }, 500);
 
 		return c.json({ message: "Response deleted successfully" }, 200);
 	},
