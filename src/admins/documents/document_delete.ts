@@ -7,7 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const document_delete = new Hono();
 
 document_delete.delete(
-	"/:document_id",
+	"/:collection_name/documents/:document_id",
 	describeRoute({
 		summary: "Delete a document",
 		description:
@@ -126,7 +126,7 @@ document_delete.delete(
 			if (error != undefined) return c.json({ error: error.message }, 500);
 		}
 
-		return c.json({ response: `Document deleted successfully` }, 200);
+		return c.json({ message: `Document deleted successfully` }, 200);
 	},
 );
 

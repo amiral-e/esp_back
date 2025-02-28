@@ -7,6 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const documents_get = new Hono();
 
 documents_get.get(
+	"/:collection_name/documents",
 	describeRoute({
 		summary: "Get documents",
 		description:
