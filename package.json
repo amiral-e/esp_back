@@ -1,0 +1,32 @@
+{
+	"name": "backend",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"test": "bun test --coverage src/**/**/*.test.ts",
+		"dev": "bun run --hot src/index.ts",
+		"build": "bun build --target=bun src/index.ts --outdir dist",
+		"start": "bun run dist/index.js",
+		"format": "bunx biome format --write **/*.ts",
+		"deploy-dev": "fly deploy --app cc-back-dev --config fly-dev.toml",
+		"deploy-prod": "fly deploy --app cc-back-prod --config fly-prod.toml"
+	},
+	"dependencies": {
+		"@hono/swagger-ui": "^0.4.1",
+		"@scalar/hono-api-reference": "^0.5.168",
+		"@supabase/supabase-js": "^2.45.4",
+		"hono": "^4.5.10",
+		"hono-openapi": "^0.4.3",
+		"llamaindex": "^0.8.31",
+		"pg": "^8.13.3",
+		"pgvector": "^0.2.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@flydotio/dockerfile": "^0.7.8",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
