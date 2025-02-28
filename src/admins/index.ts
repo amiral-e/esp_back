@@ -17,6 +17,13 @@ import announcement_post from "./forum/announcements/announcement_post.ts";
 import announcement_put from "./forum/announcements/announcement_put.ts";
 import announcement_delete from "./forum/announcements/announcement_delete.ts";
 
+import credits_post from "./profile/credits_post.ts";
+import credits_put from "./profile/credits_put.ts";
+import profile_get from "./profile/profile_get.ts";
+import level_put from "./profile/level_put.ts";
+
+import levels_get from "./config/levels_get.ts";
+
 const admin = new Hono();
 
 admin.route("/", admin_delete);
@@ -35,5 +42,12 @@ admin.route("/forum/categories", category_delete);
 admin.route("/forum/announcements", announcement_post);
 admin.route("/forum/announcements", announcement_put);
 admin.route("/forum/announcements", announcement_delete);
+
+admin.route("/users", credits_post);
+admin.route("/users", credits_put);
+admin.route("/users", profile_get);
+admin.route("/users", level_put);
+
+admin.route("/config/levels", levels_get);
 
 export default admin;
