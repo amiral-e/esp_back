@@ -1,0 +1,72 @@
+name: Tests and Conditional Workflow
+
+on: [push, pull_request]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    outputs:
+      success-percent: ${{ steps.calculate-success.outputs.percentage }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11.x
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Run tests and save output
+      run: bun test | tee test-output.txt
+
+    - name: Calculate success percentage
+      id: calculate-success
+      run: |
+        # Script Python pour analyser les résultats
+        python <<EOF
+        import re
+        with open('test-output.txt') as f:
+            output = f.read()
+        
+        # Recherche le nombre de tests réussis/échus
+        match = re.search(r'(\d+) passed(?:, (\d+) failed)?', output)
+        if match:
+            passed = int(match.group(1))
+            failed = int(match.group(2)) if match.group(2) else 0
+            total = passed + failed
+            percent = (passed / total) * 100 if total > 0 else 0
+            print(f"Percentage: {percent:.2f}%")
+            with open(env.GITHUB_OUTPUT, 'a') as f:
+                f.write(f"percentage={percent:.2f}\n")
+        else:
+            print("No test results found")
+            exit(1)
+        EOF
+
+  trigger-fly-deploy:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    if: ${{ needs.run-tests.outputs.success-percent >= 40.00 }}
+    permissions:
+      contents: read
+      actions: read/write
+    steps:
+      - name: Trigger Fly Deploy workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.actions.createWorkflowDispatch({
+              owner: github.repository_owner,
+              repo: github.repository,
+              workflow_id: "fly-deploy-dev.yml",
+              ref: "main",
+              inputs: {}
+            })
