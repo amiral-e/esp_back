@@ -101,7 +101,6 @@ documents_get.get(
 		const user = c.get("user");
 		const { collection_name } = c.req.param();
 		const collection_id = user.uid + "_" + collection_name;
-		console.log(collection_id);
 
 		const documents = await config.supabaseClient
 			.from("llamaindex_embedding")

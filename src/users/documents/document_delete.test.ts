@@ -6,26 +6,21 @@ import {
 	beforeAll,
 	afterAll,
 } from "bun:test";
-import documents_get from "./documents_get.ts";
-
+import document_delete from "./document_delete.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { createCollection, deleteCollection } from "../collections/utils.ts";
 
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
-let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var collectionName = `test_collec`;
+const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
+const collectionName = `test_collec`;
+var docId = "";
 
-afterAll(async () => {
-	// Nettoyer la collection de test
-	await deleteCollection(userId + '_' + collectionName);
-});
-
-describe("GET /users/documents (unauthorized)", () => {
+describe("DELETE /users/documents/:collection_name/documents/:document_id (unauthorized)", () => {
 	it("missing authorization header", async () => {
-		const res = await documents_get.request(`/test_collec/documents`, {
-			method: "GET",
+		const res = await document_delete.request(`/${collectionName}/documents/2`, {
+			method: "DELETE",
 		});
 		expect(await res.json()).toEqual({
 			error: "No authorization header found",
@@ -34,8 +29,8 @@ describe("GET /users/documents (unauthorized)", () => {
 	});
 
 	it("invalid authorization header", async () => {
-		const res = await documents_get.request(`/test_collec/documents`, {
-			method: "GET",
+		const res = await document_delete.request(`/${collectionName}/documents/2`, {
+			method: "DELETE",
 			headers: { Authorization: `Bearer wrong-header` },
 		});
 		expect(await res.json()).toEqual({
@@ -45,8 +40,8 @@ describe("GET /users/documents (unauthorized)", () => {
 	});
 
 	it("non-user authorization header", async () => {
-		const res = await documents_get.request(`/test_collec/documents`, {
-			method: "GET",
+		const res = await document_delete.request(`/${collectionName}/documents/2`, {
+			method: "DELETE",
 			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
@@ -56,29 +51,30 @@ describe("GET /users/documents (unauthorized)", () => {
 	});
 });
 
-describe("GET /users/documents (authorized)", () => {
-	it("should return 404 when no documents found", async () => {
-		const res = await documents_get.request(`/nonexistent_collection/documents`, {
-			method: "GET",
+describe("DELETE /users/documents/:collection_name/documents/:document_id (authorized)", () => {
+	it("should return 404 when document not found", async () => {
+		const res = await document_delete.request(`/${collectionName}/documents/nonexistent-doc`, {
+			method: "DELETE",
 			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
-
 		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
-			error: "Collection not found",
+			error: "Document not found",
 		});
 	});
 
-	it("should return documents for user", async () => {
-		await createCollection(userId, userId + '_' + collectionName);
+	it("should delete a document", async () => {
+		// Create a test document
+        docId = await createCollection(userId, userId + '_' + collectionName);
 
-		const res = await documents_get.request(`/test_collec/documents`, {
-			method: "GET",
+		const res = await document_delete.request(`/${collectionName}/documents/${docId}`, {
+			method: "DELETE",
 			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
+		
 		expect(res.status).toBe(200);
-		const body = await res.json();
-		expect(body).toHaveProperty("documents");
-		expect(body.documents).toBeInstanceOf(Array);
+		expect(await res.json()).toEqual({
+			message: "Document deleted successfully",
+		});
 	});
 });

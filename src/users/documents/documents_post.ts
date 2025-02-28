@@ -124,7 +124,6 @@ documents_post.post(
 				if (file.size > MAX_FILE_SIZE) {
 					return c.json({ error: "File size exceeds limit" }, 400);
 				}
-				console.log(file.type);
 				if (!ALLOWED_FILE_TYPES.includes(file.type)) {
 					return c.json({ error: "File type not allowed" }, 400);
 				}
