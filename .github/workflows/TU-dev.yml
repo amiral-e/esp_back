@@ -5,8 +5,6 @@ on: [push, pull_request]
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    outputs:
-      success-percent: ${{ steps.test-results.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
     
@@ -18,31 +16,13 @@ jobs:
     - name: Install dependencies
       run: bun install
 
-    - name: Run tests with JSON output
-      id: test-results
-      run: |
-        # Génère un rapport JSON des tests
-        bun run test --json > test-results.json
-        
-        # Analyse avec jq (installé par défaut sur les runners Ubuntu)
-        passed=$(jq '.passed' test-results.json | awk '{ sum += $1 } END { print sum }')
-        failed=$(jq '.failed' test-results.json | awk '{ sum += $1 } END { print sum }')
-        total=$((passed + failed))
-        
-        # Calcul du pourcentage
-        if [ $total -gt 0 ]; then
-          percent=$(( (passed * 100) / total ))
-        else
-          percent=0
-        fi
-        
-        echo "percentage=$percent" >> $GITHUB_OUTPUT
-        echo "Passed: $passed, Failed: $failed, Percentage: $percent%"
+    - name: Run tests
+      run: bun test  # Échoue automatiquement si les tests échouent
 
   trigger-deploy:
     needs: run-tests
+    if: success()  # S'exécute seulement si run-tests réussit
     runs-on: ubuntu-latest
-    if: ${{ needs.run-tests.outputs.success-percent >= 40 }}
     steps:
       - uses: actions/github-script@v6
         with:
