@@ -11,11 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11.x
-
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
@@ -27,11 +22,12 @@ jobs:
     - name: Run tests and get results
       id: test-results
       run: |
-        bun test | tee test-output.txt
+        # Exécute les tests même en cas d'échec
+        bun run test || true | tee test-output.txt
         
         # Extraction des résultats avec valeurs par défaut
-        passed=$(grep -oE '(\d+) passed' test-output.txt | awk '{print $1}' || echo "0")
-        failed=$(grep -oE '(\d+) failed' test-output.txt | awk '{print $1}' || echo "0")
+        passed=$(grep -oP '\d+(?= passed)' test-output.txt | tail -1 || echo "0")
+        failed=$(grep -oP '\d+(?= failed)' test-output.txt | tail -1 || echo "0")
         
         # Validation des nombres
         if ! [[ "$passed" =~ ^[0-9]+$ ]]; then passed=0; fi
@@ -39,6 +35,10 @@ jobs:
         
         echo "passed=$passed" >> $GITHUB_OUTPUT
         echo "failed=$failed" >> $GITHUB_OUTPUT
+        
+        # Debug
+        echo "Tests passed: $passed"
+        echo "Tests failed: $failed"
 
   trigger-fly-deploy:
     needs: run-tests
@@ -50,22 +50,24 @@ jobs:
           PASSED: ${{ needs.run-tests.outputs.passed }}
           FAILED: ${{ needs.run-tests.outputs.failed }}
         run: |
-          total=$((PASSED + FAILED))
+          # Convertit en nombres
+          passed=${PASSED:-0}
+          failed=${FAILED:-0}
+          total=$((passed + failed))
           
           if [ $total -eq 0 ]; then
-            echo "::error::Aucun test exécuté!"
-            exit 1
-          fi
-          
-          # Calcul avec bc pour les décimales
-          percent=$(echo "scale=2; $PASSED / $total * 100" | bc)
-          echo "Percentage: $percent%"
-          
-          # Comparaison numérique (40% ici)
-          if (( $(echo "$percent >= 40" | bc -l) )); then
-            echo "success=true" >> $GITHUB_OUTPUT
-          else
+            echo "::warning::Aucun test détecté - vérifiez la sortie des tests"
             echo "success=false" >> $GITHUB_OUTPUT
+            exit 0  # Continue le workflow sans échouer
+          else
+            percent=$(( (passed * 100) / total ))
+            echo "Success percentage: $percent%"
+            
+            if [ $percent -ge 40 ]; then
+              echo "success=true" >> $GITHUB_OUTPUT
+            else
+              echo "success=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Trigger Fly Deploy workflow
