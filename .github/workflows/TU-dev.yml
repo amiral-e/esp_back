@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.test-results.outputs.passed }}
+      failed: ${{ steps.test-results.outputs.failed }}
     steps:
     - uses: actions/checkout@v4
     
@@ -22,11 +25,17 @@ jobs:
       run: bun install
 
     - name: Run tests and get results
+      id: test-results
       run: |
-        bun run test | tee test-output.txt
-        # Extract test results from bun test output
-        passed=$(grep -oE '(\d+) passed' test-output.txt | awk -F ' ' '{print $1}')
-        failed=$(grep -oE '(\d+) failed' test-output.txt | awk -F ' ' '{print $1}')
+        bun test | tee test-output.txt
+        
+        # Extraction des résultats avec valeurs par défaut
+        passed=$(grep -oE '(\d+) passed' test-output.txt | awk '{print $1}' || echo "0")
+        failed=$(grep -oE '(\d+) failed' test-output.txt | awk '{print $1}' || echo "0")
+        
+        # Validation des nombres
+        if ! [[ "$passed" =~ ^[0-9]+$ ]]; then passed=0; fi
+        if ! [[ "$failed" =~ ^[0-9]+$ ]]; then failed=0; fi
         
         echo "passed=$passed" >> $GITHUB_OUTPUT
         echo "failed=$failed" >> $GITHUB_OUTPUT
@@ -37,8 +46,23 @@ jobs:
     steps:
       - name: Check test results
         id: check-results
+        env:
+          PASSED: ${{ needs.run-tests.outputs.passed }}
+          FAILED: ${{ needs.run-tests.outputs.failed }}
         run: |
-          if (( $((${needs.run-tests.outputs.passed} * 100 / (${needs.run-tests.outputs.passed} + ${needs.run-tests.outputs.failed}))) >= 40 )); then
+          total=$((PASSED + FAILED))
+          
+          if [ $total -eq 0 ]; then
+            echo "::error::Aucun test exécuté!"
+            exit 1
+          fi
+          
+          # Calcul avec bc pour les décimales
+          percent=$(echo "scale=2; $PASSED / $total * 100" | bc)
+          echo "Percentage: $percent%"
+          
+          # Comparaison numérique (40% ici)
+          if (( $(echo "$percent >= 40" | bc -l) )); then
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
@@ -50,10 +74,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.actions.createWorkflowDispatch({
-              owner: github.repository_owner,
-              repo: github.repository,
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               workflow_id: "fly-deploy-dev.yml",
-              ref: "main",
+              ref: "${{ github.ref }}",
               inputs: {}
             })
