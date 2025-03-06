@@ -3,11 +3,13 @@ name: Tests and Deployment
 on: [push, pull_request]
 
 jobs:
-  run-tests:
+  unit-tests:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
@@ -17,20 +19,22 @@ jobs:
       run: bun install
 
     - name: Run tests
-      run: bun test  # Échoue automatiquement si les tests échouent
+      run: bun run test
 
-  trigger-deploy:
-    needs: run-tests
-    if: success()  # S'exécute seulement si run-tests réussit
+  deploy:
+    name: Trigger Deployment
+    needs: unit-tests
+    if: success()  # S'exécute SEULEMENT si tous les tests réussissent
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - name: Trigger deployment workflow
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "fly-deploy-dev.yml",
-              ref: "${{ github.ref }}"
+              workflow_id: 'deploy.yml',
+              ref: '${{ github.ref }}'
             })
