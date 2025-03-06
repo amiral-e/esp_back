@@ -5,8 +5,6 @@ on: [push, pull_request]
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    outputs:
-      success-percent: ${{ steps.calculate-success.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
     
@@ -23,52 +21,30 @@ jobs:
     - name: Install dependencies
       run: bun install
 
-    - name: Run tests and save output
-      run: bun test | tee test-output.txt
-
-    - name: Verify test output
+    - name: Run tests and get results
       run: |
-        ls -la test-output.txt
-        cat test-output.txt
-
-    - name: Calculate success percentage
-      id: calculate-success
-      run: |
-        python <<EOF
-        import re
-        with open('test-output.txt') as f:
-            output = f.read()
+        bun run test | tee test-output.txt
+        # Extract test results from bun test output
+        passed=$(grep -oE '(\d+) passed' test-output.txt | awk -F ' ' '{print $1}')
+        failed=$(grep -oE '(\d+) failed' test-output.txt | awk -F ' ' '{print $1}')
         
-        print(f"Output content: {output}")  # Debug: Affiche le contenu du fichier
-        
-        match = re.search(r'(\d+) passed(?:, (\d+) failed)?', output)
-        if match:
-            passed = int(match.group(1))
-            failed = int(match.group(2)) if match.group(2) else 0
-            total = passed + failed
-            if total > 0:
-                percent = (passed / total) * 100
-                print(f"Percentage: {percent:.2f}%")
-                with open(env.GITHUB_OUTPUT, 'a') as f:
-                    f.write(f"percentage={percent:.2f}\n")
-            else:
-                print("No tests were executed")
-                exit(1)
-        else:
-            print("No test results found. Check the output format.")
-            print(f"Expected format: 'X passed, Y failed'")
-            exit(1)
-        EOF
+        echo "passed=$passed" >> $GITHUB_OUTPUT
+        echo "failed=$failed" >> $GITHUB_OUTPUT
 
   trigger-fly-deploy:
     needs: run-tests
     runs-on: ubuntu-latest
-    if: ${{ needs.run-tests.outputs.success-percent >= 40.00 }}
-    permissions:
-      contents: read
-      actions: read
     steps:
+      - name: Check test results
+        id: check-results
+        run: |
+          if (( $((${needs.run-tests.outputs.passed} * 100 / (${needs.run-tests.outputs.passed} + ${needs.run-tests.outputs.failed}))) >= 40 )); then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+
       - name: Trigger Fly Deploy workflow
+        if: steps.check-results.outputs.success == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
