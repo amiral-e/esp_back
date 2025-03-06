@@ -1,4 +1,4 @@
-name: Tests and Conditional Workflow
+name: Tests and Deployment
 
 on: [push, pull_request]
 
@@ -6,8 +6,7 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     outputs:
-      passed: ${{ steps.test-results.outputs.passed }}
-      failed: ${{ steps.test-results.outputs.failed }}
+      success-percent: ${{ steps.test-results.outputs.percentage }}
     steps:
     - uses: actions/checkout@v4
     
@@ -19,63 +18,33 @@ jobs:
     - name: Install dependencies
       run: bun install
 
-    - name: Run tests and get results
+    - name: Run tests with JSON output
       id: test-results
       run: |
-        # Capture la sortie même en cas d'échec
-        bun run test 2>&1 | tee test-output.txt || true
+        # Génère un rapport JSON des tests
+        bun run test --json > test-results.json
         
-        # Extraction des résultats avec regex améliorée
-        passed=$(grep -oE '[0-9]+ passed' test-output.txt | grep -oE '[0-9]+' || echo "0")
-        failed=$(grep -oE '[0-9]+ failed' test-output.txt | grep -oE '[0-9]+' || echo "0")
-
-        # Validation finale
-        [ -z "$passed" ] && passed=0
-        [ -z "$failed" ] && failed=0
+        # Analyse avec jq (installé par défaut sur les runners Ubuntu)
+        passed=$(jq '.passed' test-results.json | awk '{ sum += $1 } END { print sum }')
+        failed=$(jq '.failed' test-results.json | awk '{ sum += $1 } END { print sum }')
+        total=$((passed + failed))
         
-        echo "passed=$passed" >> $GITHUB_OUTPUT
-        echo "failed=$failed" >> $GITHUB_OUTPUT
+        # Calcul du pourcentage
+        if [ $total -gt 0 ]; then
+          percent=$(( (passed * 100) / total ))
+        else
+          percent=0
+        fi
+        
+        echo "percentage=$percent" >> $GITHUB_OUTPUT
+        echo "Passed: $passed, Failed: $failed, Percentage: $percent%"
 
-        # Debug
-        echo "Raw test output:"
-        cat test-output.txt
-        echo "Parsed values - Passed: $passed, Failed: $failed"
-
-  trigger-fly-deploy:
+  trigger-deploy:
     needs: run-tests
     runs-on: ubuntu-latest
+    if: ${{ needs.run-tests.outputs.success-percent >= 40 }}
     steps:
-      - name: Check test results
-        id: check-results
-        env:
-          PASSED: ${{ needs.run-tests.outputs.passed }}
-          FAILED: ${{ needs.run-tests.outputs.failed }}
-        run: |
-          # Conversion en nombres avec valeurs par défaut
-          passed=${PASSED:-0}
-          failed=${FAILED:-0}
-          total=$((passed + failed))
-          
-          if [ $total -eq 0 ]; then
-            echo "::warning::Aucun test détecté - Vérifiez:"
-            echo "1. Que les tests existent bien"
-            echo "2. Que la sortie des tests contient 'passed'/'failed'"
-            echo "3. Le format de sortie de 'bun test'"
-            echo "success=false" >> $GITHUB_OUTPUT
-          else
-            percent=$(( (passed * 100) / total ))
-            echo "Percentage: $percent% (${passed}/${total})"
-            
-            if [ $percent -ge 40 ]; then
-              echo "success=true" >> $GITHUB_OUTPUT
-            else
-              echo "success=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-      - name: Trigger Fly Deploy workflow
-        if: steps.check-results.outputs.success == 'true'
-        uses: actions/github-script@v6
+      - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -83,6 +52,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: "fly-deploy-dev.yml",
-              ref: "${{ github.ref }}",
-              inputs: {}
+              ref: "${{ github.ref }}"
             })
