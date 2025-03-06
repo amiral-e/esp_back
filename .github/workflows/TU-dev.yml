@@ -42,6 +42,7 @@ jobs:
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Trigger Fly Deploy workflow
         if: steps.check-results.outputs.success == 'true'
