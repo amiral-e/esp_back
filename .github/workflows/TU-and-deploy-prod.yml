@@ -3,10 +3,7 @@ name: Tests and Production Deployment
 on:
   push:
     branches:
-      - esp-278-cicd-backend
-  pull_request:
-    branches:
-      - esp-278-cicd-backend
+      - prod
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -44,7 +41,7 @@ jobs:
     needs: unit-tests
     if: needs.unit-tests.result == 'success'
     runs-on: ubuntu-latest
-    concurrency: deploy-group
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
