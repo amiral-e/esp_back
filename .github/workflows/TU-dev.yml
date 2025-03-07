@@ -36,6 +36,7 @@ jobs:
   deploy:
     name: Trigger Deployment
     needs: unit-tests
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deployment workflow
