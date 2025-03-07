@@ -24,7 +24,6 @@ jobs:
   deploy:
     name: Trigger Deployment
     needs: unit-tests
-    if: success()  # S'exécute SEULEMENT si tous les tests réussissent
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deployment workflow
