@@ -10,8 +10,8 @@ levels_get.get(
     describeRoute({
         summary: "Get Knowledges Levels",
         description:
-            "Retrieve knowledges levels from the database. Admin privileges are required.",
-        tags: ["admins-config"],
+            "Retrieve knowledges levels from the database. Auth is required.",
+        tags: ["users-config"],
         responses: {
             200: {
                 description: "Success",
@@ -99,18 +99,16 @@ levels_get.get(
     AuthMiddleware,
     async (c: any) => {
         const user = c.get("user");
-        if (!user.admin)
-            return c.json({ error: "Forbidden" }, 403);
 
         const levels = await config.supabaseClient
             .from("knowledges")
-            .select("id, level");
+            .select("level");
         if (levels.data == undefined || levels.data.length == 0)
             return c.json({ error: "No level found" }, 404);
         else if (levels.error != undefined)
             return c.json({ error: levels.error.message }, 500);
 
-        return c.json({ levels: levels.data }, 200);
+        return c.json({ levels: levels.data.map((l: any) => l.level) }, 200);
     },
 );
 

@@ -25,6 +25,8 @@ import forum from "./users/forum/index.ts";
 import profile_get from "./users/profile/profile_get.ts";
 import level_put from "./users/profile/level_put.ts";
 
+import levels_get from "./users/config/levels_get.ts";
+
 const app = new Hono();
 
 app.get("/", (c) => {
@@ -59,6 +61,8 @@ app.route("/forum", forum);
 
 app.route("/profile", profile_get);
 app.route("/profile/level", level_put);
+
+app.route("/config/levels", levels_get);
 
 app.get(
 	"/openapi",
