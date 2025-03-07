@@ -38,6 +38,8 @@ jobs:
     needs: unit-tests
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Trigger deployment workflow
         uses: actions/github-script@v6
