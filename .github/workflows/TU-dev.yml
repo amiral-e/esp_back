@@ -2,6 +2,18 @@ name: Tests and Deployment
 
 on: [push, pull_request]
 
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  ADMIN_ID: ${{ secrets.ADMIN_ID }}
+  DUMMY_ID: ${{ secrets.DUMMY_ID }}
+  DUMMY2_ID: ${{ secrets.DUMMY2_ID }}
+  WRONG_ID: ${{ secrets.WRONG_ID }}
+
 jobs:
   unit-tests:
     name: Run Unit Tests
@@ -37,6 +49,3 @@ jobs:
               workflow_id: 'deploy.yml',
               ref: '${{ github.ref }}'
             })
-
-
-            
