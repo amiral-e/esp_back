@@ -1,6 +1,12 @@
 name: Tests and Deployment
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - esp-278-cicd-backend
+  pull_request:
+    branches:
+      - esp-278-cicd-backend
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
