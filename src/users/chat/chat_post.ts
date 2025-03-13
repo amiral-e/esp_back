@@ -180,6 +180,13 @@ chat_post.post(
 			.eq("id", conversation.data.id);
 		if (update.error) return c.json({ error: update.error.message }, 500);
 
+		const increment_total_messages = await config.supabaseClient.rpc(
+			"increment_total_messages",
+			{ p_user_id: user.id },
+		);
+		if (increment_total_messages.error != undefined)
+			return c.json({ error: increment_total_messages.error.message }, 500);
+
 		return c.json(
 			{ role: "assistant", content: response.message.content },
 			200,

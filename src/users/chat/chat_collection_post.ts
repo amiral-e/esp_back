@@ -260,6 +260,12 @@ chat_collection_post.post(
 			if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
 				console.log("Hit rate limit. Consider implementing retry logic.");
 		}
+		const increment_total_messages = await config.supabaseClient.rpc(
+			"increment_total_messages",
+			{ p_user_id: user.id },
+		);
+		if (increment_total_messages.error != undefined)
+			return c.json({ error: increment_total_messages.error.message }, 500);
 
 		let sources_details = [];
 		for (const doc of docs) {
