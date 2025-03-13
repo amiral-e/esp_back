@@ -70,22 +70,6 @@ users_get.get(
 					},
 				},
 			},
-			404: {
-				description: "Not found",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "No user found",
-								},
-							},
-						},
-					},
-				},
-			},
 			500: {
 				description: "Internal server error",
 				content: {
@@ -112,7 +96,6 @@ users_get.get(
 		const users = await config.supabaseClient.rpc("get_users");
 		if (users.error != undefined)
 			return c.json({ error: users.error.message }, 500);
-		if (!users.data) return c.json({ error: "No user found" }, 404);
 		return c.json({ users: users.data }, 200);
 	},
 );

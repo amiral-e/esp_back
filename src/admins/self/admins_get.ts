@@ -70,22 +70,6 @@ admins_get.get(
 					},
 				},
 			},
-			404: {
-				description: "Not found",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "No admin found",
-								},
-							},
-						},
-					},
-				},
-			},
 			500: {
 				description: "Internal server error",
 				content: {
@@ -110,9 +94,7 @@ admins_get.get(
 		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const admins = await config.supabaseClient.from("admins").select("uid");
-		if (admins.data == undefined || admins.data.length == 0)
-			return c.json({ error: "No admin found" }, 404);
-		else if (admins.error != undefined)
+		if (admins.error != undefined)
 			return c.json({ error: admins.error.message }, 500);
 
 		for (let i = 0; i < admins.data.length; i++) {
