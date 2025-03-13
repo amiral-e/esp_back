@@ -3,6 +3,7 @@ import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
+import { decrease_credits } from "../profile/utils.ts";
 
 import {
 	Document,
@@ -117,6 +118,7 @@ documents_post.post(
 		}
 
 		const docs: Document[] = [];
+		let tokens = 0;
 		for (const key in json) {
 			const file = json[key];
 			if (file instanceof File) {
@@ -127,6 +129,7 @@ documents_post.post(
 					return c.json({ error: "File type not allowed" }, 400);
 				}
 				const fileContents = await file.text();
+				tokens += fileContents.length;
 				docs.push(
 					new Document({
 						text: fileContents,
@@ -151,12 +154,16 @@ documents_post.post(
 			storageContext: ctx,
 		});
 
-		const increment_total_docs = await config.supabaseClient.rpc(
+		const increment_total_docs = await config.supabaseClient.schema("public").rpc(
 			"increment_total_docs",
-			{ p_user_id: user.id, p_docs_to_add: docs.length },
+			{ p_user_id: user.uid, p_docs_to_add: docs.length },
 		);
 		if (increment_total_docs.error != undefined)
 			return c.json({ error: increment_total_docs.error.message }, 500);
+
+		const credits = await decrease_credits(tokens, user.uid, 1);
+		if (credits != "Success")
+			return c.json({ error: credits }, 500);
 
 		return c.json(
 			{

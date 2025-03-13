@@ -4,6 +4,8 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
+import { decrease_credits } from "../profile/utils.ts";
+
 const chat_post = new Hono();
 
 chat_post.post(
@@ -137,8 +139,9 @@ chat_post.post(
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
-		const { conv_id } = c.req.param();
+		const input_tokens = json.message.length;
 
+		const { conv_id } = c.req.param();
 		const conversation = await config.supabaseClient
 			.from("conversations")
 			.select("*")
@@ -182,10 +185,18 @@ chat_post.post(
 
 		const increment_total_messages = await config.supabaseClient.rpc(
 			"increment_total_messages",
-			{ p_user_id: user.id },
+			{ p_user_id: user.uid },
 		);
 		if (increment_total_messages.error != undefined)
 			return c.json({ error: increment_total_messages.error.message }, 500);
+
+		const input_results = await decrease_credits(input_tokens, user.uid, 2);
+		if (input_results != "Success")
+			return c.json({ error: input_results }, 500);
+
+		const output_results = await decrease_credits(response.message.content.length, user.uid, 3);
+		if (output_results != "Success")
+			return c.json({ error: output_results }, 500);
 
 		return c.json(
 			{ role: "assistant", content: response.message.content },
