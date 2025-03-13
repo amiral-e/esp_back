@@ -2,6 +2,8 @@ import { Hono } from "hono";
 
 import admin_delete from "./self/admin_delete.ts";
 import admin_insert from "./self/admin_insert.ts";
+import admins_get from "./self/admins_get.ts";
+import users_get from "./users/users_get.ts";
 
 import collection_delete from "./collections/collection_delete.ts";
 import collections_get from "./collections/collections_get.ts";
@@ -22,10 +24,16 @@ import credits_put from "./profile/credits_put.ts";
 import profile_get from "./profile/profile_get.ts";
 import level_put from "./profile/level_put.ts";
 
+import settings_get from "./config/prices_get.ts";
+import setting_put from "./config/price_put.ts";
+
 const admin = new Hono();
 
 admin.route("/", admin_delete);
 admin.route("/", admin_insert);
+admin.route("/", admins_get);
+
+admin.route("/users", users_get);
 
 admin.route("/collections", collection_delete);
 admin.route("/collections", collections_get);
@@ -45,5 +53,8 @@ admin.route("/users", credits_post);
 admin.route("/users", credits_put);
 admin.route("/users", profile_get);
 admin.route("/users", level_put);
+
+admin.route("/config", settings_get);
+admin.route("/config", setting_put);
 
 export default admin;
