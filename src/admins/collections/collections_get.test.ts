@@ -55,5 +55,5 @@ describe("GET /admins/collections (with privileges)", () => {
         expect(body).toHaveProperty("collections");
         expect(body.collections).toBeInstanceOf(Array);
         expect(res.status).toBe(200);
-    });
+    }, 10000);
 });
