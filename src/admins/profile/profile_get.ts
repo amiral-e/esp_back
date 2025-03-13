@@ -10,8 +10,7 @@ profile_get.get(
 	"/:user_id/profile",
 	describeRoute({
 		summary: "Get profile",
-		description:
-			"Retrieve a user's profile. Admin privileges are required.",
+		description: "Retrieve a user's profile. Admin privileges are required.",
 		tags: ["admins-users-profile"],
 		requestBody: {
 			required: false,
@@ -42,8 +41,7 @@ profile_get.get(
 								},
 								created_at: {
 									type: "string",
-									description:
-										"The date and time the user profile was created",
+									description: "The date and time the user profile was created",
 									default: "2023-01-01T00:00:00.000Z",
 								},
 							},
@@ -105,8 +103,7 @@ profile_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { user_id } = await c.req.param();
 

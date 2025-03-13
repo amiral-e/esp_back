@@ -10,8 +10,7 @@ credits_put.put(
 	"/:user_id/grant",
 	describeRoute({
 		summary: "Update Credits",
-		description:
-			"Update credits of a user. Admin privileges are required.",
+		description: "Update credits of a user. Admin privileges are required.",
 		tags: ["admins-users-profile"],
 		requestBody: {
 			required: true,
@@ -122,8 +121,7 @@ credits_put.put(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { user_id } = await c.req.param();
 

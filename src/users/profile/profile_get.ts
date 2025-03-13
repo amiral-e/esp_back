@@ -9,13 +9,8 @@ const profile_get = new Hono();
 profile_get.get(
 	describeRoute({
 		summary: "Get profile",
-		description:
-			"Retrieves user's profile. Auth is required.",
+		description: "Retrieves user's profile. Auth is required.",
 		tags: ["users-profile"],
-		requestBody: {
-			required: false,
-			content: {},
-		},
 		responses: {
 			200: {
 				description: "Success",
@@ -41,8 +36,7 @@ profile_get.get(
 								},
 								created_at: {
 									type: "string",
-									description:
-										"The date and time the user profile was created",
+									description: "The date and time the user profile was created",
 									default: "2023-01-01T00:00:00.000Z",
 								},
 							},
