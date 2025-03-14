@@ -221,7 +221,6 @@ chat_collection_post.post(
 
 		const knowledge_prompt = await get_knowledge_prompt(user.uid);
 
-		conversation.data.history.unshift({ role: "system", content: knowledge_prompt });
 		const res = await add_context_to_query(
 			conversation.data.history,
 			json.message,
@@ -255,7 +254,7 @@ chat_collection_post.post(
 		let response: any;
 		try {
 			response = await config.llm.chat({
-				messages: [{ role: "user", content: get_context_prompt(texts, res) }],
+				messages: [{ role: "system", content: knowledge_prompt }, { role: "user", content: get_context_prompt(texts, res) }],
 			});
 		} catch (error: any) {
 			console.error(
