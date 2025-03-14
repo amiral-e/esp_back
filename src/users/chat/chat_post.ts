@@ -5,6 +5,7 @@ import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
 import { decrease_credits } from "../profile/utils.ts";
+import { get_knowledge_prompt } from "./utils.ts";
 
 const chat_post = new Hono();
 
@@ -153,7 +154,10 @@ chat_post.post(
 		else if (conversation.error)
 			return c.json({ error: conversation.error.message }, 500);
 
+		const knowledge_prompt = await get_knowledge_prompt(user.uid);
+
 		var history = [];
+		history.push({ role: "system", content: knowledge_prompt });
 		if (conversation.data.history != undefined)
 			history.push(...conversation.data.history);
 		history.push({ role: "user", content: json.message });
@@ -177,6 +181,7 @@ chat_post.post(
 
 		history.push({ role: "assistant", content: response.message.content });
 
+		history = history.slice(1);
 		const update = await config.supabaseClient
 			.from("conversations")
 			.update({ history: history })
