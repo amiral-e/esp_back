@@ -161,7 +161,7 @@ documents_post.post(
 		if (increment_total_docs.error != undefined)
 			return c.json({ error: increment_total_docs.error.message }, 500);
 
-		const credits = await decrease_credits(tokens, user.uid, 1);
+		const credits = await decrease_credits(tokens, user.uid, "openai_embedding");
 		if (credits != "Success")
 			return c.json({ error: credits }, 500);
 

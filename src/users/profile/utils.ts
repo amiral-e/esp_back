@@ -1,10 +1,10 @@
 import config from "../../config.ts";
 
-async function decrease_credits(tokens: number, id: string, type: number) {
+async function decrease_credits(tokens: number, id: string, type: string) {
     const { data: price, error: price_error } = await config.supabaseClient
         .from("prices")
         .select("*")
-        .eq("id", type)
+        .eq("price", type)
         .single();
 
     if (price_error != undefined) return "Error while getting price";

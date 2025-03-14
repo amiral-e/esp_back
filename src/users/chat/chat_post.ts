@@ -190,11 +190,11 @@ chat_post.post(
 		if (increment_total_messages.error != undefined)
 			return c.json({ error: increment_total_messages.error.message }, 500);
 
-		const input_results = await decrease_credits(input_tokens, user.uid, 2);
+		const input_results = await decrease_credits(input_tokens, user.uid, "groq_input");
 		if (input_results != "Success")
 			return c.json({ error: input_results }, 500);
 
-		const output_results = await decrease_credits(response.message.content.length, user.uid, 3);
+		const output_results = await decrease_credits(response.message.content.length, user.uid, "groq_output");
 		if (output_results != "Success")
 			return c.json({ error: output_results }, 500);
 

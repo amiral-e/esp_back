@@ -248,6 +248,7 @@ chat_collection_post.post(
 				texts += source.node.text + "\n\n";
 			}
 		}
+		const query_tokens = texts.length;
 
 		let response: any;
 		try {
@@ -262,6 +263,8 @@ chat_collection_post.post(
 			if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
 				console.log("Hit rate limit. Consider implementing retry logic.");
 		}
+		const output_tokens = response.message.content.length;
+
 		const increment_total_messages = await config.supabaseClient.rpc(
 			"increment_total_messages",
 			{ p_user_id: user.uid },
@@ -269,13 +272,17 @@ chat_collection_post.post(
 		if (increment_total_messages.error != undefined)
 			return c.json({ error: increment_total_messages.error.message }, 500);
 
-		const input_result = await decrease_credits(input_tokens, user.uid, 2);
+		const input_result = await decrease_credits(input_tokens, user.uid, "groq_input");
 		if (input_result != "Success")
 			return c.json({ error: input_result }, 500);
 
-		const output_result = await decrease_credits(response.message.content.length, user.uid, 3);
+		const output_result = await decrease_credits(output_tokens, user.uid, "groq_output");
 		if (output_result != "Success")
 			return c.json({ error: output_result }, 500);
+
+		const query_result = await decrease_credits(query_tokens, user.uid, "search");
+		if (query_result != "Success")
+			return c.json({ error: query_result }, 500);
 
 		let sources_details = [];
 		for (const doc of docs) {
