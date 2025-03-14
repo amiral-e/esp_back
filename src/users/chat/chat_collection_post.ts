@@ -248,7 +248,6 @@ chat_collection_post.post(
 				texts += source.node.text + "\n\n";
 			}
 		}
-		const query_tokens = texts.length;
 
 		let response: any;
 		try {
