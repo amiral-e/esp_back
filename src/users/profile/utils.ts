@@ -9,7 +9,9 @@ async function decrease_credits(tokens: number, id: string, type: string) {
 
     if (price_error != undefined) return "Error while getting price";
 
-    let usage = tokens * price.value / 10000;
+    let usage = 0;
+    if (type == "search") usage = price.value;
+    else usage = tokens * price.value / 10000;
 
     const { data: credits, error: credits_error } = await config.supabaseClient
         .from("profiles")

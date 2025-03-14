@@ -280,7 +280,7 @@ chat_collection_post.post(
 		if (output_result != "Success")
 			return c.json({ error: output_result }, 500);
 
-		const query_result = await decrease_credits(query_tokens, user.uid, "search");
+		const query_result = await decrease_credits(1, user.uid, "search");
 		if (query_result != "Success")
 			return c.json({ error: query_result }, 500);
 
