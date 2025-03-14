@@ -7,9 +7,7 @@ import {
 	beforeEach,
 } from "bun:test";
 import announcements_get from "./announcements_get.ts";
-import envVars from "../../../config.ts";
 import config from "../../../config.ts";
-import { insertAdmin, deleteAdmin } from "../../../admins/utils.ts";
 
 let testAnnouncementId: number;
 
@@ -36,7 +34,7 @@ describe("GET /announcements", () => {
 		});
 		expect(res.status).toBe(200);
 		const data = await res.json();
-		expect(Array.isArray(data)).toBe(true);
-		expect(data.some((a: any) => a.id === testAnnouncementId)).toBe(true);
+		expect(Array.isArray(data.announcements)).toBe(true);
+		expect(data.announcements[0].id == testAnnouncementId);
 	});
 });

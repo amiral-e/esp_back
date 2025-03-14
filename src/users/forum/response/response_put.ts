@@ -169,7 +169,6 @@ response_put.put(
 		const response = await config.supabaseClient
 			.from("responses")
 			.select("*")
-			.eq("user_id", user.uid)
 			.eq("id", id)
 			.single();
 
@@ -177,6 +176,9 @@ response_put.put(
 			return c.json({ error: "Response not found" }, 404);
 		else if (response.error != undefined)
 			return c.json({ error: response.error.message }, 500);
+
+		if (user.uid != response.data.user_id)
+			return c.json({ error: "Forbidden" }, 403);
 
 		const update = await config.supabaseClient
 			.from("responses")
