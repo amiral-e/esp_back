@@ -9,7 +9,7 @@ import {
 import document_post from "./documents_post.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
-import { createGlobalCollection, deleteGlobalCollection } from "../collections/utils.ts";
+import { deleteGlobalCollection } from "../collections/utils.ts";
 
 const adminPayload = await generatePayload(config.envVars.ADMIN_ID);
 const dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
@@ -20,7 +20,7 @@ afterAll(async () => {
     await deleteGlobalCollection(config.envVars.ADMIN_ID, "global_test_collec");
 });
 
-describe("POST /users/documents/:collection_name/documents (unauthorized)", () => {
+describe("POST /admins/documents/:collection_name/documents (unauthorized)", () => {
     it("missing authorization header", async () => {
         const res = await document_post.request(`/${collectionName}/documents`, {
             method: "POST",
@@ -69,7 +69,7 @@ describe("POST /users/documents/:collection_name/documents (unauthorized)", () =
     });
 });
 
-describe("POST /users/documents/:collection_name/documents (authorized)", () => {
+describe("POST /admins/documents/:collection_name/documents (authorized)", () => {
     it("should return success when ingesting documents", async () => {
 
         const file = new File(["test content"], "test.md", {

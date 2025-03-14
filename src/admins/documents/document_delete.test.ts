@@ -17,7 +17,7 @@ const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 const collectionName = `test_collec`;
 var docId = "";
 
-describe("DELETE /users/documents/:collection_name/documents/:document_id (unauthorized)", () => {
+describe("DELETE /admins/documents/:collection_name/documents/:document_id (unauthorized)", () => {
 	it("missing authorization header", async () => {
 		const res = await document_delete.request(`/${collectionName}/documents/2`, {
 			method: "DELETE",
@@ -51,7 +51,7 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (unaut
 	});
 });
 
-describe("DELETE /users/documents/:collection_name/documents/:document_id (authorized)", () => {
+describe("DELETE /admins/documents/:collection_name/documents/:document_id (authorized)", () => {
 	it("should return 404 when document not found", async () => {
 		const res = await document_delete.request(`/${collectionName}/documents/nonexistent-doc`, {
 			method: "DELETE",

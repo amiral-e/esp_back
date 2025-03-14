@@ -21,7 +21,7 @@ afterAll(async () => {
 	await deleteGlobalCollection(config.envVars.ADMIN_ID, "global_test_collec");
 });
 
-describe("GET /users/documents (unauthorized)", () => {
+describe("GET /admins/documents (unauthorized)", () => {
 	it("missing authorization header", async () => {
 		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",
@@ -55,7 +55,7 @@ describe("GET /users/documents (unauthorized)", () => {
 	});
 });
 
-describe("GET /users/documents (authorized)", () => {
+describe("GET /admins/documents (authorized)", () => {
 	it("should return 404 when no documents found", async () => {
 		const res = await documents_get.request(`/nonexistent_collection/documents`, {
 			method: "GET",
