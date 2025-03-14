@@ -4,14 +4,14 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const levels_get = new Hono();
+const prices_get = new Hono();
 
-levels_get.get(
+prices_get.get(
 	describeRoute({
-		summary: "Get Knowledges Levels",
+		summary: "Get Platform Prices",
 		description:
-			"Retrieve knowledges levels from the database. Auth is required.",
-		tags: ["users-config"],
+			"Retrieve platform prices from the database. Admin privileges are required.",
+		tags: ["admins-platform"],
 		responses: {
 			200: {
 				description: "Success",
@@ -20,24 +20,28 @@ levels_get.get(
 						schema: {
 							type: "object",
 							properties: {
-								levels: {
+								prices: {
 									type: "array",
 									items: {
 										type: "object",
 										properties: {
-											id: {
+											price: {
 												type: "string",
-												default: "123",
+												default: "price_groq_output",
 											},
-											level: {
+											description: {
 												type: "string",
+												default: "original price of x / 1M tokens",
+											},
+											value: {
+												type: "float",
 												default: "beginner",
 											},
 										},
 									},
 								},
 							},
-							required: ["levels"],
+							required: ["prices"],
 						},
 					},
 				},
@@ -62,6 +66,22 @@ levels_get.get(
 					},
 				},
 			},
+			403: {
+				description: "Forbidden",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Forbidden",
+								},
+							},
+						},
+					},
+				},
+			},
 			404: {
 				description: "Not found",
 				content: {
@@ -71,7 +91,7 @@ levels_get.get(
 							properties: {
 								error: {
 									type: "string",
-									default: "No level found",
+									default: "No price found",
 								},
 							},
 						},
@@ -99,17 +119,18 @@ levels_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const levels = await config.supabaseClient
-			.from("knowledges")
-			.select("level");
-		if (levels.data == undefined || levels.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
+		const prices = await config.supabaseClient
+			.from("prices")
+			.select("price, description, value");
+		if (prices.data == undefined || prices.data.length == 0)
+			return c.json({ error: "No price found" }, 404);
+		else if (prices.error != undefined)
+			return c.json({ error: prices.error.message }, 500);
 
-		return c.json({ levels: levels.data.map((l: any) => l.level) }, 200);
+		return c.json({ prices: prices.data }, 200);
 	},
 );
 
-export default levels_get;
+export default prices_get;

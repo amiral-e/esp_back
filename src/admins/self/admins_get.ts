@@ -4,14 +4,13 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const levels_get = new Hono();
+const admins_get = new Hono();
 
-levels_get.get(
+admins_get.get(
 	describeRoute({
-		summary: "Get Knowledges Levels",
-		description:
-			"Retrieve knowledges levels from the database. Auth is required.",
-		tags: ["users-config"],
+		summary: "Get Admins",
+		description: "Retrieve admins list. Admin privileges are required.",
+		tags: ["admins"],
 		responses: {
 			200: {
 				description: "Success",
@@ -20,24 +19,17 @@ levels_get.get(
 						schema: {
 							type: "object",
 							properties: {
-								levels: {
+								admins: {
 									type: "array",
 									items: {
 										type: "object",
 										properties: {
-											id: {
-												type: "string",
-												default: "123",
-											},
-											level: {
-												type: "string",
-												default: "beginner",
-											},
+											uid: { type: "string", format: "uuid" },
+											email: { type: "string" },
 										},
 									},
 								},
 							},
-							required: ["levels"],
 						},
 					},
 				},
@@ -62,8 +54,8 @@ levels_get.get(
 					},
 				},
 			},
-			404: {
-				description: "Not found",
+			403: {
+				description: "Forbidden",
 				content: {
 					"application/json": {
 						schema: {
@@ -71,7 +63,7 @@ levels_get.get(
 							properties: {
 								error: {
 									type: "string",
-									default: "No level found",
+									default: "Forbidden",
 								},
 							},
 						},
@@ -99,17 +91,22 @@ levels_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const levels = await config.supabaseClient
-			.from("knowledges")
-			.select("level");
-		if (levels.data == undefined || levels.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
+		const admins = await config.supabaseClient.from("admins").select("uid");
+		if (admins.error != undefined)
+			return c.json({ error: admins.error.message }, 500);
 
-		return c.json({ levels: levels.data.map((l: any) => l.level) }, 200);
+		for (let i = 0; i < admins.data.length; i++) {
+			const email = await config.supabaseClient.rpc("get_email", {
+				user_id: admins.data[i].uid,
+			});
+			if (email.error != undefined)
+				return c.json({ error: email.error.message }, 500);
+			admins.data[i].email = email.data;
+		}
+		return c.json({ admins: admins.data }, 200);
 	},
 );
 
-export default levels_get;
+export default admins_get;

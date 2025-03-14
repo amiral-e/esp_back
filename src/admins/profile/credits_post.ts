@@ -10,8 +10,7 @@ credits_post.post(
 	"/:user_id/grant",
 	describeRoute({
 		summary: "Grant Credits",
-		description:
-			"Grant credits to a user. Admin privileges are required.",
+		description: "Grant credits to a user. Admin privileges are required.",
 		tags: ["admins-users-profile"],
 		requestBody: {
 			required: true,
@@ -122,8 +121,7 @@ credits_post.post(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const { user_id } = await c.req.param();
 

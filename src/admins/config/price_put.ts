@@ -4,14 +4,15 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const level_put = new Hono();
+const price_put = new Hono();
 
-level_put.put(
-	"/:user_id/level",
+price_put.put(
+	"/:price_name",
 	describeRoute({
-		summary: "Update Level",
-		description: "Updates user's knowledges level. Auth is required.",
-		tags: ["admins-users-profile"],
+		summary: "Update a Platform Price",
+		description:
+			"Update a platform price in the database. Admin privileges are required.",
+		tags: ["admins-platform"],
 		requestBody: {
 			required: true,
 			content: {
@@ -19,13 +20,13 @@ level_put.put(
 					schema: {
 						type: "object",
 						properties: {
-							level: {
-								type: "string",
-								description: "The new knowledges level of the user.",
-								default: "intermediate",
+							value: {
+								type: "float",
+								description: "The new value for the price.",
+								default: 0.5,
 							},
 						},
-						required: ["level"],
+						required: ["value"],
 					},
 				},
 			},
@@ -40,26 +41,10 @@ level_put.put(
 							properties: {
 								message: {
 									type: "string",
-									default: "Level updated successfully",
+									default: "Price updated successfully",
 								},
 							},
 							required: ["message"],
-						},
-					},
-				},
-			},
-			400: {
-				description: "Bad request",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: ["Invalid JSON", "Invalid level"],
-								},
-							},
 						},
 					},
 				},
@@ -84,6 +69,22 @@ level_put.put(
 					},
 				},
 			},
+			403: {
+				description: "Forbidden",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Forbidden",
+								},
+							},
+						},
+					},
+				},
+			},
 			404: {
 				description: "Not found",
 				content: {
@@ -93,7 +94,7 @@ level_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: ["No level found", "No profile found"],
+									default: "No price found",
 								},
 							},
 						},
@@ -123,48 +124,39 @@ level_put.put(
 		const user = c.get("user");
 		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const { user_id } = await c.req.param();
+		const { price_name } = c.req.param();
 
-		let json: any;
+		let value = "";
 		try {
-			json = await c.req.json();
-			if (!json || json.level == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
+			const json = await c.req.json();
+			if (!json || !json.value || typeof json.value !== "number")
+				throw new Error();
+			value = json.value;
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		const levels = await config.supabaseClient
-			.from("knowledges")
-			.select("id, level");
-		if (levels.data == undefined || levels.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
-
-		if (!levels.data.some((level: any) => level.level == json.level))
-			return c.json({ error: "Invalid level" }, 400);
-
-		const profile = await config.supabaseClient
-			.from("profiles")
-			.select("*")
-			.eq("id", user_id)
+		const price = await config.supabaseClient
+			.from("prices")
+			.select("id, price")
+			.eq("price", price_name)
 			.single();
-		if (profile.data == undefined)
-			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
+
+		if (price.data == undefined)
+			return c.json({ error: "No price found" }, 404);
+		else if (price.error != undefined)
+			return c.json({ error: price.error.message }, 500);
 
 		const update = await config.supabaseClient
-			.from("profiles")
-			.update({ level: json.level })
-			.eq("id", user_id)
-			.single();
+			.from("prices")
+			.update({ value: value })
+			.eq("id", price.data.id);
+
 		if (update.error != undefined)
 			return c.json({ error: update.error.message }, 500);
 
-		return c.json({ message: "Level updated successfully" }, 200);
+		return c.json({ message: "Price updated successfully" }, 200);
 	},
 );
 
-export default level_put;
+export default price_put;

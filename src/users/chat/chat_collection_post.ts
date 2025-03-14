@@ -7,6 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 import { VectorStoreIndex } from "llamaindex";
 
 import { add_context_to_query } from "./utils.ts";
+import { decrease_credits } from "../profile/utils.ts";
 
 const chat_collection_post = new Hono();
 
@@ -193,6 +194,7 @@ chat_collection_post.post(
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
+		const input_tokens = json.message.length;
 
 		const { conv_id } = c.req.param();
 		for (const collec_name of json.collections) {
@@ -260,6 +262,26 @@ chat_collection_post.post(
 			if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
 				console.log("Hit rate limit. Consider implementing retry logic.");
 		}
+		const output_tokens = response.message.content.length;
+
+		const increment_total_messages = await config.supabaseClient.rpc(
+			"increment_total_messages",
+			{ p_user_id: user.uid },
+		);
+		if (increment_total_messages.error != undefined)
+			return c.json({ error: increment_total_messages.error.message }, 500);
+
+		const input_result = await decrease_credits(input_tokens, user.uid, "groq_input");
+		if (input_result != "Success")
+			return c.json({ error: input_result }, 500);
+
+		const output_result = await decrease_credits(output_tokens, user.uid, "groq_output");
+		if (output_result != "Success")
+			return c.json({ error: output_result }, 500);
+
+		const query_result = await decrease_credits(1, user.uid, "search");
+		if (query_result != "Success")
+			return c.json({ error: query_result }, 500);
 
 		let sources_details = [];
 		for (const doc of docs) {
