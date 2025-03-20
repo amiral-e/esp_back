@@ -6,7 +6,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 
 import { VectorStoreIndex } from "llamaindex";
 
-import { add_context_to_query } from "./utils.ts";
+import { add_context_to_query, get_knowledge_prompt } from "./utils.ts";
 import { decrease_credits } from "../profile/utils.ts";
 
 const chat_collection_post = new Hono();
@@ -219,6 +219,8 @@ chat_collection_post.post(
 		else if (conversation.error)
 			return c.json({ error: conversation.error.message }, 500);
 
+		const knowledge_prompt = await get_knowledge_prompt(user.uid);
+
 		const res = await add_context_to_query(
 			conversation.data.history,
 			json.message,
@@ -252,7 +254,7 @@ chat_collection_post.post(
 		let response: any;
 		try {
 			response = await config.llm.chat({
-				messages: [{ role: "user", content: get_context_prompt(texts, res) }],
+				messages: [{ role: "system", content: knowledge_prompt }, { role: "user", content: get_context_prompt(texts, res) }],
 			});
 		} catch (error: any) {
 			console.error(
@@ -306,6 +308,7 @@ chat_collection_post.post(
 			});
 		}
 
+		conversation.data.history = conversation.data.history.slice(1);
 		conversation.data.history.push({ role: "user", content: json.message });
 		conversation.data.history.push({
 			role: "assistant",
