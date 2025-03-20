@@ -27,6 +27,9 @@ import level_put from "./profile/level_put.ts";
 import settings_get from "./config/prices_get.ts";
 import setting_put from "./config/price_put.ts";
 
+import question_post from "./questions/question_post.ts";
+import question_delete from "./questions/question_delete.ts";
+
 const admin = new Hono();
 
 admin.route("/", admin_delete);
@@ -56,5 +59,8 @@ admin.route("/users", level_put);
 
 admin.route("/config", settings_get);
 admin.route("/config", setting_put);
+
+admin.route("/questions", question_post);
+admin.route("/questions", question_delete);
 
 export default admin;
