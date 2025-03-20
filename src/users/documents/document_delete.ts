@@ -7,7 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const document_delete = new Hono();
 
 document_delete.delete(
-	"/:document_id",
+	"/:collection_name/documents/:document_id",
 	describeRoute({
 		summary: "Delete a document by doc_id",
 		description:

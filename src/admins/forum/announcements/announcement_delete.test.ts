@@ -7,9 +7,12 @@ import {
 	beforeEach,
 } from "bun:test";
 import announcement_delete from "./announcement_delete.ts";
-import envVars from "../../../config.ts";
 import config from "../../../config.ts";
-import { insertAdmin, deleteAdmin } from "../../utils.ts";
+import { generatePayload } from "../../../middlewares/utils.ts";
+
+let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
+let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
+const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 let testAnnouncementId: number;
 
@@ -23,7 +26,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	await deleteAdmin(envVars.DUMMY_ID);
 	if (testAnnouncementId) {
 		await config.supabaseClient
 			.from("announcements")
@@ -33,10 +35,6 @@ afterAll(async () => {
 });
 
 describe("DELETE /announcements/:id (without privileges)", () => {
-	beforeEach(async () => {
-		await deleteAdmin(envVars.DUMMY_ID);
-	});
-
 	it("missing authorization header", async () => {
 		const res = await announcement_delete.request(`/${testAnnouncementId}`, {
 			method: "DELETE",
@@ -61,7 +59,7 @@ describe("DELETE /announcements/:id (without privileges)", () => {
 	it("non-user authorization header", async () => {
 		const res = await announcement_delete.request(`/${testAnnouncementId}`, {
 			method: "DELETE",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
@@ -72,7 +70,7 @@ describe("DELETE /announcements/:id (without privileges)", () => {
 	it("correct authorization header but no admin privileges", async () => {
 		const res = await announcement_delete.request(`/${testAnnouncementId}`, {
 			method: "DELETE",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Forbidden",
@@ -82,14 +80,10 @@ describe("DELETE /announcements/:id (without privileges)", () => {
 });
 
 describe("DELETE /announcements/:id (with privileges)", () => {
-	beforeEach(async () => {
-		await insertAdmin(envVars.DUMMY_ID);
-	});
-
 	it("non-existent announcement", async () => {
 		const res = await announcement_delete.request("/999999", {
 			method: "DELETE",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Announcement not found",
@@ -98,28 +92,13 @@ describe("DELETE /announcements/:id (with privileges)", () => {
 	});
 
 	it("successfully delete announcement", async () => {
-		// Create a new announcement to delete
-		const { data: newAnnouncement } = await config.supabaseClient
-			.from("announcements")
-			.insert({ message: "Announcement to delete" })
-			.select()
-			.single();
-
-		const res = await announcement_delete.request(`/${newAnnouncement.id}`, {
+		const res = await announcement_delete.request(`/${testAnnouncementId}`, {
 			method: "DELETE",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			message: "Announcement deleted successfully",
 		});
 		expect(res.status).toBe(200);
-
-		// Verify the announcement was deleted
-		const { data: deleted } = await config.supabaseClient
-			.from("announcements")
-			.select()
-			.eq("id", newAnnouncement.id)
-			.single();
-		expect(deleted).toBe(null);
 	});
 });

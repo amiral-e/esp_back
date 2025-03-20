@@ -54,9 +54,9 @@ app.route("/conversations", conversation_post);
 app.route("/conversations", conversation_put);
 app.route("/conversations", conversation_delete);
 
-app.route("/collections/:collection_name/documents", documents_get);
-app.route("/collections/:collection_name/documents", document_delete);
-app.route("/collections/:collection_name/documents", documents_post);
+app.route("/collections", documents_get);
+app.route("/collections", document_delete);
+app.route("/collections", documents_post);
 
 app.route("/forum", forum);
 

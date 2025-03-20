@@ -6,25 +6,25 @@ import {
 	beforeAll,
 	afterAll,
 } from "bun:test";
-import collections from "./collections_get.ts";
-import { createCollection, deleteCollection } from "./utils.ts";
+import documents_get from "./documents_get.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
+import { createCollection, deleteCollection } from "../collections/utils.ts";
 
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var collectionName = `${userId}_test_collection`;
+var collectionName = `test_collec`;
 
 afterAll(async () => {
 	// Nettoyer la collection de test
-	await deleteCollection(collectionName);
+	await deleteCollection(userId + '_' + collectionName);
 });
 
-describe("GET /users/collections (unauthorized)", () => {
+describe("GET /users/documents (unauthorized)", () => {
 	it("missing authorization header", async () => {
-		const res = await collections.request("/", {
+		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",
 		});
 		expect(await res.json()).toEqual({
@@ -34,7 +34,7 @@ describe("GET /users/collections (unauthorized)", () => {
 	});
 
 	it("invalid authorization header", async () => {
-		const res = await collections.request("/", {
+		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",
 			headers: { Authorization: `Bearer wrong-header` },
 		});
@@ -45,7 +45,7 @@ describe("GET /users/collections (unauthorized)", () => {
 	});
 
 	it("non-user authorization header", async () => {
-		const res = await collections.request("/", {
+		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",
 			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
@@ -56,29 +56,29 @@ describe("GET /users/collections (unauthorized)", () => {
 	});
 });
 
-describe("GET /users/collections (authorized)", () => {
-	it("should return 404 when no collections found", async () => {
-		const res = await collections.request("/", {
+describe("GET /users/documents (authorized)", () => {
+	it("should return 404 when no documents found", async () => {
+		const res = await documents_get.request(`/nonexistent_collection/documents`, {
 			method: "GET",
 			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 
 		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
-			error: "No collections found",
+			error: "Collection not found",
 		});
 	});
 
-	it("should return collections for user", async () => {
-		await createCollection(userId, collectionName);
+	it("should return documents for user", async () => {
+		await createCollection(userId, userId + '_' + collectionName);
 
-		const res = await collections.request("/", {
+		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",
 			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(res.status).toBe(200);
 		const body = await res.json();
-		expect(body).toHaveProperty("collections");
-		expect(body.collections).toBeInstanceOf(Array);
+		expect(body).toHaveProperty("documents");
+		expect(body.documents).toBeInstanceOf(Array);
 	});
 });

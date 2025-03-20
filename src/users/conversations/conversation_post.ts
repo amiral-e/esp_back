@@ -121,11 +121,7 @@ conversation_post.post(
 			.single();
 		if (insertion.data == undefined || insertion.error != undefined)
 			return c.json({ error: insertion.error.message }, 500);
-
-		return c.json(
-			{ message: `Conversation created successfully`, id: insertion.data.id },
-			200,
-		);
+		return c.json({ message: `Conversation created successfully`, id: insertion.data.id }, 200);
 	},
 );
 

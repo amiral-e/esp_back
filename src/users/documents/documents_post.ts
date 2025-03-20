@@ -17,6 +17,7 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["text/markdown", "text/plain;charset=utf-8"];
 
 documents_post.post(
+	"/:collection_name/documents",
 	describeRoute({
 		summary: "Ingest documents",
 		description:

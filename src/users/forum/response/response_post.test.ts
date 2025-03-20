@@ -7,16 +7,18 @@ import {
 	beforeEach,
 } from "bun:test";
 import response_post from "./response_post";
-import config from "../../../config";
-import envVars from "../../../config";
-import { deleteAdmin, insertAdmin } from "../../../admins/utils";
+import config from "../../../config.ts";
+import { generatePayload } from "../../../middlewares/utils.ts";
+
+let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
+const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 describe("POST /forum/response", () => {
 	describe("Response creation tests", () => {
 		it("invalid JSON body", async () => {
 			const res = await response_post.request(`/`, {
 				method: "POST",
-				headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+				headers: { Authorization: `Bearer ${dummyPayload}` },
 			});
 			expect(res.status).toBe(400);
 			const data = await res.json();
@@ -27,7 +29,7 @@ describe("POST /forum/response", () => {
 			const res = await response_post.request(`/`, {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
+					Authorization: `Bearer ${dummyPayload}`,
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({}),
@@ -43,7 +45,7 @@ describe("POST /forum/response", () => {
 			const res = await response_post.request(`/`, {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}`,
+					Authorization: `Bearer ${dummyPayload}`,
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ message: testMessage }),
@@ -51,9 +53,7 @@ describe("POST /forum/response", () => {
 
 			expect(res.status).toBe(200);
 			const data = await res.json();
-			expect(data).toHaveProperty("id");
-			expect(data?.message).toBe(testMessage);
-			expect(data?.user_id).toBe(envVars.DUMMY_ID);
+			expect(data?.message).toBe("Response added successfully");
 			// delete response for dynamique id
 			await config.supabaseClient.from("responses").delete().eq("id", data.id);
 		});

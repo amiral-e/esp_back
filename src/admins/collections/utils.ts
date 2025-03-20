@@ -1,4 +1,5 @@
 import config from "../../config.ts";
+import { getUser } from "../../middlewares/utils.ts";
 
 import {
 	Document,
@@ -6,8 +7,12 @@ import {
 	VectorStoreIndex,
 } from "llamaindex";
 
-async function createCollection(userId: string, collectionName: string) {
+async function createGlobalCollection(userId: string, collectionName: string) {
 	try {
+        const user = await getUser(userId);
+        if (!user.admin)
+            return false;
+
 		// Create a test document
 		// @ts-ignore
 		const doc_id = Bun.randomUUIDv7();
@@ -36,7 +41,11 @@ async function createCollection(userId: string, collectionName: string) {
 	}
 }
 
-async function deleteCollection(collectionName: string) {
+async function deleteGlobalCollection(userId: string, collectionName: string) {
+	const user = await getUser(userId);
+    if (!user.admin)
+        return false;
+
 	const { data, error: lookupError } = await config.supabaseClient
 		.from("llamaindex_embedding")
 		.select("id, collection")
@@ -62,4 +71,4 @@ async function deleteCollection(collectionName: string) {
 	}
 }
 
-export { createCollection, deleteCollection };
+export { createGlobalCollection, deleteGlobalCollection };

@@ -2,6 +2,8 @@ import { verify } from "hono/jwt";
 import config from "../config.ts";
 import { getUser } from "./utils.ts";
 
+
+
 const AuthMiddleware = async (c: any, next: any) => {
 	const { authorization } = c.req.header();
 	if (!authorization)
@@ -18,7 +20,6 @@ const AuthMiddleware = async (c: any, next: any) => {
 	} catch (error) {
 		return c.json({ error: "Invalid authorization header" }, 401);
 	}
-
 	const user = await getUser(uid);
 	if (!user.valid) return c.json({ error: "Invalid user" }, 401);
 

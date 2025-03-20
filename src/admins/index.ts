@@ -38,9 +38,9 @@ admin.route("/users", users_get);
 admin.route("/collections", collection_delete);
 admin.route("/collections", collections_get);
 
-admin.route("/collections/:collection_name/documents", documents_post);
-admin.route("/collections/:collection_name/documents", documents_get);
-admin.route("/collections/:collection_name/documents", document_delete);
+admin.route("/collections", documents_post);
+admin.route("/collections", documents_get);
+admin.route("/collections", document_delete);
 
 admin.route("/forum/categories", category_post);
 admin.route("/forum/categories", category_put);
