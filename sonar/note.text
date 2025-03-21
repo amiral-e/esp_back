@@ -1,11 +1,1 @@
-docker run --rm \
-    --network=sonar_sonarnet \
-    -e SONAR_HOST_URL="http://sonarqube:9000" \
-    -e SONAR_TOKEN="sqp_d3e73af7df9b86a87e1262aa59c7cc1fb7934824" \
-    -v "/home/kamisama/Tek 5/esp_back:/usr/src" \
-    sonarsource/sonar-scanner-cli
-
-    sqp_c0af97edcb9c5511cbbd0721739c0e08c33dcd92
-
-
-    dev: sqp_0b330fa89a0e6cefd284ae9068e9dc15de73eacf
+docker run --rm --network=sonarnet -v "/home/matteo/github/esp_back:/usr/src" sonarsource/sonar-scanner-cli
