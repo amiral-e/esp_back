@@ -173,7 +173,7 @@ documents_post.post(
 
 		const increment_total_docs = await config.supabaseClient.rpc(
 			"increment_total_docs",
-			{ p_user_id: user.id, p_docs_to_add: docs.length },
+			{ p_user_id: user.uid, p_docs_to_add: docs.length },
 		);
 		if (increment_total_docs.error != undefined)
 			return c.json({ error: increment_total_docs.error.message }, 500);
