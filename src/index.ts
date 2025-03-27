@@ -30,18 +30,20 @@ import levels_get from "./users/config/levels_get.ts";
 
 import questions_get from "./users/questions/questions_get.ts";
 
+import { displayRoutes } from "./utils/routes";
+
 const app = new Hono();
 
 app.get("/", (c) => {
-	return c.json({
-		message: "Hello World",
-	});
+  return c.json({
+    message: "Hello World",
+  });
 });
 
 app.route("/admins", admin);
 
 if (process.env.NODE_ENV !== "production") {
-	app.route("/test", test);
+  app.route("/test", test);
 }
 
 app.route("/conversations", chat_post);
@@ -71,56 +73,59 @@ app.route("/config/levels", levels_get);
 app.route("/questions", questions_get);
 
 app.get(
-	"/openapi",
-	openAPISpecs(app, {
-		documentation: {
-			info: {
-				title: "Hono API",
-				version: "1.0.0",
-				description: "Hono API Documentation",
-			},
-			servers: [{ description: "Server" }],
-			components: {
-				securitySchemes: {
-					bearerAuth: {
-						type: "http",
-						scheme: "bearer",
-						bearerFormat: "JWT",
-					},
-				},
-				schemas: {
-					Error: {
-						type: "object",
-						properties: {
-							error: {
-								type: "string",
-							},
-						},
-					},
-				},
-			},
-			security: [
-				{
-					bearerAuth: [],
-				},
-			],
-		},
-	}),
+  "/openapi",
+  openAPISpecs(app, {
+    documentation: {
+      info: {
+        title: "Hono API",
+        version: "1.0.0",
+        description: "Hono API Documentation",
+      },
+      servers: [{ description: "Server" }],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+        schemas: {
+          Error: {
+            type: "object",
+            properties: {
+              error: {
+                type: "string",
+              },
+            },
+          },
+        },
+      },
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
+    },
+  })
 );
 
 import { apiReference } from "@scalar/hono-api-reference";
 
 app.get(
-	"/docs",
-	apiReference({
-		theme: "saturn",
-		spec: { url: "/openapi" },
-	}),
+  "/docs",
+  apiReference({
+    theme: "saturn",
+    spec: { url: "/openapi" },
+  })
 );
+
+// Afficher les routes au démarrage
+displayRoutes(app);
 
 console.log("Server running on port 3000");
 
 export default {
-	port: 3000,
-	fetch: app.fetch,
+  port: 3000,
+  fetch: app.fetch,
 };
