@@ -32,6 +32,8 @@ import questions_get from "./users/questions/questions_get.ts";
 
 import { displayRoutes } from "./utils/routes";
 
+import { displayRoutes } from "./utils/routes";
+
 const app = new Hono();
 
 app.get("/", (c) => {
