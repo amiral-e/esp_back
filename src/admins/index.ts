@@ -29,6 +29,7 @@ import setting_put from "./config/price_put.ts";
 
 import question_post from "./questions/question_post.ts";
 import question_delete from "./questions/question_delete.ts";
+import question_put from "./questions/question_put.ts";
 
 const admin = new Hono();
 
@@ -62,5 +63,6 @@ admin.route("/config", setting_put);
 
 admin.route("/questions", question_post);
 admin.route("/questions", question_delete);
+admin.route("/questions", question_put);
 
 export default admin;
