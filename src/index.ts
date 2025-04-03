@@ -30,6 +30,10 @@ import levels_get from "./users/config/levels_get.ts";
 
 import questions_get from "./users/questions/questions_get.ts";
 
+import report_post from "./users/reports/report_post.ts";
+import report_delete from "./users/reports/report_delete.ts";
+import report_get from "./users/reports/report_get.ts";
+
 const app = new Hono();
 
 app.get("/", (c) => {
@@ -69,6 +73,10 @@ app.route("/profile/usage", usage_get);
 app.route("/config/levels", levels_get);
 
 app.route("/questions", questions_get);
+
+app.route("/reports", report_post);
+app.route("/reports", report_delete);
+app.route("/reports", report_get);
 
 app.get(
 	"/openapi",

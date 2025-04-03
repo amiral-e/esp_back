@@ -1,17 +1,18 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
+import config from "../../config";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const levels_get = new Hono();
+const report_delete = new Hono();
 
-levels_get.get(
+report_delete.delete(
+	"/:report_id",
 	describeRoute({
-		summary: "Get Knowledges Levels",
+		summary: "Delete a report by ID",
 		description:
-			"Retrieve knowledges levels from the database. Auth is required.",
-		tags: ["users-config"],
+			"Deletes a specific report for the authenticated user. Auth is required.",
+		tags: ["users-reports"],
 		responses: {
 			200: {
 				description: "Success",
@@ -20,24 +21,11 @@ levels_get.get(
 						schema: {
 							type: "object",
 							properties: {
-								levels: {
-									type: "array",
-									items: {
-										type: "object",
-										properties: {
-											id: {
-												type: "string",
-												default: "123",
-											},
-											level: {
-												type: "string",
-												default: "beginner",
-											},
-										},
-									},
+								message: {
+									type: "string",
+									example: "Report deleted successfully",
 								},
 							},
-							required: ["levels"],
 						},
 					},
 				},
@@ -71,7 +59,7 @@ levels_get.get(
 							properties: {
 								error: {
 									type: "string",
-									default: "No level found",
+									default: "Report not found",
 								},
 							},
 						},
@@ -99,18 +87,28 @@ levels_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		const { report_id } = c.req.param();
 
-		const levels = await config.supabaseClient
-			.from("prompts")
-			.select("type")
-			.eq("knowledge", true);
-		if (levels.data == undefined || levels.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
+		const report = await config.supabaseClient
+			.from("reports")
+			.select("*")
+			.eq("user_id", user.uid)
+			.eq("id", report_id)
+			.single();
+		if (report.data == undefined || report.data.length == 0)
+			return c.json({ error: "Report not found" }, 404);
+		else if (report.error != undefined)
+			return c.json({ error: report.error.message }, 500);
 
-		return c.json({ levels: levels.data.map((l: any) => l.level) }, 200);
+		const deletion = await config.supabaseClient
+			.from("reports")
+			.delete()
+			.eq("id", report.data.id);
+		if (deletion.error != undefined)
+			return c.json({ error: deletion.error.message }, 500);
+
+		return c.json({ message: `Report deleted successfully` }, 200);
 	},
 );
 
-export default levels_get;
+export default report_delete;

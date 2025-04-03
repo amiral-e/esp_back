@@ -51,9 +51,9 @@ async function get_knowledge_prompt(uid: string) {
 			throw new Error("Failed to get profile");
 
 		const { data: knowledge, error: knowledge_error } = await config.supabaseClient
-			.from("knowledges")
+			.from("prompts")
 			.select("*")
-			.eq("level", profile.level)
+			.eq("type", profile.level)
 			.single();
 		if (knowledge_error != undefined)
 			throw new Error("Failed to get knowledge");
