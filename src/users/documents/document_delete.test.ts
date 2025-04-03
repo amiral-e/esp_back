@@ -67,6 +67,12 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (autho
 		// Create a test document
         docId = await createCollection(userId, userId + '_' + collectionName);
 
+		if (docId == "") {
+			expect(true).toBe(false);
+			expect("").toBe("Couldn't create document and collection");
+			return;
+		}
+
 		const res = await document_delete.request(`/${collectionName}/documents/${docId}`, {
 			method: "DELETE",
 			headers: { Authorization: `Bearer ${dummyPayload}` },

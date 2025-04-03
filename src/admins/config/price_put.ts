@@ -138,7 +138,7 @@ price_put.put(
 
 		const price = await config.supabaseClient
 			.from("prices")
-			.select("id, price")
+			.select("*")
 			.eq("price", price_name)
 			.single();
 
@@ -150,7 +150,7 @@ price_put.put(
 		const update = await config.supabaseClient
 			.from("prices")
 			.update({ value: value })
-			.eq("id", price.data.id);
+			.eq("price", price_name);
 
 		if (update.error != undefined)
 			return c.json({ error: update.error.message }, 500);

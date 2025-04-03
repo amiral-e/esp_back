@@ -67,6 +67,13 @@ describe("DELETE /admins/documents/:collection_name/documents/:document_id (auth
 		// Create a test document
         docId = await createGlobalCollection(config.envVars.ADMIN_ID, "global_test_collec");
 
+		if (docId == "") {
+			expect(true).toBe(false);
+			expect("").toBe("Couldn't create document and collection");
+			return;
+		}
+		
+
 		const res = await document_delete.request(`/${collectionName}/documents/${docId}`, {
 			method: "DELETE",
 			headers: { Authorization: `Bearer ${adminPayload}` },
