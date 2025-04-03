@@ -101,8 +101,9 @@ levels_get.get(
 		const user = c.get("user");
 
 		const levels = await config.supabaseClient
-			.from("knowledges")
-			.select("level");
+			.from("prompts")
+			.select("type")
+			.eq("knowledge", true);
 		if (levels.data == undefined || levels.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
 		else if (levels.error != undefined)
