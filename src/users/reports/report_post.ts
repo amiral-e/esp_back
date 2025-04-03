@@ -5,6 +5,7 @@ import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
 import { decrease_credits } from "../profile/utils.ts";
+import { get_report_prompt } from "./utils.ts";
 
 const report_post = new Hono();
 
@@ -26,7 +27,7 @@ report_post.post(
 								description: "The title of the report",
 								default: "Titre du rapport",
 							},
-                            context: {
+                            documents: {
                                 type: "array",
                                 items: {
 									type: "string",
@@ -130,22 +131,23 @@ report_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.title == undefined || json.context == undefined || json.prompt == undefined)
+			if (!json || json.title == undefined || json.documents == undefined || json.prompt == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
         var size = 0;
-        for (doc of json.context)
+        for (doc of json.documents)
             size += doc.length;
 		const input_tokens = size + json.prompt.length;
         
-        //const system_prompt = await get_system_prompt(user.uid);
-        var history = [{ role: "system", content: "You are a helpful assistant" }]
+        const report_prompt = await get_report_prompt();
+		console.log(report_prompt);
+        var history = [{ role: "system", content: report_prompt }]
 
         var content = json.prompt
-        for (var i = 0; i < json.context.length; i++) {
-            var doc = json.context[i]
+        for (var i = 0; i < json.documents.length; i++) {
+            var doc = json.documents[i]
             content += `\n\nDoc ${i+1}: ` + doc
         }
         history.push({ role: "user", content: content })
