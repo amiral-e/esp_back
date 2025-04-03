@@ -109,7 +109,7 @@ credits_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Error message",
+									default: "Invalid credits format",
 								},
 							},
 						},

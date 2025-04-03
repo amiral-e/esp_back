@@ -109,7 +109,7 @@ credits_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Error message",
+									default: "Invalid credits format",
 								},
 							},
 						},
