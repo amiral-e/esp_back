@@ -4,8 +4,9 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
+import { VectorStoreIndex } from "llamaindex";
 import { decrease_credits } from "../profile/utils.ts";
-import { get_report_prompt } from "./utils.ts";
+import { get_report_prompt, process_query } from "./utils.ts";
 
 const report_post = new Hono();
 
@@ -40,8 +41,13 @@ report_post.post(
                                 description: "The prompt used to generate the report",
                                 default: "Génère un rapport",
                             },
+							collection_name: {
+								type: "string",
+								description: "The name of the collection to use as context",
+								default: "",
+							},
 						},
-						required: ["title", "context", "prompt"],
+						required: ["title", "documents", "prompt", "collection_name"],
 					},
 				},
 			},
@@ -131,7 +137,7 @@ report_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.title == undefined || json.documents == undefined || json.prompt == undefined)
+			if (!json || json.title == undefined || json.documents == undefined || json.prompt == undefined || json.collection_name == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
@@ -140,12 +146,40 @@ report_post.post(
         for (doc of json.documents)
             size += doc.length;
 		const input_tokens = size + json.prompt.length;
+
+		const processed_query = await process_query(json.prompt);
+
+		let texts = "";
+		if (processed_query != "no search needed") {
+			let docs = [];
+			config.pgvs.setCollection(json.collection_name);
+			const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
+
+			const retriever = index.asRetriever({
+				similarityTopK: 3,
+			});
+			docs.push({
+				collection_name: json.collection_name,
+				sources: await retriever.retrieve({ query: processed_query }),
+			});
+			if (docs.length == 0) return c.json({ error: "No answer found" }, 404);
+
+			for (const doc of docs) {
+				texts += "collection: " + doc.collection_name + "\n\n";
+				for (const source of doc.sources) {
+					texts += source.node.metadata.doc_file + ":\n";
+					// @ts-ignore
+					texts += source.node.text + "\n\n";
+				}
+			}
+		}
         
         const report_prompt = await get_report_prompt();
-		console.log(report_prompt);
         var history = [{ role: "system", content: report_prompt }]
 
         var content = json.prompt
+		if (texts != undefined && texts != "")
+			content += `\n\nContext: ${texts}`
         for (var i = 0; i < json.documents.length; i++) {
             var doc = json.documents[i]
             content += `\n\nDoc ${i+1}: ` + doc
