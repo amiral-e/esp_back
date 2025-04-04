@@ -44,9 +44,18 @@ Pour créer un token d'accès :
 
 2. Crée un projet local
 
-3. Donnez un nom au token et cliquez sur `Generate`
+   ![Alt text](/sonar/local_project.png)
 
-4. Copiez le token généré
+3. utilliser la config global
+
+   ![Alt text](/sonar/setting.png)
+
+4. analyse de methode chosir en local
+   ![Alt text](/sonar/method.png)
+
+5. Donnez un nom au token et cliquez sur `Generate`
+
+6. Copiez le token généré
 
 ### 5. Configurer le fichier sonar-project.properties
 
