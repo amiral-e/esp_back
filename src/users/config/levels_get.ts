@@ -109,7 +109,7 @@ levels_get.get(
 		else if (levels.error != undefined)
 			return c.json({ error: levels.error.message }, 500);
 
-		return c.json({ levels: levels.data.map((l: any) => l.level) }, 200);
+		return c.json({ levels: levels.data.map((l: any) => l.type) }, 200);
 	},
 );
 
