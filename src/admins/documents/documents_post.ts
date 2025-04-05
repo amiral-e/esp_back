@@ -167,7 +167,7 @@ documents_post.post(
 		config.pgvs.setCollection("global_" + collection_name);
 
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
-		const index = await VectorStoreIndex.fromDocuments(docs, {
+		await VectorStoreIndex.fromDocuments(docs, {
 			storageContext: ctx,
 		});
 

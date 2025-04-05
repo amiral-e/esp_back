@@ -124,7 +124,7 @@ conversation_put.put(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.name == undefined)
+			if (json?.name == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);

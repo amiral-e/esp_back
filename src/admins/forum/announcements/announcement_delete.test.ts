@@ -4,7 +4,6 @@ import {
 	it,
 	beforeAll,
 	afterAll,
-	beforeEach,
 } from "bun:test";
 import announcement_delete from "./announcement_delete.ts";
 import config from "../../../config.ts";

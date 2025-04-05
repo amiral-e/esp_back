@@ -184,11 +184,10 @@ chat_collection_post.post(
 		try {
 			json = await c.req.json();
 			if (
-				!json ||
-				json.message == undefined ||
-				json.message == "" ||
-				json.collections == undefined ||
-				json.collections.length == 0
+				json?.message == undefined ||
+				json?.message == "" ||
+				json?.collections == undefined ||
+				json?.collections.length == 0
 			)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {

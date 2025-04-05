@@ -11,6 +11,7 @@ async function get_report_prompt() {
 			throw new Error("Failed to get prompt");
 		return prompt.prompt
 	} catch (error) {
+		console.error("Failed to get prompt");
 		throw error;
 	}
 }

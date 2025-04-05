@@ -2,8 +2,6 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
-	beforeAll,
 	afterAll,
 } from "bun:test";
 import collections from "./collections_get.ts";
@@ -15,7 +13,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var collectionName = `${userId}_test_collection`;
+let collectionName = `${userId}_test_collection`;
 
 afterAll(async () => {
 	// Nettoyer la collection de test

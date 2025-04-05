@@ -5,7 +5,7 @@ import config from "../config.ts";
 
 const user_jwt_gen = new Hono();
 
-import { decode, sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 
 user_jwt_gen.post(
 	describeRoute({
@@ -57,7 +57,7 @@ user_jwt_gen.post(
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.uid == undefined)
+			if (json?.uid == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);

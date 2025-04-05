@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, beforeAll, afterAll } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import conversations from "./conversations_get.ts";
 import { createConversation, deleteConversation } from "./utils.ts";
 
@@ -8,15 +8,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var cleanupConversations: string[] = [];
-var convId: string = "";
-
-/* afterAll(async () => {
-    // Nettoyer toutes les conversations de test
-    for (const convId of cleanupConversations) {
-        await deleteConversation(userId, convId);
-    }
-}); */
+let convId: string = "";
 
 describe("GET /users/conversations (unauthorized)", () => {
     it("missing authorization header", async () => {

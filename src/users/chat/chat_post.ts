@@ -135,7 +135,7 @@ chat_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.message == undefined)
+			if (json?.message == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
@@ -156,7 +156,7 @@ chat_post.post(
 
 		const knowledge_prompt = await get_knowledge_prompt(user.uid);
 
-		var history = [];
+		let history = [];
 		history.push({ role: "system", content: knowledge_prompt });
 		if (conversation.data.history != undefined)
 			history.push(...conversation.data.history);

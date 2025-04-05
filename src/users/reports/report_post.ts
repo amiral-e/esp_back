@@ -137,13 +137,13 @@ report_post.post(
 
 		try {
 			json = await c.req.json();
-			if (!json || json.title == undefined || json.documents == undefined || json.prompt == undefined || json.collection_name == undefined)
+			if (json?.title == undefined || json?.documents == undefined || json?.prompt == undefined || json?.collection_name == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
-        var size = 0;
-        for (doc of json.documents)
+        let size = 0;
+        for (let doc of json.documents)
             size += doc.length;
 		const input_tokens = size + json.prompt.length;
 
@@ -175,15 +175,14 @@ report_post.post(
 		}
         
         const report_prompt = await get_report_prompt();
-        var history = [{ role: "system", content: report_prompt }]
+        let history = [{ role: "system", content: report_prompt }]
 
-        var content = json.prompt
-		if (texts != undefined && texts != "")
+        let content = json.prompt
+		if (texts != undefined && texts.trim() != "")
 			content += `\n\nContext: ${texts}`
-        for (var i = 0; i < json.documents.length; i++) {
-            var doc = json.documents[i]
-            content += `\n\nDoc ${i+1}: ` + doc
-        }
+		if (json.documents && json.documents.length > 0)
+			for (const [i, doc] of json.documents.entries())
+	            content += `\n\nDoc ${i+1}: ` + doc;
         history.push({ role: "user", content: content })
         
 		let response: any;

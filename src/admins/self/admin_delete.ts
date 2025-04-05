@@ -148,7 +148,7 @@ admin_delete.delete(
 		let request_uid = "";
 		try {
 			const json = await c.req.json();
-			if (!json || !json.user_id || typeof json.user_id !== "string")
+			if (json?.user_id == undefined || typeof json?.user_id !== "string")
 				throw new Error();
 			request_uid = json.user_id;
 		} catch (error) {
@@ -159,9 +159,9 @@ admin_delete.delete(
 			return c.json({ error: "You can't remove yourself from admins" }, 400);
 
 		const request_user = await getUser(request_uid);
-		if (!request_user || !request_user.valid)
+		if (request_user?.valid == undefined)
 			return c.json({ error: "User not found" }, 404);
-		else if (!request_user.admin)
+		else if (request_user?.admin == undefined)
 			return c.json({ error: "User is not an admin" }, 400);
 
 		const deletion = await config.supabaseClient

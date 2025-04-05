@@ -134,7 +134,7 @@ category_put.put(
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || (json.name == undefined && json.description == undefined))
+			if (json?.name == undefined && json?.description == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);

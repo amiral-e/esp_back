@@ -2,7 +2,6 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
 	beforeAll,
 	afterAll,
 } from "bun:test";
@@ -12,7 +11,7 @@ import {
 	createConversation,
 	deleteConversation,
 } from "../conversations/utils.ts";
-import { createCollection, deleteCollection } from "../collections/utils.ts";
+import { createCollection } from "../collections/utils.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
@@ -21,7 +20,7 @@ const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
-var convId = "";
+let convId = "";
 const collecName = userId + "_test_collec";
 
 beforeAll(async () => {
@@ -30,7 +29,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await deleteConversation(userId, convId);
-	//await deleteCollection(collecName);
 });
 
 describe("POST /conversations/:conv_id/collections/:collec_name (unauthorized)", () => {

@@ -1,7 +1,7 @@
 import config from "../config.ts";
 
 async function isAdmin(id: string) {
-	const { data, error } = await config.supabaseClient
+	const { data } = await config.supabaseClient
 		.from("admins")
 		.select("*")
 		.eq("uid", id)
@@ -11,7 +11,7 @@ async function isAdmin(id: string) {
 
 async function insertAdmin(id: string) {
 	if (await isAdmin(id)) return;
-	const { data, error } = await config.supabaseClient
+	const { error } = await config.supabaseClient
 		.from("admins")
 		.insert({ uid: id })
 		.select("*")
@@ -21,7 +21,7 @@ async function insertAdmin(id: string) {
 
 async function deleteAdmin(id: string) {
 	if (!(await isAdmin(id))) return;
-	const { data, error } = await config.supabaseClient
+	const { error } = await config.supabaseClient
 		.from("admins")
 		.delete()
 		.eq("uid", id)

@@ -1,11 +1,5 @@
 import config from "../../config.ts";
 
-import {
-	Document,
-	storageContextFromDefaults,
-	VectorStoreIndex,
-} from "llamaindex";
-
 function get_prompt(history: any[], query: string): string {
 	const context_prompt = `Chat history is below.
 ---------------------
@@ -59,6 +53,7 @@ async function get_knowledge_prompt(uid: string) {
 			throw new Error("Failed to get knowledge");
 		return knowledge.prompt
 	} catch (error) {
+		console.error(error);
 		throw error;
 	}
 }

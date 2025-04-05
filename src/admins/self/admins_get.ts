@@ -97,13 +97,13 @@ admins_get.get(
 		if (admins.error != undefined)
 			return c.json({ error: admins.error.message }, 500);
 
-		for (let i = 0; i < admins.data.length; i++) {
+		for (const admin of admins.data) {
 			const email = await config.supabaseClient.rpc("get_email", {
-				user_id: admins.data[i].uid,
+				user_id: admin.uid,
 			});
 			if (email.error != undefined)
 				return c.json({ error: email.error.message }, 500);
-			admins.data[i].email = email.data;
+			admin.email = email.data;
 		}
 		return c.json({ admins: admins.data }, 200);
 	},

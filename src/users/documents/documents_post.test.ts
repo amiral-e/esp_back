@@ -2,15 +2,12 @@ import {
     describe,
     expect,
     it,
-    beforeEach,
-    beforeAll,
     afterAll,
 } from "bun:test";
 import document_post from "./documents_post.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
-import { createCollection, deleteCollection } from "../collections/utils.ts";
-import admin from "../../admins/index.ts";
+import { deleteCollection } from "../collections/utils.ts";
 
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);

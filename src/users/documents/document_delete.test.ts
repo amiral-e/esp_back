@@ -2,20 +2,17 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
-	beforeAll,
-	afterAll,
 } from "bun:test";
 import document_delete from "./document_delete.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
-import { createCollection, deleteCollection } from "../collections/utils.ts";
+import { createCollection } from "../collections/utils.ts";
 
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 const collectionName = `test_collec`;
-var docId = "";
+let docId = "";
 
 describe("DELETE /users/documents/:collection_name/documents/:document_id (unauthorized)", () => {
 	it("missing authorization header", async () => {

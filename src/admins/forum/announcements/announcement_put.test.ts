@@ -4,7 +4,6 @@ import {
 	it,
 	beforeAll,
 	afterAll,
-	beforeEach,
 } from "bun:test";
 import announcement_put from "./announcement_put.ts";
 import config from "../../../config.ts";
@@ -17,7 +16,7 @@ const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let testAnnouncementId: number;
 
 beforeAll(async () => {
-	const { data, error } = await config.supabaseClient
+	const { data } = await config.supabaseClient
 		.from("announcements")
 		.insert({ message: "Test Annoncement" })
 		.select()

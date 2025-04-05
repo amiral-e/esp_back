@@ -129,7 +129,7 @@ price_put.put(
 		let value = "";
 		try {
 			const json = await c.req.json();
-			if (!json || !json.value || typeof json.value !== "number")
+			if (json?.value == undefined || typeof json?.value !== "number")
 				throw new Error();
 			value = json.value;
 		} catch (error) {

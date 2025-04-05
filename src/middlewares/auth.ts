@@ -14,7 +14,7 @@ const AuthMiddleware = async (c: any, next: any) => {
 
 	try {
 		const decoded = await verify(bearer, config.envVars.JWT_SECRET);
-		if (!decoded || !decoded["uid"] || typeof decoded["uid"] !== "string")
+		if (!decoded?.uid || typeof decoded.uid !== "string")
 			return c.json({ error: "Invalid authorization header" }, 401);
 		uid = decoded["uid"];
 	} catch (error) {

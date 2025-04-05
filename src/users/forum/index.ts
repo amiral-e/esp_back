@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-4;
+
 import categories_get from "./categories/categories_get";
 
 import response_delete from "./response/response_delete";

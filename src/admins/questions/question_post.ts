@@ -130,7 +130,7 @@ question_post.post(
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || json.question == undefined || json.level == undefined)
+			if (json?.question == undefined || json?.level == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);

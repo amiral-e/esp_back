@@ -2,16 +2,12 @@ import {
 	describe,
 	expect,
 	it,
-	beforeAll,
-	afterAll,
-	beforeEach,
 } from "bun:test";
 import response_post from "./response_post";
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";
 
 let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
-const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 describe("POST /forum/response", () => {
 	describe("Response creation tests", () => {

@@ -2,14 +2,12 @@ import {
 	describe,
 	expect,
 	it,
-	beforeAll,
 	afterAll,
-	beforeEach,
 } from "bun:test";
 import admin from "../index.ts";
 
 import config from "../../config.ts";
-import { insertAdmin, deleteAdmin } from "../utils.ts";
+import { deleteAdmin } from "../utils.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);

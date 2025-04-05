@@ -91,8 +91,6 @@ collections_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
 		const collections = await config.supabaseClient
 			.from("llamaindex_embedding")
 			.select("collection")

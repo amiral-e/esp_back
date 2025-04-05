@@ -98,8 +98,6 @@ levels_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
 		const levels = await config.supabaseClient
 			.from("prompts")
 			.select("type")

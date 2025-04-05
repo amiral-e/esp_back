@@ -119,7 +119,7 @@ document_delete.delete(
 			return c.json({ error: documents.error.message }, 500);
 
 		for (const item of documents.data) {
-			const { data, error } = await config.supabaseClient
+			const { error } = await config.supabaseClient
 				.from("llamaindex_embedding")
 				.delete()
 				.eq("id", item.id);
