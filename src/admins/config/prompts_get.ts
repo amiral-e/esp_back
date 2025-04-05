@@ -10,7 +10,7 @@ prompts_get.get(
 	describeRoute({
 		summary: "Get Platform's Prompts",
 		description:
-			"Retrieve platform's prompts from the database. Auth is required.",
+			"Retrieve platform's prompts from the database. Admin privileges are required.",
 		tags: ["admins-config"],
 		responses: {
 			200: {
@@ -103,6 +103,7 @@ prompts_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const prompts = await config.supabaseClient
 			.from("prompts")
