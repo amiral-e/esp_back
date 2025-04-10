@@ -137,39 +137,49 @@ report_post.post(
 
 		try {
 			json = await c.req.json();
-			if (json?.title == undefined || json?.documents == undefined || json?.prompt == undefined || json?.collection_name == undefined)
+			if (json?.title == undefined || json?.prompt == undefined)
 				return c.json({ error: "Invalid JSON" }, 400);
 		} catch (error) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
+		if (json?.documents == undefined)
+			json.documents = [];
+		if (json?.collection_name == undefined)
+			json.collection_name = "";
+
         let size = 0;
         for (let doc of json.documents)
             size += doc.length;
 		const input_tokens = size + json.prompt.length;
 
-		const processed_query = await process_query(json.prompt);
-
 		let texts = "";
-		if (processed_query != "no search needed") {
-			let docs = [];
-			config.pgvs.setCollection(json.collection_name);
-			const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
+		if (json.collection_name != "") {
+			console.log("collection name", json.collection_name);
+			const processed_query = await process_query(json.prompt);
 
-			const retriever = index.asRetriever({
-				similarityTopK: 3,
-			});
-			docs.push({
-				collection_name: json.collection_name,
-				sources: await retriever.retrieve({ query: processed_query }),
-			});
-			if (docs.length == 0) return c.json({ error: "No answer found" }, 404);
+			console.log(processed_query);
 
-			for (const doc of docs) {
-				texts += "collection: " + doc.collection_name + "\n\n";
-				for (const source of doc.sources) {
-					texts += source.node.metadata.doc_file + ":\n";
-					// @ts-ignore
-					texts += source.node.text + "\n\n";
+			if (processed_query != "no search needed") {
+				let docs = [];
+				config.pgvs.setCollection(json.collection_name);
+				const index = await VectorStoreIndex.fromVectorStore(config.pgvs);
+
+				const retriever = index.asRetriever({
+					similarityTopK: 3,
+				});
+				docs.push({
+					collection_name: json.collection_name,
+					sources: await retriever.retrieve({ query: processed_query }),
+				});
+				if (docs.length == 0) return c.json({ error: "No answer found" }, 404);
+
+				for (const doc of docs) {
+					texts += `collection '${doc.collection_name}': \n\n`;
+					for (const source of doc.sources) {
+						texts += source.node.metadata.doc_file + ":\n";
+						// @ts-ignore
+						texts += source.node.text + "\n\n";
+					}
 				}
 			}
 		}
@@ -177,12 +187,14 @@ report_post.post(
         const report_prompt = await get_report_prompt();
         let history = [{ role: "system", content: report_prompt }]
 
-        let content = json.prompt
+        let content = "";
 		if (texts != undefined && texts.trim() != "")
-			content += `\n\nContext: ${texts}`
+            content += "## Context:\n" + texts;
 		if (json.documents && json.documents.length > 0)
+			content +=  "\n## User's documents:";
 			for (const [i, doc] of json.documents.entries())
-	            content += `\n\nDoc ${i+1}: ` + doc;
+				content += `\n\nDoc ${i+1}:\n` + doc;
+
         history.push({ role: "user", content: content })
         
 		let response: any;
