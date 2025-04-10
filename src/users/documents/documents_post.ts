@@ -3,7 +3,7 @@ import { describeRoute } from "hono-openapi";
 
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
-import { decrease_credits } from "../profile/utils.ts";
+import { decrease_credits, check_credits } from "../profile/utils.ts";
 
 import {
 	Document,
@@ -88,6 +88,22 @@ documents_post.post(
 					},
 				},
 			},
+			402: {
+				description: "Payment Required",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Not enough credits",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: "Internal Server Error",
 				content: {
@@ -147,6 +163,9 @@ documents_post.post(
 			else return c.json({ error: "Invalid JSON" }, 400);
 		}
 		if (docs.length == 0) return c.json({ error: "No files provided" }, 400);
+
+		const validate_credits = await check_credits(tokens, user.uid, false, true);
+		if (validate_credits != "Success") return c.json({ error: "Not enough credits" }, 402);
 
 		config.pgvs.setCollection(user.uid + "_" + collection_name);
 

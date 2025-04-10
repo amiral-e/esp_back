@@ -4,7 +4,7 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-import { decrease_credits } from "../profile/utils.ts";
+import { decrease_credits, check_credits } from "../profile/utils.ts";
 import { get_knowledge_prompt } from "./utils.ts";
 
 const chat_post = new Hono();
@@ -94,6 +94,22 @@ chat_post.post(
 					},
 				},
 			},
+			402: {
+				description: "Payment Required",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Not enough credits",
+								},
+							},
+						},
+					},
+				},
+			},
 			404: {
 				description: "Not found",
 				content: {
@@ -141,6 +157,10 @@ chat_post.post(
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 		const input_tokens = json.message.length;
+
+		const validate_credits = await check_credits(input_tokens, user.uid, false, false);
+		if (validate_credits != "Success")
+			return c.json({ error: "Not enough credits" }, 402);
 
 		const { conv_id } = c.req.param();
 		const conversation = await config.supabaseClient

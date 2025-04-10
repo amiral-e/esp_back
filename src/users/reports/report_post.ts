@@ -5,7 +5,7 @@ import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
 import { VectorStoreIndex } from "llamaindex";
-import { decrease_credits } from "../profile/utils.ts";
+import { decrease_credits, check_credits } from "../profile/utils.ts";
 import { get_report_prompt, process_query } from "./utils.ts";
 
 const report_post = new Hono();
@@ -112,6 +112,22 @@ report_post.post(
 					},
 				},
 			},
+			402: {
+				description: "Payment Required",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Not enough credits",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: "Internal server error",
 				content: {
@@ -151,6 +167,10 @@ report_post.post(
         for (let doc of json.documents)
             size += doc.length;
 		const input_tokens = size + json.prompt.length;
+
+		const validate_credits = await check_credits(input_tokens, user.uid, false, false);
+		if (validate_credits != "Success")
+			return c.json({ error: "Not enough credits" }, 402);
 
 		let texts = "";
 		if (json.collection_name != "") {
