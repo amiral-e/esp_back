@@ -257,7 +257,7 @@ async function update_credits(uid: string, input_tokens: number, output_tokens: 
 		{ p_user_id: uid },
 	);
 	if (increment_total_messages.error != undefined)
-		return { error: increment_total_messages.error.message, status:500};
+		return { error: increment_total_messages.error.message, status: 500};
 
 	const input_result = await decrease_credits(input_tokens, uid, "groq_input");
 	if (input_result != "Success")
