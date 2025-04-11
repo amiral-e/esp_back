@@ -4,14 +4,14 @@ import { describeRoute } from "hono-openapi";
 import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
 
-const levels_get = new Hono();
+const prompts_get = new Hono();
 
-levels_get.get(
+prompts_get.get(
 	describeRoute({
-		summary: "Get Knowledges Levels",
+		summary: "Get Platform's Prompts",
 		description:
-			"Retrieve knowledges levels from the database. Auth is required.",
-		tags: ["users-config"],
+			"Retrieve platform's prompts from the database. Admin privileges are required.",
+		tags: ["admins-config"],
 		responses: {
 			200: {
 				description: "Success",
@@ -20,7 +20,7 @@ levels_get.get(
 						schema: {
 							type: "object",
 							properties: {
-								levels: {
+								prompts: {
 									type: "array",
 									items: {
 										type: "object",
@@ -29,15 +29,19 @@ levels_get.get(
 												type: "string",
 												default: "123",
 											},
-											level: {
+											type: {
 												type: "string",
 												default: "beginner",
 											},
+											prompt: {
+												type: "string",
+												default: "This is a system prompt"
+											}
 										},
 									},
 								},
 							},
-							required: ["levels"],
+							required: ["prompts"],
 						},
 					},
 				},
@@ -99,18 +103,18 @@ levels_get.get(
 	AuthMiddleware,
 	async (c: any) => {
 		const user = c.get("user");
+		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-		const levels = await config.supabaseClient
+		const prompts = await config.supabaseClient
 			.from("prompts")
-			.select("type")
-			.eq("knowledge", true);
-		if (levels.data == undefined || levels.data.length == 0)
+			.select("type, prompt");
+		if (prompts.data == undefined || prompts.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
+		else if (prompts.error != undefined)
+			return c.json({ error: prompts.error.message }, 500);
 
-		return c.json({ levels: levels.data.map((l: any) => l.type) }, 200);
+		return c.json({ prompts: prompts.data }, 200);
 	},
 );
 
-export default levels_get;
+export default prompts_get;
