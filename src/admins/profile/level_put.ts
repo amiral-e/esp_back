@@ -143,7 +143,7 @@ level_put.put(
 		else if (levels.error != undefined)
 			return c.json({ error: levels.error.message }, 500);
 
-		if (!levels.data.some((level: any) => level.level == json.level))
+		if (!levels.data.some((level: any) => level.type == json.level))
 			return c.json({ error: "Invalid level" }, 400);
 
 		const profile = await config.supabaseClient
