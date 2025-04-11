@@ -11,7 +11,7 @@ async function createGlobalCollection(userId: string, collectionName: string) {
 	try {
         const user = await getUser(userId);
         if (!user.admin)
-            return false;
+            return "";
 
 		// Create a test document
 		// @ts-ignore
@@ -37,7 +37,7 @@ async function createGlobalCollection(userId: string, collectionName: string) {
 		return doc_id;
 	} catch (error: any) {
 		console.error("Error creating collection:", error.message);
-		return false;
+		return "";
 	}
 }
 

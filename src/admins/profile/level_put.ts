@@ -135,8 +135,9 @@ level_put.put(
 		}
 
 		const levels = await config.supabaseClient
-			.from("knowledges")
-			.select("id, level");
+			.from("prompts")
+			.select("id, type")
+			.eq("knowledge", true);
 		if (levels.data == undefined || levels.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
 		else if (levels.error != undefined)
