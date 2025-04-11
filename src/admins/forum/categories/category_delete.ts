@@ -115,16 +115,12 @@ category_delete.delete(
 			.single();
 		if (categories.data == undefined || categories.data.length == 0)
 			return c.json({ error: "Category not found" }, 404);
-		if (categories.error != undefined)
-			return c.json({ error: categories.error.message }, 500);
 
 		const deletion = await config.supabaseClient
 			.from("categories")
 			.delete()
 			.eq("id", id)
 			.select("*");
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
 
 		return c.json({ message: "Category deleted successfully" }, 200);
 	},

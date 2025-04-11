@@ -115,16 +115,12 @@ announcement_delete.delete(
 			.single();
 		if (announcement.data == undefined || announcement.data.length == 0)
 			return c.json({ error: "Announcement not found" }, 404);
-		if (announcement.error != undefined)
-			return c.json({ error: announcement.error.message }, 500);
 
 		const deletion = await config.supabaseClient
 			.from("announcements")
 			.delete()
 			.eq("id", id)
 			.select("*");
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
 
 		return c.json({ message: "Announcement deleted successfully" }, 200);
 	},

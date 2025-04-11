@@ -346,8 +346,6 @@ async function post_chat_with_collection(c: any) {
 		.single();
 	if (conversation.data == undefined || conversation.data.length == 0)
 		return c.json({ error: "Conversation not found" }, 404);
-	else if (conversation.error)
-		return c.json({ error: conversation.error.message }, 500);
 
 	const elems = await set_messages_history(c, conversation, json, user.uid);
 	if (elems.error != undefined)

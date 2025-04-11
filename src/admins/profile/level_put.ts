@@ -140,8 +140,6 @@ level_put.put(
 			.eq("knowledge", true);
 		if (levels.data == undefined || levels.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
 
 		if (!levels.data.some((level: any) => level.type == json.level))
 			return c.json({ error: "Invalid level" }, 400);
@@ -153,16 +151,12 @@ level_put.put(
 			.single();
 		if (profile.data == undefined)
 			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
 
 		const update = await config.supabaseClient
 			.from("profiles")
 			.update({ level: json.level })
 			.eq("id", user_id)
 			.single();
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Level updated successfully" }, 200);
 	},

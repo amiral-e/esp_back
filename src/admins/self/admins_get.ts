@@ -94,15 +94,11 @@ admins_get.get(
 		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
 		const admins = await config.supabaseClient.from("admins").select("uid");
-		if (admins.error != undefined)
-			return c.json({ error: admins.error.message }, 500);
 
 		for (const admin of admins.data) {
 			const email = await config.supabaseClient.rpc("get_email", {
 				user_id: admin.uid,
 			});
-			if (email.error != undefined)
-				return c.json({ error: email.error.message }, 500);
 			admin.email = email.data;
 		}
 		return c.json({ admins: admins.data }, 200);

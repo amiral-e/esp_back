@@ -139,8 +139,6 @@ question_post.post(
 		const result = await config.supabaseClient
 			.from("questions")
 			.insert({ question: json.question, level: json.level })
-		if (result.error != undefined)
-			return c.json({ error: result.error.message }, 500);
 
 		return c.json({ message: "Question added successfully" }, 200);
 	},

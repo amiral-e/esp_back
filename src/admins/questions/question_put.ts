@@ -145,8 +145,6 @@ question_put.put(
 			.eq("knowledge", true);
 		if (levels.data == undefined || levels.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
 
 		if (!levels.data.some((level: any) => level.level == json.level))
 			return c.json({ error: "Invalid level" }, 400);
@@ -156,8 +154,6 @@ question_put.put(
 			.update({ question: json.question, level: json.level })
 			.eq("id", question_id)
 			.single();
-		if (result.error != undefined)
-			return c.json({ error: result.error.message }, 500);
 
 		return c.json({ message: "Question updated successfully" }, 200);
 	},

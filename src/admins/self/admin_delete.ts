@@ -170,8 +170,6 @@ admin_delete.delete(
 			.eq("uid", request_uid)
 			.select("*")
 			.single();
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
 		return c.json({ message: "User removed from admins" }, 200);
 	},
 );

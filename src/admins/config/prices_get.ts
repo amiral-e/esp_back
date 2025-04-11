@@ -126,8 +126,6 @@ prices_get.get(
 			.select("price, description, value");
 		if (prices.data == undefined || prices.data.length == 0)
 			return c.json({ error: "No price found" }, 404);
-		else if (prices.error != undefined)
-			return c.json({ error: prices.error.message }, 500);
 
 		return c.json({ prices: prices.data }, 200);
 	},

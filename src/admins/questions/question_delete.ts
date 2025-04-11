@@ -114,8 +114,6 @@ question_delete.delete(
             .single();
         if (question.data == undefined)
             return c.json({ error: "Question not found" }, 404);
-        if (question.error != undefined)
-            return c.json({ error: question.error.message }, 500);
 
 		const deletion = await config.supabaseClient
 			.from("questions")
@@ -123,8 +121,6 @@ question_delete.delete(
 			.eq("id", question_id)
 			.select("*")
 			.single();
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
 		return c.json({ message: "Question deleted successfully" }, 200);
 	},
 );

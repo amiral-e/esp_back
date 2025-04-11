@@ -141,8 +141,6 @@ category_post.post(
 			.from("categories")
 			.insert(json)
 			.select("*");
-		if (insertion.error != undefined)
-			return c.json({ error: insertion.error.message }, 500);
 
 		return c.json({ message: "Category created successfully" }, 200);
 	},

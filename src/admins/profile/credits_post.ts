@@ -139,15 +139,11 @@ credits_post.post(
 			.select("credits")
 			.eq("id", user_id)
 			.single();
-		if (credits.error != undefined)
-			return c.json({ error: credits.error.message }, 500);
 
 		const update = await config.supabaseClient
 			.from("profiles")
 			.update({ credits: credits.data.credits + json.credits })
 			.eq("id", user_id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Credits granted successfully" }, 200);
 	},

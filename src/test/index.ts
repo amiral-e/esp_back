@@ -24,9 +24,13 @@ test.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		return c.json({ user: user });
+		return await get_user(c);
 	},
 );
+
+async function get_user(c: any) {
+	const user = c.get("user");
+	return c.json({ user: user });
+}
 
 export default test;

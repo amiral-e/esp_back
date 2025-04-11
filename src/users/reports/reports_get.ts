@@ -91,22 +91,24 @@ reports_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
-		const reports = await config.supabaseClient
-			.from("reports")
-			.select("title, id")
-			.eq("user_id", user.uid);
-		if (reports.data == undefined || reports.data.length == 0)
-			return c.json({ error: "No report found" }, 404);
-		else if (reports.error != undefined)
-			return c.json({ error: reports.error.message }, 500);
-
-		return c.json(
-			reports.data,
-			200,
-		);
+		return await get_reports(c);
 	},
 );
+
+async function get_reports(c: any) {
+	const user = c.get("user");
+
+	const reports = await config.supabaseClient
+		.from("reports")
+		.select("title, id")
+		.eq("user_id", user.uid);
+	if (reports.data == undefined || reports.data.length == 0)
+		return c.json({ error: "No report found" }, 404);
+
+	return c.json(
+		reports.data,
+		200,
+	);
+}
 
 export default reports_get;

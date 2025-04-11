@@ -114,33 +114,33 @@ response_delete.delete(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		const id = c.req.param("id");
-
-		const response = await config.supabaseClient
-			.from("responses")
-			.select("*")
-			.eq("id", id)
-			.single();
-
-		if (response.data == undefined || response.data.length == 0)
-			return c.json({ error: "Response not found" }, 404);
-		else if (response.error != undefined)
-			return c.json({ error: response.error.message }, 500);
-
-		const is_admin = await isAdmin(user.uid);
-		if (user.uid != response.data.user_id && !is_admin)
-			return c.json({ error: "Forbidden" }, 403);
-
-		const deletion = await config.supabaseClient
-			.from("responses")
-			.delete()
-			.eq("id", id);
-
-		if (deletion.error) return c.json({ error: deletion.error.message }, 500);
-
-		return c.json({ message: "Response deleted successfully" }, 200);
+		return await delete_response(c);
 	},
 );
+
+async function delete_response(c: any) {
+	const user = c.get("user");
+	const id = c.req.param("id");
+
+	const response = await config.supabaseClient
+		.from("responses")
+		.select("*")
+		.eq("id", id)
+		.single();
+
+	if (response.data == undefined || response.data.length == 0)
+		return c.json({ error: "Response not found" }, 404);
+
+	const is_admin = await isAdmin(user.uid);
+	if (user.uid != response.data.user_id && !is_admin)
+		return c.json({ error: "Forbidden" }, 403);
+
+	const deletion = await config.supabaseClient
+		.from("responses")
+		.delete()
+		.eq("id", id);
+
+	return c.json({ message: "Response deleted successfully" }, 200);
+}
 
 export default response_delete;

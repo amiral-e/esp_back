@@ -86,29 +86,29 @@ report_delete.delete(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		const { report_id } = c.req.param();
-
-		const report = await config.supabaseClient
-			.from("reports")
-			.select("*")
-			.eq("user_id", user.uid)
-			.eq("id", report_id)
-			.single();
-		if (report.data == undefined || report.data.length == 0)
-			return c.json({ error: "Report not found" }, 404);
-		else if (report.error != undefined)
-			return c.json({ error: report.error.message }, 500);
-
-		const deletion = await config.supabaseClient
-			.from("reports")
-			.delete()
-			.eq("id", report.data.id);
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
-
-		return c.json({ message: `Report deleted successfully` }, 200);
+		return await delete_report(c);
 	},
 );
+
+async function delete_report(c: any) {
+	const user = c.get("user");
+	const { report_id } = c.req.param();
+
+	const report = await config.supabaseClient
+		.from("reports")
+		.select("*")
+		.eq("user_id", user.uid)
+		.eq("id", report_id)
+		.single();
+	if (report.data == undefined || report.data.length == 0)
+		return c.json({ error: "Report not found" }, 404);
+
+	const deletion = await config.supabaseClient
+		.from("reports")
+		.delete()
+		.eq("id", report.data.id);
+
+	return c.json({ message: `Report deleted successfully` }, 200);
+}
 
 export default report_delete;

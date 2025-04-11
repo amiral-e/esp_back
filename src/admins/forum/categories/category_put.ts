@@ -147,15 +147,11 @@ category_put.put(
 			.single();
 		if (categorie.data == undefined || categorie.data.length == 0)
 			return c.json({ error: "Category not found" }, 404);
-		else if (categorie.error != undefined)
-			return c.json({ error: categorie.error.message }, 500);
 
 		const update = await config.supabaseClient
 			.from("categories")
 			.update(json)
 			.eq("id", id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Category updated successfully" }, 200);
 	},

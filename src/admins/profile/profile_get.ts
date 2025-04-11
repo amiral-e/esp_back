@@ -114,8 +114,6 @@ profile_get.get(
 			.single();
 		if (profile.data == undefined)
 			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
 
 		return c.json({ profile: profile.data }, 200);
 	},

@@ -110,8 +110,6 @@ prompts_get.get(
 			.select("type, prompt");
 		if (prompts.data == undefined || prompts.data.length == 0)
 			return c.json({ error: "No level found" }, 404);
-		else if (prompts.error != undefined)
-			return c.json({ error: prompts.error.message }, 500);
 
 		return c.json({ prompts: prompts.data }, 200);
 	},

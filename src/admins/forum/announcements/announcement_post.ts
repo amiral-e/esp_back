@@ -136,8 +136,6 @@ announcement_post.post(
 			.insert(json)
 			.select("*")
 			.single();
-		if (insertion.error != undefined)
-			return c.json({ error: insertion.error.message }, 500);
 
 		return c.json({ message: "Announcement created successfully" }, 200);
 	},

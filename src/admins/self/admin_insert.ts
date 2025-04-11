@@ -168,8 +168,6 @@ admin_insert.post(
 			.insert({ uid: request_uid })
 			.select("*")
 			.single();
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 		return c.json({ message: `User added to admins` }, 200);
 	},
 );

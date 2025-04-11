@@ -138,8 +138,6 @@ credits_put.put(
 			.from("profiles")
 			.update({ credits: json.credits })
 			.eq("id", user_id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Credits updated successfully" }, 200);
 	},

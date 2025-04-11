@@ -158,8 +158,6 @@ announcement_put.put(
 			.single();
 		if (announcement.data == undefined || announcement.data.length == 0)
 			return c.json({ error: "Announcement not found" }, 404);
-		else if (announcement.error != undefined)
-			return c.json({ error: announcement.error.message }, 500);
 
 		const update = await config.supabaseClient
 			.from("announcements")
@@ -167,8 +165,6 @@ announcement_put.put(
 			.eq("id", id)
 			.select("*")
 			.single();
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Announcement updated successfully" }, 200);
 	},

@@ -144,16 +144,11 @@ price_put.put(
 
 		if (price.data == undefined)
 			return c.json({ error: "No price found" }, 404);
-		else if (price.error != undefined)
-			return c.json({ error: price.error.message }, 500);
 
 		const update = await config.supabaseClient
 			.from("prices")
 			.update({ value: value })
 			.eq("price", price_name);
-
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
 
 		return c.json({ message: "Price updated successfully" }, 200);
 	},
