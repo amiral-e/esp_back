@@ -105,6 +105,22 @@ question_put.put(
 					},
 				},
 			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Question not found",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: "Internal server error",
 				content: {
@@ -151,14 +167,17 @@ async function put_question(c: any) {
 	if (levels.data == undefined || levels.data.length == 0)
 		return c.json({ error: "No level found" }, 404);
 
-	if (!levels.data.some((level: any) => level.level == json.level))
+	if (!levels.data.some((level: any) => level.type == json.level))
 		return c.json({ error: "Invalid level" }, 400);
 
-	await config.supabaseClient
+	const result = await config.supabaseClient
 		.from("questions")
 		.update({ question: json.question, level: json.level })
 		.eq("id", question_id)
+		.select("*")
 		.single();
+	if (result.data == undefined)
+		return c.json({ error: "Question not found" }, 404);
 
 	return c.json({ message: "Question updated successfully" }, 200);
 }

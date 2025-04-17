@@ -30,4 +30,14 @@ async function deleteConversation(
         console.log(error.message);
 }
 
-export { createConversation, deleteConversation };
+async function deleteConversations(userId: string) {
+    const { error } = await config.supabaseClient
+        .from("conversations")
+        .delete()
+        .eq("user_id", userId);
+
+    if (error != undefined)
+        console.log(error.message);
+}
+
+export { createConversation, deleteConversation, deleteConversations };

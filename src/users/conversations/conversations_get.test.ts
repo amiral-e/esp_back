@@ -1,6 +1,6 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeAll } from "bun:test";
 import conversations from "./conversations_get.ts";
-import { createConversation, deleteConversation } from "./utils.ts";
+import { createConversation, deleteConversation, deleteConversations } from "./utils.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
@@ -9,6 +9,11 @@ const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let convId: string = "";
+
+beforeAll(async () => {
+    // Nettoyer les conversations
+    await deleteConversations(userId);
+});
 
 describe("GET /users/conversations (unauthorized)", () => {
     it("missing authorization header", async () => {
@@ -63,7 +68,7 @@ describe("GET /users/conversations (authorized)", () => {
     });
 
     it("should return 404 when no conversations found", async () => {
-        // Nettoyer toutes les conversations de test
+        // Nettoyer la conversation de test
         await deleteConversation(userId, convId);
 
         // Utiliser un utilisateur qui n'a pas de conversations

@@ -93,10 +93,10 @@ describe("POST /admins (with privileges)", () => {
 			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ user_id: "non-user" }),
 		});
+		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
 			error: "User not found",
 		});
-		expect(res.status).toBe(404);
 	});
 
 	it("non-admin user", async () => {

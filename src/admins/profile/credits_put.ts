@@ -109,7 +109,7 @@ credits_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Error message",
+									default: "Invalid credits format",
 								},
 							},
 						},
@@ -139,10 +139,12 @@ async function put_credits(c: any) {
 		return c.json({ error: "Invalid JSON" }, 400);
 	}
 
-	await config.supabaseClient
+	const result = await config.supabaseClient
 		.from("profiles")
 		.update({ credits: json.credits })
 		.eq("id", user_id);
+	if (result.error != undefined)
+		return c.json({ error: "Invalid credits format" }, 500);
 
 	return c.json({ message: "Credits updated successfully" }, 200);
 }

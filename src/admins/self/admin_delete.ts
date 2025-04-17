@@ -164,9 +164,9 @@ async function delete_admin(c: any) {
 		return c.json({ error: "You can't remove yourself from admins" }, 400);
 
 	const request_user = await getUser(request_uid);
-	if (request_user?.valid == undefined)
+	if (request_user?.valid == false)
 		return c.json({ error: "User not found" }, 404);
-	else if (request_user?.admin == undefined)
+	else if (request_user?.admin == false)
 		return c.json({ error: "User is not an admin" }, 400);
 
 	await config.supabaseClient

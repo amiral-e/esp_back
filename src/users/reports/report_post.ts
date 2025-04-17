@@ -172,10 +172,7 @@ async function validate_json(c: any) {
 async function process_documents(c: any, json: any, uid: string, input_tokens: number) {
 	let texts = "";
 	if (json.collection_name != "") {
-		console.log("collection name", json.collection_name);
 		const processed_query = await process_query(json.prompt);
-
-		console.log(processed_query);
 
 		if (processed_query != "no search needed") {
 			let docs = [];
@@ -211,10 +208,11 @@ async function process_model_response(c: any, json: any, texts: any) {
 	let content = "";
 	if (texts != undefined && texts.trim() != "")
 		content += "## Context:\n" + texts;
-	if (json.documents && json.documents.length > 0)
+	if (json.documents && json.documents.length > 0) {
 		content +=  "\n## User's documents:";
 		for (const [i, doc] of json.documents.entries())
 			content += `\n\nDoc ${i+1}:\n` + doc;
+	}
 
 	history.push({ role: "user", content: content })
 	
@@ -240,7 +238,9 @@ async function process_model_response(c: any, json: any, texts: any) {
 async function update_credits(uid: string, input_tokens: number, json: any, response: any) {
 	const result = await config.supabaseClient
 		.from("reports")
-		.insert({ user_id: uid, title: json.title, text: response.message.content });
+		.insert({ user_id: uid, title: json.title, text: response.message.content })
+		.select("id")
+		.single();
 	if (result.error) return { error: result.error.message, status: 500 };
 
 	const increment_total_reports = await config.supabaseClient.rpc(
@@ -257,7 +257,7 @@ async function update_credits(uid: string, input_tokens: number, json: any, resp
 	const output_results = await decrease_credits(response.message.content.length, uid, "groq_output");
 	if (output_results != "Success")
 		return { error: output_results, status: 500};
-	return { result: "Success"}
+	return { result: "Success", id: result.data.id }
 }
 
 async function post_report(c: any) {
@@ -289,7 +289,7 @@ async function post_report(c: any) {
 		return c.json({ error: result.error }, 500);
 
 	return c.json(
-		{ title: json.title, text: response.message.content },
+		{ title: json.title, text: response.message.content, id: result.id },
 		200,
 	);
 }
