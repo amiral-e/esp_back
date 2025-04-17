@@ -103,26 +103,28 @@ conversation_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
-		let json: any;
-		try {
-			json = await c.req.json();
-			if (!json || json.name == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
-		} catch (error) {
-			return c.json({ error: "Invalid JSON" }, 400);
-		}
-
-		const insertion = await config.supabaseClient
-			.from("conversations")
-			.insert({ history: [], name: json.name, user_id: user.uid })
-			.select("*")
-			.single();
-		if (insertion.data == undefined || insertion.error != undefined)
-			return c.json({ error: insertion.error.message }, 500);
-		return c.json({ message: `Conversation created successfully`, id: insertion.data.id }, 200);
+		return await post_conversation(c);
 	},
 );
+
+async function post_conversation(c: any) {
+	const user = c.get("user");
+
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.name == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	const insertion = await config.supabaseClient
+		.from("conversations")
+		.insert({ history: [], name: json.name, user_id: user.uid })
+		.select("*")
+		.single();
+	return c.json({ message: `Conversation created successfully`, id: insertion.data.id }, 200);
+}
 
 export default conversation_post;

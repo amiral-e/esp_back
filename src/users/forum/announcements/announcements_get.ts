@@ -86,17 +86,19 @@ announcements_get.get(
 		},
 	}),
 	async (c) => {
-		const announcements = await config.supabaseClient
-			.from("announcements")
-			.select("*");
-
-		if (announcements.data == undefined || announcements.data.length == 0)
-			return c.json({ error: "No announcement found" }, 404);
-		else if (announcements.error != undefined)
-			return c.json({ error: announcements.error.message }, 500);
-
-		return c.json({ announcements: announcements.data }, 200);
+		return await get_announcements(c);
 	},
 );
+
+async function get_announcements(c: any) {
+	const announcements = await config.supabaseClient
+		.from("announcements")
+		.select("*");
+
+	if (announcements.data == undefined || announcements.data.length == 0)
+		return c.json({ error: "No announcement found" }, 404);
+
+	return c.json({ announcements: announcements.data }, 200);
+}
 
 export default announcements_get;

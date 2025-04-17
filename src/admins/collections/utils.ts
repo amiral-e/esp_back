@@ -31,7 +31,7 @@ async function createGlobalCollection(userId: string, collectionName: string) {
 
 		// Create storage context and index
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
-		const index = await VectorStoreIndex.fromDocuments([testDoc], {
+		await VectorStoreIndex.fromDocuments([testDoc], {
 			storageContext: ctx,
 		});
 		return doc_id;

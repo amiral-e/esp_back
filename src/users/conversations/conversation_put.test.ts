@@ -8,7 +8,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var convId = "";
+let convId = "";
 
 beforeAll(async () => {
 	convId = await createConversation(userId, "test_conv");

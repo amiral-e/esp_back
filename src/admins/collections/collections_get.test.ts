@@ -5,7 +5,6 @@ import { generatePayload } from "../../middlewares/utils.ts";
 import { createGlobalCollection, deleteGlobalCollection} from "./utils.ts"
 
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
-let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 afterAll(async () => {

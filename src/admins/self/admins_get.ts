@@ -90,23 +90,23 @@ admins_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const admins = await config.supabaseClient.from("admins").select("uid");
-		if (admins.error != undefined)
-			return c.json({ error: admins.error.message }, 500);
-
-		for (let i = 0; i < admins.data.length; i++) {
-			const email = await config.supabaseClient.rpc("get_email", {
-				user_id: admins.data[i].uid,
-			});
-			if (email.error != undefined)
-				return c.json({ error: email.error.message }, 500);
-			admins.data[i].email = email.data;
-		}
-		return c.json({ admins: admins.data }, 200);
+		return await get_admins(c);
 	},
 );
+
+async function get_admins(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const admins = await config.supabaseClient.from("admins").select("uid");
+
+	for (const admin of admins.data) {
+		const email = await config.supabaseClient.rpc("get_email", {
+			user_id: admin.uid,
+		});
+		admin.email = email.data;
+	}
+	return c.json({ admins: admins.data }, 200);
+}
 
 export default admins_get;

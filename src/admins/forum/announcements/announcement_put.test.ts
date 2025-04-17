@@ -17,7 +17,7 @@ const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let testAnnouncementId: number;
 
 beforeAll(async () => {
-	const { data, error } = await config.supabaseClient
+	const { data } = await config.supabaseClient
 		.from("announcements")
 		.insert({ message: "Test Annoncement" })
 		.select()

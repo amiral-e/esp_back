@@ -2,7 +2,6 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
 	beforeAll,
 	afterAll,
 } from "bun:test";
@@ -20,7 +19,7 @@ import {
 	deleteConversation,
 } from "../conversations/utils.ts";
 
-var convId = "";
+let convId = "";
 
 beforeAll(async () => {
 	convId = await createConversation(userId, "test_conv");

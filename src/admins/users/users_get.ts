@@ -90,14 +90,16 @@ users_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const users = await config.supabaseClient.rpc("get_users");
-		if (users.error != undefined)
-			return c.json({ error: users.error.message }, 500);
-		return c.json({ users: users.data }, 200);
+		return await get_users(c);
 	},
 );
+
+async function get_users(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const users = await config.supabaseClient.rpc("get_users");
+	return c.json({ users: users.data }, 200);
+}
 
 export default users_get;

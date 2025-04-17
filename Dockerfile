@@ -1,6 +1,6 @@
 FROM debian:bookworm AS build
 
-RUN apt-get update && apt-get install -y python3 unzip curl
+RUN apt-get update && apt-get install -y curl python3 unzip
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH=/root/.bun/bin:$PATH
 

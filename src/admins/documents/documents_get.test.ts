@@ -2,8 +2,6 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
-	beforeAll,
 	afterAll,
 } from "bun:test";
 import documents_get from "./documents_get.ts";
@@ -13,7 +11,6 @@ import { generatePayload } from "../../middlewares/utils.ts";
 import { createGlobalCollection, deleteGlobalCollection } from "../collections/utils.ts";
 
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
-let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 afterAll(async () => {

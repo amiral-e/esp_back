@@ -102,19 +102,21 @@ prompts_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const prompts = await config.supabaseClient
-			.from("prompts")
-			.select("type, prompt");
-		if (prompts.data == undefined || prompts.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (prompts.error != undefined)
-			return c.json({ error: prompts.error.message }, 500);
-
-		return c.json({ prompts: prompts.data }, 200);
+		return await get_prompts(c);
 	},
 );
+
+async function get_prompts(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const prompts = await config.supabaseClient
+		.from("prompts")
+		.select("type, prompt");
+	if (prompts.data == undefined || prompts.data.length == 0)
+		return c.json({ error: "No level found" }, 404);
+
+	return c.json({ prompts: prompts.data }, 200);
+}
 
 export default prompts_get;

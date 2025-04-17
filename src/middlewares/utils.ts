@@ -1,6 +1,6 @@
 import config from "../config.ts";
 
-import { decode, sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 
 async function getUser(uid: string) {
 	const is_valid = await config.supabaseClient.rpc("is_valid_uid", {

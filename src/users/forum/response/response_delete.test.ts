@@ -3,8 +3,6 @@ import {
 	expect,
 	it,
 	beforeAll,
-	afterAll,
-	beforeEach,
 } from "bun:test";
 
 import response_post from "./response_post";
@@ -16,11 +14,6 @@ import { generatePayload } from "../../../middlewares/utils.ts";
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
 let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
 let dummyPayload2 = await generatePayload(config.envVars.DUMMY2_ID);
-const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-
-async function cleanupResponse(id: number) {
-	await config.supabaseClient.from("responses").delete().eq("id", id);
-}
 
 describe("DELETE /forum/response/:id", () => {
 	let createdResponse: any;
@@ -36,10 +29,6 @@ describe("DELETE /forum/response/:id", () => {
 		});
 		createdResponse = await res.json();
 	});
-
-	/* afterAll(async () => {
-		await cleanupResponse(createdResponse?.id);
-	}); */
 
 	it("should not delete other user response as user", async () => {
 		const res = await response_delete.request(`/${createdResponse?.id}`, {

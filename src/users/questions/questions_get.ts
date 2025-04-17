@@ -94,27 +94,27 @@ questions_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
-        const profile = await config.supabaseClient
-            .from("profiles")
-            .select("level")
-            .eq("id", user.uid)
-            .single();
-        if (profile.error != undefined)
-            return c.json({ error: profile.error.message }, 500);
-
-		const questions = await config.supabaseClient
-			.from("questions")
-			.select("question")
-            .eq("level", profile.data.level);
-		if (questions.data == undefined || questions.data.length == 0)
-			return c.json({ error: "No questions found" }, 404);
-		else if (questions.error != undefined)
-			return c.json({ error: questions.error.message }, 500);
-
-		return c.json({ questions: questions.data.map((l: any) => l.question) }, 200);
+		return await get_questions(c);
 	},
 );
+
+async function get_questions(c: any) {
+	const user = c.get("user");
+
+	const profile = await config.supabaseClient
+		.from("profiles")
+		.select("level")
+		.eq("id", user.uid)
+		.single();
+
+	const questions = await config.supabaseClient
+		.from("questions")
+		.select("question")
+		.eq("level", profile.data.level);
+	if (questions.data == undefined || questions.data.length == 0)
+		return c.json({ error: "No questions found" }, 404);
+
+	return c.json({ questions: questions.data.map((l: any) => l.question) }, 200);
+}
 
 export default questions_get;

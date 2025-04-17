@@ -98,19 +98,19 @@ levels_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
-		const levels = await config.supabaseClient
-			.from("prompts")
-			.select("type")
-			.eq("knowledge", true);
-		if (levels.data == undefined || levels.data.length == 0)
-			return c.json({ error: "No level found" }, 404);
-		else if (levels.error != undefined)
-			return c.json({ error: levels.error.message }, 500);
-
-		return c.json({ levels: levels.data.map((l: any) => l.type) }, 200);
+		return await get_levels(c);
 	},
 );
+
+async function get_levels(c: any) {
+	const levels = await config.supabaseClient
+		.from("prompts")
+		.select("type")
+		.eq("knowledge", true);
+	if (levels.data == undefined || levels.data.length == 0)
+		return c.json({ error: "No level found" }, 404);
+
+	return c.json({ levels: levels.data.map((l: any) => l.type) }, 200);
+}
 
 export default levels_get;

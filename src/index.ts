@@ -35,6 +35,7 @@ import { displayRoutes } from "./utils/routes";
 import report_post from "./users/reports/report_post.ts";
 import report_delete from "./users/reports/report_delete.ts";
 import report_get from "./users/reports/report_get.ts";
+import reports_get from "./users/reports/reports_get.ts";
 
 const app = new Hono();
 
@@ -79,6 +80,7 @@ app.route("/questions", questions_get);
 app.route("/reports", report_post);
 app.route("/reports", report_delete);
 app.route("/reports", report_get);
+app.route("/reports", reports_get);
 
 app.get(
   "/openapi",

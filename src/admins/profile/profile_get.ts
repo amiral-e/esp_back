@@ -102,23 +102,25 @@ profile_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const { user_id } = await c.req.param();
-
-		const profile = await config.supabaseClient
-			.from("profiles")
-			.select("*")
-			.eq("id", user_id)
-			.single();
-		if (profile.data == undefined)
-			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
-
-		return c.json({ profile: profile.data }, 200);
+		return await get_profile(c);
 	},
 );
+
+async function get_profile(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { user_id } = await c.req.param();
+
+	const profile = await config.supabaseClient
+		.from("profiles")
+		.select("*")
+		.eq("id", user_id)
+		.single();
+	if (profile.data == undefined)
+		return c.json({ error: "No profile found" }, 404);
+
+	return c.json({ profile: profile.data }, 200);
+}
 
 export default profile_get;

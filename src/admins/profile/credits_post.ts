@@ -120,37 +120,38 @@ credits_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const { user_id } = await c.req.param();
-
-		let json: any;
-		try {
-			json = await c.req.json();
-			if (!json || json.credits == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
-		} catch (error) {
-			return c.json({ error: "Invalid JSON" }, 400);
-		}
-
-		const credits = await config.supabaseClient
-			.from("profiles")
-			.select("credits")
-			.eq("id", user_id)
-			.single();
-		if (credits.error != undefined)
-			return c.json({ error: credits.error.message }, 500);
-
-		const update = await config.supabaseClient
-			.from("profiles")
-			.update({ credits: credits.data.credits + json.credits })
-			.eq("id", user_id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
-
-		return c.json({ message: "Credits granted successfully" }, 200);
+		return await post_credits(c);
 	},
 );
+
+
+async function post_credits(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { user_id } = await c.req.param();
+
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.credits == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	const credits = await config.supabaseClient
+		.from("profiles")
+		.select("credits")
+		.eq("id", user_id)
+		.single();
+
+	await config.supabaseClient
+		.from("profiles")
+		.update({ credits: credits.data.credits + json.credits })
+		.eq("id", user_id);
+
+	return c.json({ message: "Credits granted successfully" }, 200);
+}
 
 export default credits_post;

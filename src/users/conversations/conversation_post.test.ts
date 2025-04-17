@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "bun:test";
+import { describe, expect, it, afterAll } from "bun:test";
 import conversation from "./conversation_post.ts";
 import { deleteConversation } from "./utils.ts";
 
@@ -8,7 +8,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
-var convId = "";
+let convId = "";
 
 afterAll(async () => {
     await deleteConversation(userId, convId);

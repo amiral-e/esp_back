@@ -103,31 +103,31 @@ announcement_delete.delete(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const { id } = await c.req.param();
-
-		const announcement = await config.supabaseClient
-			.from("announcements")
-			.select("*")
-			.eq("id", id)
-			.single();
-		if (announcement.data == undefined || announcement.data.length == 0)
-			return c.json({ error: "Announcement not found" }, 404);
-		if (announcement.error != undefined)
-			return c.json({ error: announcement.error.message }, 500);
-
-		const deletion = await config.supabaseClient
-			.from("announcements")
-			.delete()
-			.eq("id", id)
-			.select("*");
-		if (deletion.error != undefined)
-			return c.json({ error: deletion.error.message }, 500);
-
-		return c.json({ message: "Announcement deleted successfully" }, 200);
+		return await delete_announcement(c);
 	},
 );
+
+async function delete_announcement(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { id } = await c.req.param();
+
+	const announcement = await config.supabaseClient
+		.from("announcements")
+		.select("*")
+		.eq("id", id)
+		.single();
+	if (announcement.data == undefined || announcement.data.length == 0)
+		return c.json({ error: "Announcement not found" }, 404);
+
+	await config.supabaseClient
+		.from("announcements")
+		.delete()
+		.eq("id", id)
+		.select("*");
+
+	return c.json({ message: "Announcement deleted successfully" }, 200);
+}
 
 export default announcement_delete;
