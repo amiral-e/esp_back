@@ -42,6 +42,18 @@ async function process_query(query: string) {
 	}
 }
 
+async function createReport(userId: string) {
+	const { data, error: createError } = await config.supabaseClient
+		.from("reports")
+		.insert({ user_id: userId, title: "My report", text: "This is my report" })
+		.select("*")
+		.single();
+	if (createError) {
+		throw createError;
+	}
+	return data.id;
+}
+
 async function deleteReport(report_id: string) {
 	const { error: deleteError } = await config.supabaseClient
 		.from("reports")
@@ -52,4 +64,4 @@ async function deleteReport(report_id: string) {
 	}
 }
 
-export { get_report_prompt, process_query, deleteReport };
+export { get_report_prompt, process_query, createReport, deleteReport };
