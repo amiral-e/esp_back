@@ -15,9 +15,9 @@ beforeAll(async () => {
     questionId = await createQuestion();
 });
 
-/* afterAll(async () => {
+afterAll(async () => {
     await deleteQuestion(questionId);
-}); */
+});
 
 describe("PUT /admins/questions (unauthorized)", () => {
     it("missing authorization header", async () => {
