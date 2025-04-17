@@ -30,8 +30,6 @@ import levels_get from "./users/config/levels_get.ts";
 
 import questions_get from "./users/questions/questions_get.ts";
 
-import { displayRoutes } from "./utils/routes";
-
 import report_post from "./users/reports/report_post.ts";
 import report_delete from "./users/reports/report_delete.ts";
 import report_get from "./users/reports/report_get.ts";
@@ -129,9 +127,6 @@ app.get(
     spec: { url: "/openapi" },
   })
 );
-
-// Afficher les routes au démarrage
-displayRoutes(app);
 
 console.log("Server running on port 3000");
 

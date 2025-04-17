@@ -102,7 +102,6 @@ create_post.post(
     if (!user) return c.json({ error: "Invalid user" }, 401);
     const body = await c.req.json();
     const { title, content } = body;
-    console.log(body);
     if (!title || !content)
       return c.json({ error: "Missing title or content" }, 400);
     const { data: postData, error: postError } = await config.supabaseClient
@@ -112,7 +111,6 @@ create_post.post(
       .single();
 
     if (postError) return c.json({ error: postError.message }, 500);
-    console.log(postData);
 
     return c.json(
       { message: "Post created successfully", post: postData },

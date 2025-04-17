@@ -105,10 +105,10 @@ describe("DELETE /admins (with privileges)", () => {
 			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ user_id: config.envVars.DUMMY_ID }),
 		});
+		expect(res.status).toBe(400);
 		expect(await res.json()).toEqual({
 			error: "User is not an admin",
 		});
-		expect(res.status).toBe(400);
 	});
 
 	it("admin user", async () => {

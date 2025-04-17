@@ -42,4 +42,14 @@ async function process_query(query: string) {
 	}
 }
 
-export { get_report_prompt, process_query };
+async function deleteReport(report_id: string) {
+	const { error: deleteError } = await config.supabaseClient
+		.from("reports")
+		.delete()
+		.eq("id", report_id)
+	if (deleteError) {
+		throw deleteError;
+	}
+}
+
+export { get_report_prompt, process_query, deleteReport };

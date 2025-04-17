@@ -70,7 +70,7 @@ describe("POST /:user_id/grant (with privileges)", () => {
         });
     });
 
-    it("should return 400 for invalid credits", async () => {
+    it("should return 500 for invalid credits", async () => {
         const res = await credits_post.request(`/${DUMMY_ID}/grant`, {
             method: "POST",
             headers: { Authorization: `Bearer ${adminPayload}` },

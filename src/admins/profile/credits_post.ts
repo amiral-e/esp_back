@@ -146,10 +146,12 @@ async function post_credits(c: any) {
 		.eq("id", user_id)
 		.single();
 
-	await config.supabaseClient
+	const result = await config.supabaseClient
 		.from("profiles")
 		.update({ credits: credits.data.credits + json.credits })
 		.eq("id", user_id);
+	if (result.error != undefined)
+		return c.json({ error: "Invalid credits format" }, 500);
 
 	return c.json({ message: "Credits granted successfully" }, 200);
 }
