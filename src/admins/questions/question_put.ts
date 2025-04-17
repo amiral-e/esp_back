@@ -105,6 +105,22 @@ question_put.put(
 					},
 				},
 			},
+			404: {
+				description: "Not found",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							properties: {
+								error: {
+									type: "string",
+									default: "Question not found",
+								},
+							},
+						},
+					},
+				},
+			},
 			500: {
 				description: "Internal server error",
 				content: {
