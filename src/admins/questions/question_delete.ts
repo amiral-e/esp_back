@@ -7,7 +7,7 @@ import AuthMiddleware from "../../middlewares/auth.ts";
 const question_delete = new Hono();
 
 question_delete.delete(
-    "/:question_id",
+	"/:question_id",
 	describeRoute({
 		summary: "Delete question",
 		description:
@@ -102,27 +102,31 @@ question_delete.delete(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		const { question_id } = c.req.param();
-
-        const question = await config.supabaseClient
-            .from("questions")
-            .select("*")
-            .eq("id", question_id)
-            .single();
-        if (question.data == undefined)
-            return c.json({ error: "Question not found" }, 404);
-
-		const deletion = await config.supabaseClient
-			.from("questions")
-			.delete()
-			.eq("id", question_id)
-			.select("*")
-			.single();
-		return c.json({ message: "Question deleted successfully" }, 200);
+		return await delete_question(c);
 	},
 );
+
+async function delete_question(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { question_id } = c.req.param();
+
+	const question = await config.supabaseClient
+		.from("questions")
+		.select("*")
+		.eq("id", question_id)
+		.single();
+	if (question.data == undefined)
+		return c.json({ error: "Question not found" }, 404);
+
+	await config.supabaseClient
+		.from("questions")
+		.delete()
+		.eq("id", question_id)
+		.select("*")
+		.single();
+	return c.json({ message: "Question deleted successfully" }, 200);
+}
 
 export default question_delete;

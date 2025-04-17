@@ -23,11 +23,11 @@ question_post.post(
 								description: "The question to add in database",
 								default: "",
 							},
-                            level: {
-                                type: "string",
-                                description: "The knowledge level of the question",
-                                default: "beginner"
-                            }
+							level: {
+								type: "string",
+								description: "The knowledge level of the question",
+								default: "beginner"
+							}
 						},
 						required: ["question", "level"],
 					},
@@ -124,24 +124,28 @@ question_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-		let json: any;
-		try {
-			json = await c.req.json();
-			if (json?.question == undefined || json?.level == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
-		} catch (error) {
-			return c.json({ error: "Invalid JSON" }, 400);
-		}
-
-		const result = await config.supabaseClient
-			.from("questions")
-			.insert({ question: json.question, level: json.level })
-
-		return c.json({ message: "Question added successfully" }, 200);
+		return await post_question(c);
 	},
 );
+
+async function post_question(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.question == undefined || json?.level == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	await config.supabaseClient
+		.from("questions")
+		.insert({ question: json.question, level: json.level })
+
+	return c.json({ message: "Question added successfully" }, 200);
+}
 
 export default question_post;
