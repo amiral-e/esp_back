@@ -9,12 +9,13 @@ import {
 async function createCollection(userId: string, collectionName: string) {
 	try {
 		// Create a test document
+		// @ts-ignore
+		const doc_id = Bun.randomUUIDv7();
 		const fileContents = "a";
 		const testDoc = new Document({
 			text: fileContents,
 			metadata: {
-				// @ts-ignore
-				doc_id: Bun.randomUUIDv7(),
+				doc_id: doc_id,
 				doc_file: "test.txt",
 				user: userId,
 			},
@@ -25,12 +26,13 @@ async function createCollection(userId: string, collectionName: string) {
 
 		// Create storage context and index
 		const ctx = await storageContextFromDefaults({ vectorStore: config.pgvs });
-		const index = await VectorStoreIndex.fromDocuments([testDoc], {
+		await VectorStoreIndex.fromDocuments([testDoc], {
 			storageContext: ctx,
 		});
+		return doc_id;
 	} catch (error: any) {
 		console.error("Error creating collection:", error.message);
-		return false;
+		return "";
 	}
 }
 
@@ -60,4 +62,35 @@ async function deleteCollection(collectionName: string) {
 	}
 }
 
-export { createCollection, deleteCollection };
+async function deleteCollections(userId: string) {
+	const { data: total_data, error: lookupTotalError } = await config.supabaseClient
+		.from("llamaindex_embedding")
+		.select("collection")
+		.like("collection", userId + "_%");
+	if (lookupTotalError != undefined) {
+		throw new Error("Error while looking for collections");
+	}
+
+	for (const item of total_data) {
+		const { data, error: deleteError } = await config.supabaseClient
+			.from("llamaindex_embedding")
+			.delete()
+			.eq("collection", item.collection);
+
+		if (deleteError != undefined) {
+			throw new Error("Error while deleting collection");
+		}
+		for (const item of data) {
+			const { error: deleteError } = await config.supabaseClient
+				.from("llamaindex_embedding")
+				.delete()
+				.eq("id", item.id);
+	
+			if (deleteError != undefined) {
+				throw new Error("Error while deleting embeddings");
+			}
+		}
+	}
+}
+
+export { createCollection, deleteCollection, deleteCollections };

@@ -1,0 +1,49 @@
+name: Tests and Deployment
+
+on: 
+  push:
+    branches:
+      - dev
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  ADMIN_ID: ${{ secrets.ADMIN_ID }}
+  DUMMY_ID: ${{ secrets.DUMMY_ID }}
+  DUMMY2_ID: ${{ secrets.DUMMY2_ID }}
+  WRONG_ID: ${{ secrets.WRONG_ID }}
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Run tests
+      run: bun run test
+
+  deploy:
+    name: Deploy app on dev env
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --app cc-back-dev --config fly-dev.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}

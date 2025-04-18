@@ -2,14 +2,12 @@ import {
 	describe,
 	expect,
 	it,
-	beforeAll,
 	afterAll,
-	beforeEach,
 } from "bun:test";
 import admin from "../index.ts";
 
 import config from "../../config.ts";
-import { insertAdmin, deleteAdmin } from "../utils.ts";
+import { deleteAdmin } from "../utils.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
@@ -95,10 +93,10 @@ describe("POST /admins (with privileges)", () => {
 			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ user_id: "non-user" }),
 		});
+		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
 			error: "User not found",
 		});
-		expect(res.status).toBe(404);
 	});
 
 	it("non-admin user", async () => {

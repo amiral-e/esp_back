@@ -10,8 +10,7 @@ credits_put.put(
 	"/:user_id/grant",
 	describeRoute({
 		summary: "Update Credits",
-		description:
-			"Update credits of a user. Admin privileges are required.",
+		description: "Update credits of a user. Admin privileges are required.",
 		tags: ["admins-users-profile"],
 		requestBody: {
 			required: true,
@@ -110,7 +109,7 @@ credits_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Error message",
+									default: "Invalid credits format",
 								},
 							},
 						},
@@ -121,30 +120,33 @@ credits_put.put(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
-
-		const { user_id } = await c.req.param();
-
-		let json: any;
-		try {
-			json = await c.req.json();
-			if (!json || json.credits == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
-		} catch (error) {
-			return c.json({ error: "Invalid JSON" }, 400);
-		}
-
-		const update = await config.supabaseClient
-			.from("profiles")
-			.update({ credits: json.credits })
-			.eq("id", user_id);
-		if (update.error != undefined)
-			return c.json({ error: update.error.message }, 500);
-
-		return c.json({ message: "Credits updated successfully" }, 200);
+		return await put_credits(c);
 	},
 );
+
+async function put_credits(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { user_id } = await c.req.param();
+
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.credits == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	const result = await config.supabaseClient
+		.from("profiles")
+		.update({ credits: json.credits })
+		.eq("id", user_id);
+	if (result.error != undefined)
+		return c.json({ error: "Invalid credits format" }, 500);
+
+	return c.json({ message: "Credits updated successfully" }, 200);
+}
 
 export default credits_put;

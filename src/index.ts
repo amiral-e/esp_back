@@ -24,19 +24,29 @@ import forum from "./users/forum/index.ts";
 
 import profile_get from "./users/profile/profile_get.ts";
 import level_put from "./users/profile/level_put.ts";
+import usage_get from "./users/profile/usage_get.ts";
+
+import levels_get from "./users/config/levels_get.ts";
+
+import questions_get from "./users/questions/questions_get.ts";
+
+import report_post from "./users/reports/report_post.ts";
+import report_delete from "./users/reports/report_delete.ts";
+import report_get from "./users/reports/report_get.ts";
+import reports_get from "./users/reports/reports_get.ts";
 
 const app = new Hono();
 
 app.get("/", (c) => {
-	return c.json({
-		message: "Hello World",
-	});
+  return c.json({
+    message: "Hello World",
+  });
 });
 
 app.route("/admins", admin);
 
 if (process.env.NODE_ENV !== "production") {
-	app.route("/test", test);
+  app.route("/test", test);
 }
 
 app.route("/conversations", chat_post);
@@ -51,66 +61,76 @@ app.route("/conversations", conversation_post);
 app.route("/conversations", conversation_put);
 app.route("/conversations", conversation_delete);
 
-app.route("/collections/:collection_name/documents", documents_get);
-app.route("/collections/:collection_name/documents", document_delete);
-app.route("/collections/:collection_name/documents", documents_post);
+app.route("/collections", documents_get);
+app.route("/collections", document_delete);
+app.route("/collections", documents_post);
 
 app.route("/forum", forum);
 
 app.route("/profile", profile_get);
 app.route("/profile/level", level_put);
+app.route("/profile/usage", usage_get);
+
+app.route("/config/levels", levels_get);
+
+app.route("/questions", questions_get);
+
+app.route("/reports", report_post);
+app.route("/reports", report_delete);
+app.route("/reports", report_get);
+app.route("/reports", reports_get);
 
 app.get(
-	"/openapi",
-	openAPISpecs(app, {
-		documentation: {
-			info: {
-				title: "Hono API",
-				version: "1.0.0",
-				description: "Hono API Documentation",
-			},
-			servers: [{ description: "Server" }],
-			components: {
-				securitySchemes: {
-					bearerAuth: {
-						type: "http",
-						scheme: "bearer",
-						bearerFormat: "JWT",
-					},
-				},
-				schemas: {
-					Error: {
-						type: "object",
-						properties: {
-							error: {
-								type: "string",
-							},
-						},
-					},
-				},
-			},
-			security: [
-				{
-					bearerAuth: [],
-				},
-			],
-		},
-	}),
+  "/openapi",
+  openAPISpecs(app, {
+    documentation: {
+      info: {
+        title: "Hono API",
+        version: "1.0.0",
+        description: "Hono API Documentation",
+      },
+      servers: [{ description: "Server" }],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+        schemas: {
+          Error: {
+            type: "object",
+            properties: {
+              error: {
+                type: "string",
+              },
+            },
+          },
+        },
+      },
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
+    },
+  })
 );
 
 import { apiReference } from "@scalar/hono-api-reference";
 
 app.get(
-	"/docs",
-	apiReference({
-		theme: "saturn",
-		spec: { url: "/openapi" },
-	}),
+  "/docs",
+  apiReference({
+    theme: "saturn",
+    spec: { url: "/openapi" },
+  })
 );
 
 console.log("Server running on port 3000");
 
 export default {
-	port: 3000,
-	fetch: app.fetch,
+  port: 3000,
+  fetch: app.fetch,
 };

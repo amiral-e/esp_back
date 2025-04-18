@@ -9,13 +9,8 @@ const profile_get = new Hono();
 profile_get.get(
 	describeRoute({
 		summary: "Get profile",
-		description:
-			"Retrieves user's profile. Auth is required.",
+		description: "Retrieves user's profile. Auth is required.",
 		tags: ["users-profile"],
-		requestBody: {
-			required: false,
-			content: {},
-		},
 		responses: {
 			200: {
 				description: "Success",
@@ -41,8 +36,7 @@ profile_get.get(
 								},
 								created_at: {
 									type: "string",
-									description:
-										"The date and time the user profile was created",
+									description: "The date and time the user profile was created",
 									default: "2023-01-01T00:00:00.000Z",
 								},
 							},
@@ -87,20 +81,22 @@ profile_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-
-		const profile = await config.supabaseClient
-			.from("profiles")
-			.select("*")
-			.eq("id", user.uid)
-			.single();
-		if (profile.data == undefined)
-			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
-
-		return c.json({ profile: profile.data }, 200);
+		return await get_profile(c);
 	},
 );
+
+async function get_profile(c: any) {
+	const user = c.get("user");
+
+	const profile = await config.supabaseClient
+		.from("profiles")
+		.select("*")
+		.eq("id", user.uid)
+		.single();
+	if (profile.data == undefined)
+		return c.json({ error: "No profile found" }, 404);
+
+	return c.json({ profile: profile.data }, 200);
+}
 
 export default profile_get;

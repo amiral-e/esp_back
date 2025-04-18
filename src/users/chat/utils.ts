@@ -1,11 +1,5 @@
 import config from "../../config.ts";
 
-import {
-	Document,
-	storageContextFromDefaults,
-	VectorStoreIndex,
-} from "llamaindex";
-
 function get_prompt(history: any[], query: string): string {
 	const context_prompt = `Chat history is below.
 ---------------------
@@ -40,4 +34,28 @@ async function add_context_to_query(
 	}
 }
 
-export { add_context_to_query };
+async function get_knowledge_prompt(uid: string) {
+	try {
+		const { data: profile, error: profile_error } = await config.supabaseClient
+			.from("profiles")
+			.select("*")
+			.eq("id", uid)
+			.single();
+		if (profile_error != undefined)
+			throw new Error("Failed to get profile");
+
+		const { data: knowledge, error: knowledge_error } = await config.supabaseClient
+			.from("prompts")
+			.select("*")
+			.eq("type", profile.level)
+			.single();
+		if (knowledge_error != undefined)
+			throw new Error("Failed to get knowledge");
+		return knowledge.prompt
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
+}
+
+export { add_context_to_query, get_knowledge_prompt };

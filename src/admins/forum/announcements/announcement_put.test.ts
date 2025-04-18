@@ -1,33 +1,32 @@
 import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-	beforeEach,
+  describe,
+  expect,
+  it,
+  beforeAll,
+  afterAll,
+  beforeEach,
 } from "bun:test";
 import announcement_put from "./announcement_put.ts";
-import announcement_post from "./announcement_post.ts";
-import envVars from "../../../config.ts";
-import { insertAdmin, deleteAdmin } from "../../utils.ts";
 import config from "../../../config.ts";
+import { generatePayload } from "../../../middlewares/utils.ts";
+
+let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
+let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
+const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 let testAnnouncementId: number;
-let jwt_token: any;
 
 beforeAll(async () => {
-	await insertAdmin(envVars.DUMMY_ID);
-	const { data, error } = await config.supabaseClient
+	const { data } = await config.supabaseClient
 		.from("announcements")
 		.insert({ message: "Test Annoncement" })
 		.select()
 		.single();
 
-	testAnnouncementId = data.id;
+  testAnnouncementId = data.id;
 });
 
 afterAll(async () => {
-	await deleteAdmin(envVars.DUMMY_ID);
 	await config.supabaseClient
 		.from("announcements")
 		.delete()
@@ -35,10 +34,6 @@ afterAll(async () => {
 });
 
 describe("PUT /announcements/:id (without privileges)", () => {
-	beforeEach(async () => {
-		await deleteAdmin(envVars.DUMMY_ID);
-	});
-
 	it("missing authorization header", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
@@ -49,21 +44,21 @@ describe("PUT /announcements/:id (without privileges)", () => {
 		expect(res.status).toBe(401);
 	});
 
-	it("invalid authorization header", async () => {
-		const res = await announcement_put.request(`/${testAnnouncementId}`, {
-			method: "PUT",
-			headers: { Authorization: `Bearer wrong-header` },
-		});
-		expect(await res.json()).toEqual({
-			error: "Invalid authorization header",
-		});
-		expect(res.status).toBe(401);
-	});
+  it("invalid authorization header", async () => {
+    const res = await announcement_put.request(`/${testAnnouncementId}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer wrong-header` },
+    });
+    expect(await res.json()).toEqual({
+      error: "Invalid authorization header",
+    });
+    expect(res.status).toBe(401);
+  });
 
 	it("non-user authorization header", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
@@ -74,7 +69,7 @@ describe("PUT /announcements/:id (without privileges)", () => {
 	it("regular user without admin privileges", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Forbidden",
@@ -84,14 +79,10 @@ describe("PUT /announcements/:id (without privileges)", () => {
 });
 
 describe("PUT /announcements/:id (with privileges)", () => {
-	beforeEach(async () => {
-		await insertAdmin(envVars.DUMMY_ID);
-	});
-
 	it("invalid JSON", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid JSON",
@@ -102,7 +93,7 @@ describe("PUT /announcements/:id (with privileges)", () => {
 	it("missing message field", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({}),
 		});
 		expect(await res.json()).toEqual({
@@ -114,7 +105,7 @@ describe("PUT /announcements/:id (with privileges)", () => {
 	it("non-existent announcement", async () => {
 		const res = await announcement_put.request("/999999", {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ message: "Updated message" }),
 		});
 		expect(await res.json()).toEqual({
@@ -126,7 +117,7 @@ describe("PUT /announcements/:id (with privileges)", () => {
 	it("successful announcement update", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {
 			method: "PUT",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ message: "Updated announcement" }),
 		});
 		expect(res.status).toBe(200);

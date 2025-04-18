@@ -1,8 +1,5 @@
 import { Hono } from "hono";
 
-import { verify } from "hono/jwt";
-import config from "../config.ts";
-
 import user_get from "./user_get.ts";
 import user_jwt_gen from "./user_jwt_gen.ts";
 import { describeRoute } from "hono-openapi";
@@ -27,9 +24,13 @@ test.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		return c.json({ user: user });
+		return await get_user(c);
 	},
 );
+
+async function get_user(c: any) {
+	const user = c.get("user");
+	return c.json({ user: user });
+}
 
 export default test;

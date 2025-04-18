@@ -3,7 +3,7 @@
 	"module": "index.ts",
 	"type": "module",
 	"scripts": {
-		"test": "bun test --coverage src/**/**/*.test.ts",
+		"test": "bun test --coverage src/**/**/*.test.ts src/**/**/**/*.test.ts",
 		"dev": "bun run --hot src/index.ts",
 		"build": "bun build --target=bun src/index.ts --outdir dist",
 		"start": "bun run dist/index.js",
@@ -19,7 +19,8 @@
 		"hono-openapi": "^0.4.3",
 		"llamaindex": "^0.8.31",
 		"pg": "^8.13.3",
-		"pgvector": "^0.2.0"
+		"pgvector": "^0.2.0",
+		"typedoc": "^0.28.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",

@@ -2,34 +2,16 @@ import {
 	describe,
 	expect,
 	it,
-	beforeAll,
-	afterAll,
-	beforeEach,
 } from "bun:test";
 import announcement_post from "./announcement_post.ts";
-import envVars from "../../../config.ts";
-import { insertAdmin, deleteAdmin } from "../../utils.ts";
 import config from "../../../config.ts";
-import user_jwt_gen from "../../../test/user_jwt_gen.ts";
+import { generatePayload } from "../../../middlewares/utils.ts";
 
-afterAll(async () => {
-	await deleteAdmin(envVars.DUMMY_ID);
-});
+let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
+let dummyPayload = await generatePayload(config.envVars.DUMMY_ID);
+const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 
 describe("POST /announcements (without privileges)", () => {
-	let jwt_token: any;
-	beforeAll(async () => {
-		const res = await user_jwt_gen.request("/", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ uid: envVars.DUMMY2_ID }),
-		});
-		const data = await res.json();
-		jwt_token = data.token;
-	});
-
 	it("missing authorization header", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
@@ -54,7 +36,7 @@ describe("POST /announcements (without privileges)", () => {
 	it("non-user authorization header", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
@@ -65,7 +47,7 @@ describe("POST /announcements (without privileges)", () => {
 	it("regular user without admin privileges", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${jwt_token}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Forbidden",
@@ -75,14 +57,10 @@ describe("POST /announcements (without privileges)", () => {
 });
 
 describe("POST /announcements (with privileges)", () => {
-	beforeAll(async () => {
-		await insertAdmin(envVars.DUMMY_ID);
-	});
-
 	it("invalid JSON", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid JSON",
@@ -93,7 +71,7 @@ describe("POST /announcements (with privileges)", () => {
 	it("missing message field", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({}),
 		});
 		expect(await res.json()).toEqual({
@@ -105,15 +83,11 @@ describe("POST /announcements (with privileges)", () => {
 	it("successful announcement creation", async () => {
 		const res = await announcement_post.request("/", {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${adminPayload}` },
 			body: JSON.stringify({ message: "Test announcement" }),
 		});
 		expect(res.status).toBe(200);
 		const res_data = await res.json();
 		expect(res_data.message).toEqual("Announcement created successfully");
-		await config.supabaseClient
-			.from("announcements")
-			.delete()
-			.eq("id", res_data.data.id);
 	});
 });

@@ -2,17 +2,24 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
-	beforeAll,
 	afterAll,
+	beforeAll
 } from "bun:test";
 import collections from "./collections_get.ts";
-import { createCollection, deleteCollection } from "./utils.ts";
+import { createCollection, deleteCollection, deleteCollections } from "./utils.ts";
 
-import envVars from "../../config.ts";
+import config from "../../config.ts";
+import { generatePayload } from "../../middlewares/utils.ts";
 
-const userId = envVars.DUMMY_ID;
-var collectionName = `${userId}_test_collection`;
+const userId = config.envVars.DUMMY_ID;
+let dummyPayload = await generatePayload(userId);
+let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
+let collectionName = `${userId}_test_collection`;
+
+beforeAll(async () => {
+	// Nettoyer la collection de test
+	await deleteCollections(userId);
+});
 
 afterAll(async () => {
 	// Nettoyer la collection de test
@@ -44,7 +51,7 @@ describe("GET /users/collections (unauthorized)", () => {
 	it("non-user authorization header", async () => {
 		const res = await collections.request("/", {
 			method: "GET",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
@@ -57,7 +64,7 @@ describe("GET /users/collections (authorized)", () => {
 	it("should return 404 when no collections found", async () => {
 		const res = await collections.request("/", {
 			method: "GET",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 
 		expect(res.status).toBe(404);
@@ -71,7 +78,7 @@ describe("GET /users/collections (authorized)", () => {
 
 		const res = await collections.request("/", {
 			method: "GET",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(res.status).toBe(200);
 		const body = await res.json();

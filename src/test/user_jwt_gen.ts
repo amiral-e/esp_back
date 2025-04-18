@@ -5,7 +5,7 @@ import config from "../config.ts";
 
 const user_jwt_gen = new Hono();
 
-import { decode, sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 
 user_jwt_gen.post(
 	describeRoute({
@@ -54,21 +54,25 @@ user_jwt_gen.post(
 		},
 	}),
 	async (c: any) => {
-		let json: any;
-		try {
-			json = await c.req.json();
-			if (!json || json.uid == undefined)
-				return c.json({ error: "Invalid JSON" }, 400);
-		} catch (error) {
-			return c.json({ error: "Invalid JSON" }, 400);
-		}
-
-		const token = await sign({ uid: json.uid }, config.envVars.JWT_SECRET);
-		return c.json({
-			message: "Here is your JWT",
-			token: token,
-		});
+		return await generate_user_jwt(c);
 	},
 );
+
+async function generate_user_jwt(c: any) {
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.uid == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	const token = await sign({ uid: json.uid }, config.envVars.JWT_SECRET);
+	return c.json({
+		message: "Here is your JWT",
+		token: token,
+	});
+}
 
 export default user_jwt_gen;

@@ -10,8 +10,7 @@ profile_get.get(
 	"/:user_id/profile",
 	describeRoute({
 		summary: "Get profile",
-		description:
-			"Retrieve a user's profile. Admin privileges are required.",
+		description: "Retrieve a user's profile. Admin privileges are required.",
 		tags: ["admins-users-profile"],
 		requestBody: {
 			required: false,
@@ -42,8 +41,7 @@ profile_get.get(
 								},
 								created_at: {
 									type: "string",
-									description:
-										"The date and time the user profile was created",
+									description: "The date and time the user profile was created",
 									default: "2023-01-01T00:00:00.000Z",
 								},
 							},
@@ -104,24 +102,25 @@ profile_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		const user = c.get("user");
-		if (!user.admin)
-			return c.json({ error: "Forbidden" }, 403);
-
-		const { user_id } = await c.req.param();
-
-		const profile = await config.supabaseClient
-			.from("profiles")
-			.select("*")
-			.eq("id", user_id)
-			.single();
-		if (profile.data == undefined)
-			return c.json({ error: "No profile found" }, 404);
-		else if (profile.error != undefined)
-			return c.json({ error: profile.error.message }, 500);
-
-		return c.json({ profile: profile.data }, 200);
+		return await get_profile(c);
 	},
 );
+
+async function get_profile(c: any) {
+	const user = c.get("user");
+	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+
+	const { user_id } = await c.req.param();
+
+	const profile = await config.supabaseClient
+		.from("profiles")
+		.select("*")
+		.eq("id", user_id)
+		.single();
+	if (profile.data == undefined)
+		return c.json({ error: "No profile found" }, 404);
+
+	return c.json({ profile: profile.data }, 200);
+}
 
 export default profile_get;

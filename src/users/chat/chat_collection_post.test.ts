@@ -2,30 +2,33 @@ import {
 	describe,
 	expect,
 	it,
-	beforeEach,
 	beforeAll,
 	afterAll,
 } from "bun:test";
 import chat_collection_post from "./chat_collection_post.ts";
 
-import envVars from "../../config.ts";
-
 import {
 	createConversation,
 	deleteConversation,
 } from "../conversations/utils.ts";
-import { createCollection, deleteCollection } from "../collections/utils.ts";
+import { createCollection } from "../collections/utils.ts";
 
-var convId = "";
-const collecName = envVars.DUMMY_ID + "_test_collec";
+import config from "../../config.ts";
+import { generatePayload } from "../../middlewares/utils.ts";
+
+const userId = config.envVars.DUMMY_ID;
+let dummyPayload = await generatePayload(userId);
+let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
+
+let convId = "";
+const collecName = userId + "_test_collec";
 
 beforeAll(async () => {
-	convId = await createConversation(envVars.DUMMY_ID, "test_conv");
+	convId = await createConversation(userId, "test_conv");
 });
 
 afterAll(async () => {
-	await deleteConversation(envVars.DUMMY_ID, convId);
-	await deleteCollection(collecName);
+	await deleteConversation(userId, convId);
 });
 
 describe("POST /conversations/:conv_id/collections/:collec_name (unauthorized)", () => {
@@ -55,7 +58,7 @@ describe("POST /conversations/:conv_id/collections/:collec_name (unauthorized)",
 	it("non-user authorization header", async () => {
 		const res = await chat_collection_post.request(`/${convId}/collections`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.WRONG_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${wrongPayload}` },
 			body: JSON.stringify({ message: "test", collections: [collecName] }),
 		});
 		expect(await res.json()).toEqual({
@@ -69,7 +72,7 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 	it("invalid JSON", async () => {
 		const res = await chat_collection_post.request(`/${convId}/collections`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 		});
 		expect(await res.json()).toEqual({
 			error: "Invalid JSON",
@@ -80,7 +83,7 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 	it("empty message", async () => {
 		const res = await chat_collection_post.request(`/${convId}/collections`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "", collections: [collecName] }),
 		});
 		expect(await res.json()).toEqual({
@@ -92,7 +95,7 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 	it("invalid collection name", async () => {
 		const res = await chat_collection_post.request(`/${convId}/collections`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "test", collections: ["invalid_name"] }),
 		});
 		expect(await res.json()).toEqual({
@@ -106,7 +109,7 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 			`/invalid_conv_id/collections`,
 			{
 				method: "POST",
-				headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+				headers: { Authorization: `Bearer ${dummyPayload}` },
 				body: JSON.stringify({ message: "test", collections: [collecName] }),
 			},
 		);
@@ -117,11 +120,11 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 	});
 
 	it("successful post", async () => {
-		await createCollection(envVars.DUMMY_ID, collecName);
+		await createCollection(userId, collecName);
 
 		const res = await chat_collection_post.request(`/${convId}/collections`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${envVars.DUMMY_JWT_PAYLOAD}` },
+			headers: { Authorization: `Bearer ${dummyPayload}` },
 			body: JSON.stringify({ message: "test", collections: [collecName] }),
 		});
 		expect(res.status).toBe(200);
