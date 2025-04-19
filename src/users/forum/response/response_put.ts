@@ -26,7 +26,7 @@ async function put_response(c: any) {
 	if (user.uid != response.data.user_id)
 		return c.json({ error: "Forbidden" }, 403);
 
-	const update = await config.supabaseClient
+	await config.supabaseClient
 		.from("responses")
 		.update({ message: body.message })
 		.eq("id", id)

@@ -13,7 +13,7 @@ async function delete_conversation(c: any) {
 	if (conversation.data == undefined || conversation.data.length == 0)
 		return c.json({ error: "Conversation not found" }, 404);
 
-	const deletion = await config.supabaseClient
+	await config.supabaseClient
 		.from("conversations")
 		.delete()
 		.eq("id", conversation.data.id);

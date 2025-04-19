@@ -13,7 +13,7 @@ async function delete_report(c: any) {
 	if (report.data == undefined || report.data.length == 0)
 		return c.json({ error: "Report not found" }, 404);
 
-	const deletion = await config.supabaseClient
+	await config.supabaseClient
 		.from("reports")
 		.delete()
 		.eq("id", report.data.id);

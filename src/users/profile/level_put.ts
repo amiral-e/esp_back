@@ -29,7 +29,7 @@ async function put_level(c: any) {
 	if (profile.data == undefined)
 		return c.json({ error: "No profile found" }, 404);
 
-	const update = await config.supabaseClient
+	await config.supabaseClient
 		.from("profiles")
 		.update({ level: json.level })
 		.eq("id", user.uid)

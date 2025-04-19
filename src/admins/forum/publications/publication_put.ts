@@ -10,7 +10,7 @@ async function post_update(c: any) {
 		let json: any;
 		try {
 			json = await c.req.json();
-			if (!json || !json.title || !json.content) {
+			if (!json?.title || !json?.content) {
 				return c.json({ error: "Invalid JSON" }, 400);
 			}
 		} catch (error) {

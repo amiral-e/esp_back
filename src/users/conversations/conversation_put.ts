@@ -21,7 +21,7 @@ async function put_conversation(c: any) {
 	if (conversation.data == undefined || conversation.data.length == 0)
 		return c.json({ error: "Conversation not found" }, 404);
 
-	const update = await config.supabaseClient
+	await config.supabaseClient
 		.from("conversations")
 		.update({ name: json.name })
 		.eq("id", conversation.data.id);

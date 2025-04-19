@@ -60,12 +60,12 @@ async function post_chat(c: any) {
 	history.push({ role: "assistant", content: response.message.content });
 
 	history = history.slice(1);
-	const update = await config.supabaseClient
+	await config.supabaseClient
 		.from("conversations")
 		.update({ history: history })
 		.eq("id", conversation.data.id);
 
-	const increment_total_messages = await config.supabaseClient.rpc(
+	await config.supabaseClient.rpc(
 		"increment_total_messages",
 		{ p_user_id: user.uid },
 	);

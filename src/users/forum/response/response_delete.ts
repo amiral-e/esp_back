@@ -18,7 +18,7 @@ async function delete_response(c: any) {
 	if (user.uid != response.data.user_id && !is_admin)
 		return c.json({ error: "Forbidden" }, 403);
 
-	const deletion = await config.supabaseClient
+	await config.supabaseClient
 		.from("responses")
 		.delete()
 		.eq("id", id);
