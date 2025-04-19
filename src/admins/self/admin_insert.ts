@@ -19,8 +19,7 @@ async function insert_admin(c: any) {
 		return c.json({ error: "You can't add yourself to admins" }, 400);
 
 	const request_user = await getUser(request_uid);
-	if (!request_user?.valid)
-		return c.json({ error: "User not found" }, 404);
+	if (!request_user?.valid) return c.json({ error: "User not found" }, 404);
 	else if (request_user.admin)
 		return c.json({ error: "User is already an admin" }, 400);
 

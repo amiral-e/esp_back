@@ -35,8 +35,8 @@ prompts_get.get(
 											},
 											prompt: {
 												type: "string",
-												default: "This is a system prompt"
-											}
+												default: "This is a system prompt",
+											},
 										},
 									},
 								},

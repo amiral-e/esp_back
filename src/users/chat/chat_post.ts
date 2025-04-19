@@ -16,7 +16,12 @@ async function post_chat(c: any) {
 	}
 	const input_tokens = json.message.length;
 
-	const validate_credits = await check_credits(input_tokens, user.uid, false, false);
+	const validate_credits = await check_credits(
+		input_tokens,
+		user.uid,
+		false,
+		false,
+	);
 	if (validate_credits != "Success")
 		return c.json({ error: "Not enough credits" }, 402);
 
@@ -44,10 +49,7 @@ async function post_chat(c: any) {
 			messages: JSON.parse(JSON.stringify(history)),
 		});
 	} catch (error: any) {
-		console.error(
-			"LLM Error:",
-			error instanceof Error ? error.message : error,
-		);
+		console.error("LLM Error:", error instanceof Error ? error.message : error);
 		if (error.message?.toLowerCase().includes("rate_limit_exceeded")) {
 			console.log("Hit rate limit. Consider implementing retry logic.");
 			return c.json({ error: "Rate limit exceeded" }, 500);
@@ -68,18 +70,22 @@ async function post_chat(c: any) {
 		{ p_user_id: user.uid },
 	);
 
-	const input_results = await decrease_credits(input_tokens, user.uid, "groq_input");
-	if (input_results != "Success")
-		return c.json({ error: input_results }, 500);
+	const input_results = await decrease_credits(
+		input_tokens,
+		user.uid,
+		"groq_input",
+	);
+	if (input_results != "Success") return c.json({ error: input_results }, 500);
 
-	const output_results = await decrease_credits(response.message.content.length, user.uid, "groq_output");
+	const output_results = await decrease_credits(
+		response.message.content.length,
+		user.uid,
+		"groq_output",
+	);
 	if (output_results != "Success")
 		return c.json({ error: output_results }, 500);
 
-	return c.json(
-		{ role: "assistant", content: response.message.content },
-		200,
-	);
+	return c.json({ role: "assistant", content: response.message.content }, 200);
 }
 
 export default post_chat;

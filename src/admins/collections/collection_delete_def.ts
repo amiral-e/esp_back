@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import AuthMiddleware from "../../middlewares/auth.ts";
-import delete_collection from "./collection_delete.ts"
+import delete_collection from "./collection_delete.ts";
 
 const collection_delete = new Hono();
 

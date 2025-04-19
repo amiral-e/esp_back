@@ -86,7 +86,7 @@ collection_delete.delete(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await delete_collection(c);		
+		return await delete_collection(c);
 	},
 );
 

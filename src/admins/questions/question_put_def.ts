@@ -10,7 +10,8 @@ question_put.put(
 	"/:question_id",
 	describeRoute({
 		summary: "Put predefined question",
-		description: "Put predefined question by level. Admin privileges are required.",
+		description:
+			"Put predefined question by level. Admin privileges are required.",
 		tags: ["admins-questions"],
 		requestBody: {
 			required: true,
@@ -27,8 +28,8 @@ question_put.put(
 							level: {
 								type: "string",
 								description: "The knowledge level of the question",
-								default: "beginner"
-							}
+								default: "beginner",
+							},
 						},
 						required: ["question", "level"],
 					},

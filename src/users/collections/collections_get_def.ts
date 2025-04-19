@@ -92,7 +92,7 @@ collections_get.get(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await get_collections(c);		
+		return await get_collections(c);
 	},
 );
 

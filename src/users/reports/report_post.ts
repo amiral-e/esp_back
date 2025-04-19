@@ -14,14 +14,17 @@ async function validate_json(c: any) {
 	} catch (error) {
 		return { error: "Invalid JSON", status: 400 };
 	}
-	if (json?.documents == undefined)
-		json.documents = [];
-	if (json?.collection_name == undefined)
-		json.collection_name = "";
+	if (json?.documents == undefined) json.documents = [];
+	if (json?.collection_name == undefined) json.collection_name = "";
 	return json;
 }
 
-async function process_documents(c: any, json: any, uid: string, input_tokens: number) {
+async function process_documents(
+	c: any,
+	json: any,
+	uid: string,
+	input_tokens: number,
+) {
 	let texts = "";
 	if (json.collection_name != "") {
 		const processed_query = await process_query(json.prompt);
@@ -55,29 +58,26 @@ async function process_documents(c: any, json: any, uid: string, input_tokens: n
 
 async function process_model_response(c: any, json: any, texts: any) {
 	const report_prompt = await get_report_prompt();
-	let history = [{ role: "system", content: report_prompt }]
+	let history = [{ role: "system", content: report_prompt }];
 
 	let content = "";
 	if (texts != undefined && texts.trim() != "")
 		content += "## Context:\n" + texts;
 	if (json.documents && json.documents.length > 0) {
-		content +=  "\n## User's documents:";
+		content += "\n## User's documents:";
 		for (const [i, doc] of json.documents.entries())
-			content += `\n\nDoc ${i+1}:\n` + doc;
+			content += `\n\nDoc ${i + 1}:\n` + doc;
 	}
 
-	history.push({ role: "user", content: content })
-	
+	history.push({ role: "user", content: content });
+
 	let response: any;
 	try {
 		response = await config.llm.chat({
 			messages: JSON.parse(JSON.stringify(history)),
 		});
 	} catch (error: any) {
-		console.error(
-			"LLM Error:",
-			error instanceof Error ? error.message : error,
-		);
+		console.error("LLM Error:", error instanceof Error ? error.message : error);
 		if (error.message?.toLowerCase().includes("rate_limit_exceeded")) {
 			console.log("Hit rate limit. Consider implementing retry logic.");
 			return { error: "Rate limit exceeded", status: 500 };
@@ -87,7 +87,12 @@ async function process_model_response(c: any, json: any, texts: any) {
 	return response;
 }
 
-async function update_credits(uid: string, input_tokens: number, json: any, response: any) {
+async function update_credits(
+	uid: string,
+	input_tokens: number,
+	json: any,
+	response: any,
+) {
 	const result = await config.supabaseClient
 		.from("reports")
 		.insert({ user_id: uid, title: json.title, text: response.message.content })
@@ -100,33 +105,39 @@ async function update_credits(uid: string, input_tokens: number, json: any, resp
 		{ p_user_id: uid },
 	);
 	if (increment_total_reports.error != undefined)
-		return { error: increment_total_reports.error.message, status: 500};
+		return { error: increment_total_reports.error.message, status: 500 };
 
 	const input_results = await decrease_credits(input_tokens, uid, "groq_input");
-	if (input_results != "Success")
-		return { error: input_results , status: 500};
+	if (input_results != "Success") return { error: input_results, status: 500 };
 
-	const output_results = await decrease_credits(response.message.content.length, uid, "groq_output");
+	const output_results = await decrease_credits(
+		response.message.content.length,
+		uid,
+		"groq_output",
+	);
 	if (output_results != "Success")
-		return { error: output_results, status: 500};
-	return { result: "Success", id: result.data.id }
+		return { error: output_results, status: 500 };
+	return { result: "Success", id: result.data.id };
 }
 
 async function post_report(c: any) {
 	const user = c.get("user");
 
 	let json = await validate_json(c);
-	if (json.error != undefined)
-		return c.json({ error: json.error }, 400);
+	if (json.error != undefined) return c.json({ error: json.error }, 400);
 
 	let size = 0;
-	for (let doc of json.documents)
-		size += doc.length;
+	for (let doc of json.documents) size += doc.length;
 	const input_tokens = size + json.prompt.length;
 
-	const validate_credits = await check_credits(input_tokens, user.uid, false, false);
+	const validate_credits = await check_credits(
+		input_tokens,
+		user.uid,
+		false,
+		false,
+	);
 	if (validate_credits != "Success")
-		return c.json({ error: "Not enough credits"}, 402);
+		return c.json({ error: "Not enough credits" }, 402);
 
 	const texts = await process_documents(c, json, user.uid, input_tokens);
 	if (texts.error != undefined)
@@ -137,8 +148,7 @@ async function post_report(c: any) {
 		return c.json({ error: response.error }, response.status);
 
 	const result = await update_credits(user.uid, input_tokens, json, response);
-	if (result.error != undefined)
-		return c.json({ error: result.error }, 500);
+	if (result.error != undefined) return c.json({ error: result.error }, 500);
 
 	return c.json(
 		{ title: json.title, text: response.message.content, id: result.id },

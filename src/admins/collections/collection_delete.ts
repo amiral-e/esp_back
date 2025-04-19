@@ -1,4 +1,4 @@
-import config from "../../config.ts";;
+import config from "../../config.ts";
 
 async function delete_collection(c: any) {
 	const user = c.get("user");

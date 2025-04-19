@@ -2,8 +2,6 @@ import { verify } from "hono/jwt";
 import config from "../config.ts";
 import { getUser } from "./utils.ts";
 
-
-
 const AuthMiddleware = async (c: any, next: any) => {
 	const { authorization } = c.req.header();
 	if (!authorization)

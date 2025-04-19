@@ -26,7 +26,7 @@ import level_put from "./profile/level_put_def.ts";
 
 import settings_get from "./config/prices_get_def.ts";
 import setting_put from "./config/price_put_def.ts";
-import prompts_get from "./config/prompts_get_def.ts"
+import prompts_get from "./config/prompts_get_def.ts";
 
 import question_post from "./questions/question_post_def.ts";
 import question_delete from "./questions/question_delete_def.ts";

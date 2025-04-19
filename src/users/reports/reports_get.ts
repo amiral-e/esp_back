@@ -10,10 +10,7 @@ async function get_reports(c: any) {
 	if (reports.data == undefined || reports.data.length == 0)
 		return c.json({ error: "No report found" }, 404);
 
-	return c.json(
-		reports.data,
-		200,
-	);
+	return c.json(reports.data, 200);
 }
 
 export default get_reports;

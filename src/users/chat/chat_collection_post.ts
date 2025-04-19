@@ -34,10 +34,15 @@ async function validate_json(c: any) {
 	} catch (error) {
 		return { error: "Invalid JSON" };
 	}
-	return json
+	return json;
 }
 
-async function set_messages_history(c: any, conversation: any, json: any, uid: string) {
+async function set_messages_history(
+	c: any,
+	conversation: any,
+	json: any,
+	uid: string,
+) {
 	const knowledge_prompt = await get_knowledge_prompt(uid);
 
 	const res = await add_context_to_query(
@@ -72,29 +77,39 @@ async function set_messages_history(c: any, conversation: any, json: any, uid: s
 	return { prompt: knowledge_prompt, res: res, texts: texts, docs: docs };
 }
 
-async function update_credits(uid: string, input_tokens: number, output_tokens: number) {
+async function update_credits(
+	uid: string,
+	input_tokens: number,
+	output_tokens: number,
+) {
 	const increment_total_messages = await config.supabaseClient.rpc(
 		"increment_total_messages",
 		{ p_user_id: uid },
 	);
 	if (increment_total_messages.error != undefined)
-		return { error: increment_total_messages.error.message, status: 500};
+		return { error: increment_total_messages.error.message, status: 500 };
 
 	const input_result = await decrease_credits(input_tokens, uid, "groq_input");
-	if (input_result != "Success")
-		return { error: input_result, status: 500};
+	if (input_result != "Success") return { error: input_result, status: 500 };
 
-	const output_result = await decrease_credits(output_tokens, uid, "groq_output");
-	if (output_result != "Success")
-		return { error: output_result, status: 500};
+	const output_result = await decrease_credits(
+		output_tokens,
+		uid,
+		"groq_output",
+	);
+	if (output_result != "Success") return { error: output_result, status: 500 };
 
 	const query_result = await decrease_credits(1, uid, "search");
-	if (query_result != "Success")
-		return { error: query_result, status: 500};
+	if (query_result != "Success") return { error: query_result, status: 500 };
 	return { result: "Success" };
 }
 
-async function update_conv_history(conversation: any, json: any, response: any, docs: any) {
+async function update_conv_history(
+	conversation: any,
+	json: any,
+	response: any,
+	docs: any,
+) {
 	let sources_details = [];
 	for (const doc of docs) {
 		const details = doc.sources.map((x: any) => {
@@ -138,12 +153,16 @@ async function update_conv_history(conversation: any, json: any, response: any, 
 async function post_chat_with_collection(c: any) {
 	const user = c.get("user");
 
-	let json = await validate_json(c)
-	if (json.error != undefined)
-		return c.json({ error: json.error}, 400);
+	let json = await validate_json(c);
+	if (json.error != undefined) return c.json({ error: json.error }, 400);
 
 	const input_tokens = json.message.length;
-	const validate_credits = await check_credits(input_tokens, user.uid, true, false);
+	const validate_credits = await check_credits(
+		input_tokens,
+		user.uid,
+		true,
+		false,
+	);
 	if (validate_credits != "Success")
 		return c.json({ error: "Not enough credits" }, 402);
 
@@ -175,25 +194,40 @@ async function post_chat_with_collection(c: any) {
 	let response: any;
 	try {
 		response = await config.llm.chat({
-			messages: [{ role: "system", content: elems.prompt }, { role: "user", content: get_context_prompt(elems.texts, elems.res) }],
+			messages: [
+				{ role: "system", content: elems.prompt },
+				{ role: "user", content: get_context_prompt(elems.texts, elems.res) },
+			],
 		});
 	} catch (error: any) {
-		console.error(
-			"LLM Error:",
-			error instanceof Error ? error.message : error,
-		);
+		console.error("LLM Error:", error instanceof Error ? error.message : error);
 		if (error.message?.toLowerCase().includes("rate_limit_exceeded"))
 			console.log("Hit rate limit. Consider implementing retry logic.");
 	}
 	const output_tokens = response.message.content.length;
 
-	const update_credits_result = await update_credits(user.uid, input_tokens, output_tokens);
+	const update_credits_result = await update_credits(
+		user.uid,
+		input_tokens,
+		output_tokens,
+	);
 	if (update_credits_result.error != undefined)
-		return c.json({ error: update_credits_result.error }, update_credits_result.status);
+		return c.json(
+			{ error: update_credits_result.error },
+			update_credits_result.status,
+		);
 
-	const update_history_result = await update_conv_history(conversation, json, response, elems.docs);
+	const update_history_result = await update_conv_history(
+		conversation,
+		json,
+		response,
+		elems.docs,
+	);
 	if (update_history_result.error != undefined)
-		return c.json({ error: update_history_result.error }, update_history_result.status);
+		return c.json(
+			{ error: update_history_result.error },
+			update_history_result.status,
+		);
 
 	return c.json(
 		{

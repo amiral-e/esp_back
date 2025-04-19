@@ -9,7 +9,8 @@ const question_post = new Hono();
 question_post.post(
 	describeRoute({
 		summary: "Post predefined question",
-		description: "Post predefined question by level. Admin privileges are required.",
+		description:
+			"Post predefined question by level. Admin privileges are required.",
 		tags: ["admins-questions"],
 		requestBody: {
 			required: true,
@@ -26,8 +27,8 @@ question_post.post(
 							level: {
 								type: "string",
 								description: "The knowledge level of the question",
-								default: "beginner"
-							}
+								default: "beginner",
+							},
 						},
 						required: ["question", "level"],
 					},

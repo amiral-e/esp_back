@@ -6,8 +6,7 @@ async function put_conversation(c: any) {
 
 	try {
 		json = await c.req.json();
-		if (json?.name == undefined)
-			return c.json({ error: "Invalid JSON" }, 400);
+		if (json?.name == undefined) return c.json({ error: "Invalid JSON" }, 400);
 	} catch (error) {
 		return c.json({ error: "Invalid JSON" }, 400);
 	}

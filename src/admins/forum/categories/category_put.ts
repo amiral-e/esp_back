@@ -23,10 +23,7 @@ async function put_category(c: any) {
 	if (categorie.data == undefined || categorie.data.length == 0)
 		return c.json({ error: "Category not found" }, 404);
 
-	await config.supabaseClient
-		.from("categories")
-		.update(json)
-		.eq("id", id);
+	await config.supabaseClient.from("categories").update(json).eq("id", id);
 
 	return c.json({ message: "Category updated successfully" }, 200);
 }

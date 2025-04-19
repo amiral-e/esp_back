@@ -175,7 +175,7 @@ chat_collection_post.post(
 	AuthMiddleware,
 	async (c) => {
 		return await post_chat_with_collection(c);
-	}
+	},
 );
 
 export default chat_collection_post;

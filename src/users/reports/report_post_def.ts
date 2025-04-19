@@ -24,19 +24,19 @@ report_post.post(
 								description: "The title of the report",
 								default: "Titre du rapport",
 							},
-                            documents: {
-                                type: "array",
-                                items: {
+							documents: {
+								type: "array",
+								items: {
 									type: "string",
 									description: "The documents texts used as context",
 									default: "",
 								},
-                            },
-                            prompt: {
-                                type: "string",
-                                description: "The prompt used to generate the report",
-                                default: "Génère un rapport",
-                            },
+							},
+							prompt: {
+								type: "string",
+								description: "The prompt used to generate the report",
+								default: "Génère un rapport",
+							},
 							collection_name: {
 								type: "string",
 								description: "The name of the collection to use as context",

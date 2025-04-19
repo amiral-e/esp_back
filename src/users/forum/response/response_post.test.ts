@@ -1,8 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-} from "bun:test";
+import { describe, expect, it } from "bun:test";
 import response_post from "./response_post_def.ts";
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";

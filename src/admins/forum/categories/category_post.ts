@@ -13,10 +13,7 @@ async function post_category(c: any) {
 		return c.json({ error: "Invalid JSON" }, 400);
 	}
 
-	await config.supabaseClient
-		.from("categories")
-		.insert(json)
-		.select("*");
+	await config.supabaseClient.from("categories").insert(json).select("*");
 
 	return c.json({ message: "Category created successfully" }, 200);
 }

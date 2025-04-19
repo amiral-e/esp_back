@@ -8,8 +8,7 @@ async function delete_admin(c: any) {
 	let request_uid = "";
 	try {
 		const json = await c.req.json();
-		if (!json?.user_id || typeof json?.user_id !== "string")
-			throw new Error();
+		if (!json?.user_id || typeof json?.user_id !== "string") throw new Error();
 		request_uid = json.user_id;
 	} catch (error) {
 		return c.json({ error: "Invalid JSON" }, 400);
@@ -19,8 +18,7 @@ async function delete_admin(c: any) {
 		return c.json({ error: "You can't remove yourself from admins" }, 400);
 
 	const request_user = await getUser(request_uid);
-	if (!request_user?.valid)
-		return c.json({ error: "User not found" }, 404);
+	if (!request_user?.valid) return c.json({ error: "User not found" }, 404);
 	else if (!request_user?.admin)
 		return c.json({ error: "User is not an admin" }, 400);
 

@@ -27,11 +27,14 @@ async function post_question(c: any) {
 		.from("questions")
 		.insert({ question: json.question, level: json.level })
 		.select("*")
-		.single()
+		.single();
 	if (result.error != undefined)
 		return c.json({ error: result.error.message }, 500);
 
-	return c.json({ message: "Question added successfully", id: result.data.id }, 200);
+	return c.json(
+		{ message: "Question added successfully", id: result.data.id },
+		200,
+	);
 }
 
 export default post_question;

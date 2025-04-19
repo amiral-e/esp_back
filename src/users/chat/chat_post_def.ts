@@ -143,7 +143,7 @@ chat_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await post_chat(c);	
+		return await post_chat(c);
 	},
 );
 

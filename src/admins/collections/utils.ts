@@ -9,9 +9,8 @@ import {
 
 async function createGlobalCollection(userId: string, collectionName: string) {
 	try {
-        const user = await getUser(userId);
-        if (!user.admin)
-            return "";
+		const user = await getUser(userId);
+		if (!user.admin) return "";
 
 		// Create a test document
 		// @ts-ignore
@@ -43,8 +42,7 @@ async function createGlobalCollection(userId: string, collectionName: string) {
 
 async function deleteGlobalCollection(userId: string, collectionName: string) {
 	const user = await getUser(userId);
-    if (!user.admin)
-        return false;
+	if (!user.admin) return false;
 
 	const { data, error: lookupError } = await config.supabaseClient
 		.from("llamaindex_embedding")

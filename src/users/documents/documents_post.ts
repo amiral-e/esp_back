@@ -52,7 +52,8 @@ async function post_documents(c: any) {
 	if (docs.length == 0) return c.json({ error: "No files provided" }, 400);
 
 	const validate_credits = await check_credits(tokens, user.uid, false, true);
-	if (validate_credits != "Success") return c.json({ error: "Not enough credits" }, 402);
+	if (validate_credits != "Success")
+		return c.json({ error: "Not enough credits" }, 402);
 
 	config.pgvs.setCollection(user.uid + "_" + collection_name);
 
@@ -61,16 +62,17 @@ async function post_documents(c: any) {
 		storageContext: ctx,
 	});
 
-	const increment_total_docs = await config.supabaseClient.schema("public").rpc(
-		"increment_total_docs",
-		{ p_user_id: user.uid, p_docs_to_add: docs.length },
-	);
+	const increment_total_docs = await config.supabaseClient
+		.schema("public")
+		.rpc("increment_total_docs", {
+			p_user_id: user.uid,
+			p_docs_to_add: docs.length,
+		});
 	if (increment_total_docs.error != undefined)
 		return c.json({ error: increment_total_docs.error.message }, 500);
 
 	const credits = await decrease_credits(tokens, user.uid, "openai_embedding");
-	if (credits != "Success")
-		return c.json({ error: credits }, 500);
+	if (credits != "Success") return c.json({ error: credits }, 500);
 
 	return c.json(
 		{

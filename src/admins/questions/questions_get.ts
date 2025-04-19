@@ -6,7 +6,7 @@ async function get_questions(c: any) {
 
 	const questions = await config.supabaseClient
 		.from("questions")
-		.select("id, question, level")
+		.select("id, question, level");
 	if (questions.data == undefined || questions.data.length == 0)
 		return c.json({ error: "No questions found" }, 404);
 

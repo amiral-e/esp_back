@@ -1,10 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-} from "bun:test";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
 import announcements_get from "./announcements_get_def.ts";
 import config from "../../../config.ts";
 

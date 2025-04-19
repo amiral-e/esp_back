@@ -22,8 +22,7 @@ async function put_price(c: any) {
 		.eq("price", price_name)
 		.single();
 
-	if (price.data == undefined)
-		return c.json({ error: "No price found" }, 404);
+	if (price.data == undefined) return c.json({ error: "No price found" }, 404);
 
 	await config.supabaseClient
 		.from("prices")

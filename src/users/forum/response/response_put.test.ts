@@ -1,10 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-} from "bun:test";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
 import response_post from "./response_post_def.ts";
 import response_put from "./response_put_def.ts";
 

@@ -41,17 +41,17 @@ async function get_knowledge_prompt(uid: string) {
 			.select("*")
 			.eq("id", uid)
 			.single();
-		if (profile_error != undefined)
-			throw new Error("Failed to get profile");
+		if (profile_error != undefined) throw new Error("Failed to get profile");
 
-		const { data: knowledge, error: knowledge_error } = await config.supabaseClient
-			.from("prompts")
-			.select("*")
-			.eq("type", profile.level)
-			.single();
+		const { data: knowledge, error: knowledge_error } =
+			await config.supabaseClient
+				.from("prompts")
+				.select("*")
+				.eq("type", profile.level)
+				.single();
 		if (knowledge_error != undefined)
 			throw new Error("Failed to get knowledge");
-		return knowledge.prompt
+		return knowledge.prompt;
 	} catch (error) {
 		console.error(error);
 		throw error;

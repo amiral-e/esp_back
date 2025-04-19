@@ -52,10 +52,10 @@ async function post_documents(c: any) {
 		storageContext: ctx,
 	});
 
-	await config.supabaseClient.rpc(
-		"increment_total_docs",
-		{ p_user_id: user.uid, p_docs_to_add: docs.length },
-	);
+	await config.supabaseClient.rpc("increment_total_docs", {
+		p_user_id: user.uid,
+		p_docs_to_add: docs.length,
+	});
 
 	return c.json(
 		{

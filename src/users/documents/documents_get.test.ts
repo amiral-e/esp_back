@@ -1,9 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	afterAll,
-} from "bun:test";
+import { describe, expect, it, afterAll } from "bun:test";
 import documents_get from "./documents_get_def.ts";
 
 import config from "../../config.ts";
@@ -17,7 +12,7 @@ let collectionName = `test_collec`;
 
 afterAll(async () => {
 	// Nettoyer la collection de test
-	await deleteCollection(userId + '_' + collectionName);
+	await deleteCollection(userId + "_" + collectionName);
 });
 
 describe("GET /users/documents (unauthorized)", () => {
@@ -56,10 +51,13 @@ describe("GET /users/documents (unauthorized)", () => {
 
 describe("GET /users/documents (authorized)", () => {
 	it("should return 404 when no documents found", async () => {
-		const res = await documents_get.request(`/nonexistent_collection/documents`, {
-			method: "GET",
-			headers: { Authorization: `Bearer ${dummyPayload}` },
-		});
+		const res = await documents_get.request(
+			`/nonexistent_collection/documents`,
+			{
+				method: "GET",
+				headers: { Authorization: `Bearer ${dummyPayload}` },
+			},
+		);
 
 		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
@@ -68,7 +66,7 @@ describe("GET /users/documents (authorized)", () => {
 	});
 
 	it("should return documents for user", async () => {
-		await createCollection(userId, userId + '_' + collectionName);
+		await createCollection(userId, userId + "_" + collectionName);
 
 		const res = await documents_get.request(`/test_collec/documents`, {
 			method: "GET",

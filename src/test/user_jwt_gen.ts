@@ -5,8 +5,7 @@ async function generate_user_jwt(c: any) {
 	let json: any;
 	try {
 		json = await c.req.json();
-		if (json?.uid == undefined)
-			return c.json({ error: "Invalid JSON" }, 400);
+		if (json?.uid == undefined) return c.json({ error: "Invalid JSON" }, 400);
 	} catch (error) {
 		return c.json({ error: "Invalid JSON" }, 400);
 	}
