@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll, afterAll } from "bun:test";
-import question_put from "./question_put.ts";
+import question_put from "./question_put_def.ts";
 import { createQuestion, deleteQuestion } from "./utils.ts";
 
 import { generatePayload } from "../../middlewares/utils.ts";

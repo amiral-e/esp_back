@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll } from "bun:test";
 import { generatePayload } from "../../middlewares/utils.ts";
-import report_delete from "./report_delete.ts";
+import report_delete from "./report_delete_def.ts";
 
 import config from "../../config.ts";
 import { createReport, deleteReport } from "./utils.ts";

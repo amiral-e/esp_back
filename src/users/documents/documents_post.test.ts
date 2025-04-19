@@ -4,7 +4,7 @@ import {
     it,
     afterAll,
 } from "bun:test";
-import document_post from "./documents_post.ts";
+import document_post from "./documents_post_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { deleteCollection } from "../collections/utils.ts";

@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, beforeAll, afterAll } from "bun:test";
-import credits_post from "./credits_post.ts";
+import credits_post from "./credits_post_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 

@@ -6,7 +6,7 @@ import {
   afterAll,
   beforeEach,
 } from "bun:test";
-import announcement_put from "./announcement_put.ts";
+import announcement_put from "./announcement_put_def.ts";
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";
 

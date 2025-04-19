@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll } from "bun:test";
-import conversations from "./conversations_get.ts";
+import conversations from "./conversations_get_def.ts";
 import { createConversation, deleteConversation, deleteConversations } from "./utils.ts";
 
 import config from "../../config.ts";

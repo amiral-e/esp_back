@@ -5,7 +5,7 @@ import {
 	afterAll,
 	beforeAll
 } from "bun:test";
-import collections from "./collections_get.ts";
+import collections from "./collections_get_def.ts";
 import { createCollection, deleteCollection, deleteCollections } from "./utils.ts";
 
 import config from "../../config.ts";

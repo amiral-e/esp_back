@@ -5,8 +5,8 @@ import {
 	beforeAll,
 	afterAll,
 } from "bun:test";
-import response_post from "./response_post";
-import response_put from "./response_put";
+import response_post from "./response_post_def.ts";
+import response_put from "./response_put_def.ts";
 
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";

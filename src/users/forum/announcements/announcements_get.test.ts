@@ -5,7 +5,7 @@ import {
 	beforeAll,
 	afterAll,
 } from "bun:test";
-import announcements_get from "./announcements_get.ts";
+import announcements_get from "./announcements_get_def.ts";
 import config from "../../../config.ts";
 
 let testAnnouncementId: number;

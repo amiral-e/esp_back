@@ -1,5 +1,5 @@
 import { describe, expect, it, afterAll } from "bun:test";
-import collections_get from "./collections_get.ts";
+import collections_get from "./collections_get_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { createGlobalCollection, deleteGlobalCollection} from "./utils.ts"

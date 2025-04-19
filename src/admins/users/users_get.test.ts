@@ -6,7 +6,7 @@ import {
 	afterAll,
 	beforeEach,
 } from "bun:test";
-import users_get from "./users_get.ts";
+import users_get from "./users_get_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 

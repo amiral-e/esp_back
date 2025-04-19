@@ -1,6 +1,6 @@
 // src/users/reports/report_post.test.ts
 import { describe, expect, it, afterAll } from "bun:test";
-import report_post from "./report_post.ts";
+import report_post from "./report_post_def.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 
 import config from "../../config.ts";

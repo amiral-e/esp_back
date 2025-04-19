@@ -1,6 +1,6 @@
 // src/admins/config/prices_get.test.ts
 import { describe, expect, it, beforeAll, afterAll } from "bun:test";
-import prices from "./prices_get.ts";
+import prices from "./prices_get_def.ts";
 import { createPrice, deletePrice } from "./utils.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import config from "../../config.ts";

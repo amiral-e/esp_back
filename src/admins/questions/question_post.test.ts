@@ -1,5 +1,5 @@
 import { describe, expect, it, afterAll } from "bun:test";
-import question_post from "./question_post.ts";
+import question_post from "./question_post_def.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 
 import config from "../../config.ts";

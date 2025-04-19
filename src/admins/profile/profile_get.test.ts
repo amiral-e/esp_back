@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, beforeAll, afterAll } from "bun:test";
-import profile_get from "./profile_get.ts";
+import profile_get from "./profile_get_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 

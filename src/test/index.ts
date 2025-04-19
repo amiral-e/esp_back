@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
-import user_get from "./user_get.ts";
-import user_jwt_gen from "./user_jwt_gen.ts";
+import user_get from "./user_get_def.ts";
+import user_jwt_gen from "./user_jwt_gen_def.ts";
 import { describeRoute } from "hono-openapi";
 
 import AuthMiddleware from "../middlewares/auth.ts";

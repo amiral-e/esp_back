@@ -1,62 +1,5 @@
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-
 import config from "../config.ts";
-
-const user_jwt_gen = new Hono();
-
 import { sign } from "hono/jwt";
-
-user_jwt_gen.post(
-	describeRoute({
-		summary: "Generate user's JWT",
-		description:
-			"This is a test route, it generates a JWT from a given uid. Auth is not required.",
-		tags: ["debug"],
-		requestBody: {
-			content: {
-				"application/json": {
-					schema: {
-						type: "object",
-						properties: {
-							uid: {
-								type: "string",
-								description: "The user uid",
-							},
-						},
-						required: ["uid"],
-					},
-				},
-			},
-			required: true,
-		},
-		responses: {
-			200: {
-				description: "OK",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								message: {
-									type: "string",
-									description: "The message",
-								},
-								token: {
-									type: "string",
-									description: "The JWT token",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}),
-	async (c: any) => {
-		return await generate_user_jwt(c);
-	},
-);
 
 async function generate_user_jwt(c: any) {
 	let json: any;
@@ -75,4 +18,4 @@ async function generate_user_jwt(c: any) {
 	});
 }
 
-export default user_jwt_gen;
+export default generate_user_jwt;

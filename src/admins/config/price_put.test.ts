@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll, afterAll } from "bun:test";
-import price from "./price_put.ts";
+import price from "./price_put_def.ts";
 import { createPrice, deletePrice } from "./utils.ts";
 
 import { generatePayload } from "../../middlewares/utils.ts";

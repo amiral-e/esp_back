@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll, afterAll } from "bun:test";
-import prompts from "./prompts_get.ts";
+import prompts from "./prompts_get_def.ts";
 
 import { generatePayload } from "../../middlewares/utils.ts";
 import config from "../../config.ts";

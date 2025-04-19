@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, beforeAll, afterAll } from "bun:test";
-import usage_get from "./usage_get.ts";
+import usage_get from "./usage_get_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 

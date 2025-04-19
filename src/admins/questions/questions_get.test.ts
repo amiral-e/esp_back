@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import questions_get from "./questions_get.ts";
+import questions_get from "./questions_get_def.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import config from "../../config.ts";
 

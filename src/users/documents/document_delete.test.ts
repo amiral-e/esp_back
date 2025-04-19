@@ -3,7 +3,7 @@ import {
 	expect,
 	it,
 } from "bun:test";
-import document_delete from "./document_delete.ts";
+import document_delete from "./document_delete_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { createCollection } from "../collections/utils.ts";
