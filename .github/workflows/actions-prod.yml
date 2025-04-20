@@ -3,7 +3,7 @@ name: Tests and Production Deployment
 on:
   push:
     branches:
-      - prod
+      - main
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

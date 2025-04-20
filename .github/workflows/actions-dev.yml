@@ -38,7 +38,6 @@ jobs:
 
   deploy:
     name: Deploy app on dev env
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
