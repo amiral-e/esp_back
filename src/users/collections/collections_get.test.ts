@@ -3,7 +3,6 @@ import collections from "./collections_get_def.ts";
 import {
 	createCollection,
 	deleteCollection,
-	deleteCollections,
 } from "./utils.ts";
 
 import config from "../../config.ts";
@@ -13,10 +12,6 @@ const userId = config.envVars.DUMMY_ID;
 let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let collectionName = `${userId}_test_collection`;
-
-beforeAll(async () => {
-	await deleteCollections(userId);
-});
 
 afterAll(async () => {
 	await deleteCollection(collectionName);

@@ -57,35 +57,7 @@ async function deleteCollection(collectionName: string) {
 		if (deleteError)
 			return;
 	}
+	return;
 }
 
-async function deleteCollections(userId: string) {
-	const { data: total_data, error: lookupTotalError } =
-		await config.supabaseClient
-			.from("llamaindex_embedding")
-			.select("collection")
-			.like("collection", userId + "_%");
-	if (lookupTotalError != undefined)
-		return;
-
-	for (const item of total_data) {
-		const { data, error: deleteError } = await config.supabaseClient
-			.from("llamaindex_embedding")
-			.delete()
-			.eq("collection", item.collection);
-
-		if (deleteError != undefined)
-			return;
-		for (const item of data) {
-			const { error: deleteError } = await config.supabaseClient
-				.from("llamaindex_embedding")
-				.delete()
-				.eq("id", item.id);
-
-			if (deleteError != undefined)
-				return;
-		}
-	}
-}
-
-export { createCollection, deleteCollection, deleteCollections };
+export { createCollection, deleteCollection };
