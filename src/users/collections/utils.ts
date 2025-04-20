@@ -42,12 +42,10 @@ async function deleteCollection(collectionName: string) {
 		.select("id, collection")
 		.eq("collection", collectionName);
 
-	if (!data || data.length === 0) {
-		throw new Error("Collection not found");
-	}
-	if (lookupError) {
-		throw lookupError;
-	}
+	if (!data || data.length === 0)
+		return;
+	if (lookupError)
+		return;
 
 	// Delete all embeddings in the collection
 	for (const item of data) {
@@ -56,41 +54,10 @@ async function deleteCollection(collectionName: string) {
 			.delete()
 			.eq("id", item.id);
 
-		if (deleteError) {
-			throw deleteError;
-		}
+		if (deleteError)
+			return;
 	}
+	return;
 }
 
-async function deleteCollections(userId: string) {
-	const { data: total_data, error: lookupTotalError } = await config.supabaseClient
-		.from("llamaindex_embedding")
-		.select("collection")
-		.like("collection", userId + "_%");
-	if (lookupTotalError != undefined) {
-		throw new Error("Error while looking for collections");
-	}
-
-	for (const item of total_data) {
-		const { data, error: deleteError } = await config.supabaseClient
-			.from("llamaindex_embedding")
-			.delete()
-			.eq("collection", item.collection);
-
-		if (deleteError != undefined) {
-			throw new Error("Error while deleting collection");
-		}
-		for (const item of data) {
-			const { error: deleteError } = await config.supabaseClient
-				.from("llamaindex_embedding")
-				.delete()
-				.eq("id", item.id);
-	
-			if (deleteError != undefined) {
-				throw new Error("Error while deleting embeddings");
-			}
-		}
-	}
-}
-
-export { createCollection, deleteCollection, deleteCollections };
+export { createCollection, deleteCollection };

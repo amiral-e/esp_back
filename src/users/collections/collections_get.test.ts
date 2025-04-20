@@ -1,12 +1,9 @@
+import { describe, expect, it, afterAll, beforeAll } from "bun:test";
+import collections from "./collections_get_def.ts";
 import {
-	describe,
-	expect,
-	it,
-	afterAll,
-	beforeAll
-} from "bun:test";
-import collections from "./collections_get.ts";
-import { createCollection, deleteCollection, deleteCollections } from "./utils.ts";
+	createCollection,
+	deleteCollection,
+} from "./utils.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
@@ -16,13 +13,7 @@ let dummyPayload = await generatePayload(userId);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let collectionName = `${userId}_test_collection`;
 
-beforeAll(async () => {
-	// Nettoyer la collection de test
-	await deleteCollections(userId);
-});
-
 afterAll(async () => {
-	// Nettoyer la collection de test
 	await deleteCollection(collectionName);
 });
 

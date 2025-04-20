@@ -7,7 +7,7 @@
 		"dev": "bun run --hot src/index.ts",
 		"build": "bun build --target=bun src/index.ts --outdir dist",
 		"start": "bun run dist/index.js",
-		"format": "bunx biome format --write **/*.ts",
+		"format": "bunx biome format --write src/*.ts src/**/*.ts src/**/**/*.ts src/**/**/**/*.ts",
 		"deploy-dev": "fly deploy --app cc-back-dev --config fly-dev.toml",
 		"deploy-prod": "fly deploy --app cc-back-prod --config fly-prod.toml"
 	},

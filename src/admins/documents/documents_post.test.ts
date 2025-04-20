@@ -1,10 +1,5 @@
-import {
-    describe,
-    expect,
-    it,
-    afterAll,
-} from "bun:test";
-import document_post from "./documents_post.ts";
+import { describe, expect, it, afterAll } from "bun:test";
+import document_post from "./documents_post_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { deleteGlobalCollection } from "../collections/utils.ts";
@@ -15,112 +10,111 @@ const wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 const collectionName = `test_collec`;
 
 afterAll(async () => {
-    await deleteGlobalCollection(config.envVars.ADMIN_ID, "global_test_collec");
+	await deleteGlobalCollection(config.envVars.ADMIN_ID, "global_test_collec");
 });
 
 describe("POST /admins/documents/:collection_name/documents (unauthorized)", () => {
-    it("missing authorization header", async () => {
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            body: new FormData(),
-        });
-        expect(await res.json()).toEqual({
-            error: "No authorization header found",
-        });
-        expect(res.status).toBe(401);
-    });
+	it("missing authorization header", async () => {
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			body: new FormData(),
+		});
+		expect(await res.json()).toEqual({
+			error: "No authorization header found",
+		});
+		expect(res.status).toBe(401);
+	});
 
-    it("invalid authorization header", async () => {
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer wrong-header` },
-            body: new FormData(),
-        });
-        expect(await res.json()).toEqual({
-            error: "Invalid authorization header",
-        });
-        expect(res.status).toBe(401);
-    });
+	it("invalid authorization header", async () => {
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer wrong-header` },
+			body: new FormData(),
+		});
+		expect(await res.json()).toEqual({
+			error: "Invalid authorization header",
+		});
+		expect(res.status).toBe(401);
+	});
 
-    it("non-user authorization header", async () => {
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${wrongPayload}` },
-            body: new FormData(),
-        });
-        expect(await res.json()).toEqual({
-            error: "Invalid user",
-        });
-        expect(res.status).toBe(401);
-    });
+	it("non-user authorization header", async () => {
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${wrongPayload}` },
+			body: new FormData(),
+		});
+		expect(await res.json()).toEqual({
+			error: "Invalid user",
+		});
+		expect(res.status).toBe(401);
+	});
 
-    it("non-admin authorization header", async () => {
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${dummyPayload}` },
-            body: new FormData(),
-        });
-        expect(await res.json()).toEqual({
-            error: "Forbidden",
-        });
-        expect(res.status).toBe(403);
-    });
+	it("non-admin authorization header", async () => {
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${dummyPayload}` },
+			body: new FormData(),
+		});
+		expect(await res.json()).toEqual({
+			error: "Forbidden",
+		});
+		expect(res.status).toBe(403);
+	});
 });
 
 describe("POST /admins/documents/:collection_name/documents (authorized)", () => {
-    it("should return success when ingesting documents", async () => {
+	it("should return success when ingesting documents", async () => {
+		const file = new File(["test content"], "test.md", {
+			type: "text/markdown",
+		});
+		const formData = new FormData();
+		formData.append("file", file);
 
-        const file = new File(["test content"], "test.md", {
-            type: "text/markdown",
-        });
-        const formData = new FormData();
-        formData.append("file", file);
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: formData,
+		});
 
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${adminPayload}` },
-            body: formData,
-        });
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({
+			message: "You have ingested 1 documents into the collection test_collec",
+		});
+	});
 
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({
-            message: "You have ingested 1 documents into the collection test_collec",
-        });
-    });
+	it("should return 400 for invalid file types", async () => {
+		const file = new File(["test content"], "test.png");
+		const formData = new FormData();
+		formData.append("file", file);
 
-    it("should return 400 for invalid file types", async () => {
-        const file = new File(["test content"], "test.png");
-        const formData = new FormData();
-        formData.append("file", file);
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: formData,
+		});
 
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${adminPayload}` },
-            body: formData,
-        });
+		expect(res.status).toBe(400);
+		expect(await res.json()).toEqual({
+			error: "File type not allowed",
+		});
+	});
 
-        expect(res.status).toBe(400);
-        expect(await res.json()).toEqual({
-            error: "File type not allowed",
-        });
-    });
+	it("should return 400 when providing multiple files", async () => {
+		const file1 = new File(["content1"], "file1.md");
+		const file2 = new File(["content2"], "file2.md");
+		const formData = new FormData();
+		formData.append("file", file1);
+		formData.append("file", file2);
 
-    it("should return 400 when providing multiple files", async () => {
-        const file1 = new File(["content1"], "file1.md");
-        const file2 = new File(["content2"], "file2.md");
-        const formData = new FormData();
-        formData.append("file", file1);
-        formData.append("file", file2);
+		const res = await document_post.request(`/${collectionName}/documents`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${adminPayload}` },
+			body: formData,
+		});
 
-        const res = await document_post.request(`/${collectionName}/documents`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${adminPayload}` },
-            body: formData,
-        });
-
-        expect(res.status).toBe(400);
-        expect(await res.json()).toEqual({
-            error: "Please provide a single file at a time",
-        });
-    });
+		expect(res.status).toBe(400);
+		expect(await res.json()).toEqual({
+			error: "Please provide a single file at a time",
+		});
+	});
 });

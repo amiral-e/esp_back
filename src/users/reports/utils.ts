@@ -7,9 +7,8 @@ async function get_report_prompt() {
 			.select("*")
 			.eq("type", "report")
 			.single();
-		if (prompt_error != undefined)
-			throw new Error("Failed to get prompt");
-		return prompt.prompt
+		if (prompt_error != undefined) throw new Error("Failed to get prompt");
+		return prompt.prompt;
 	} catch (error) {
 		console.error("Failed to get prompt");
 		throw error;
@@ -23,8 +22,7 @@ async function process_query(query: string) {
 			.select("*")
 			.eq("type", "search_query")
 			.single();
-		if (prompt_error != undefined)
-			throw new Error("Failed to get prompt");
+		if (prompt_error != undefined) throw new Error("Failed to get prompt");
 		const history = [{ role: "system", content: prompt.prompt }];
 		history.push({ role: "user", content: "User's query: " + query });
 
@@ -58,7 +56,7 @@ async function deleteReport(report_id: string) {
 	const { error: deleteError } = await config.supabaseClient
 		.from("reports")
 		.delete()
-		.eq("id", report_id)
+		.eq("id", report_id);
 	if (deleteError) {
 		throw deleteError;
 	}

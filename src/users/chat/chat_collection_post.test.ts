@@ -1,11 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-} from "bun:test";
-import chat_collection_post from "./chat_collection_post.ts";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
+import chat_collection_post from "./chat_collection_post_def.ts";
 
 import {
 	createConversation,

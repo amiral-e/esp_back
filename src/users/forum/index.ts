@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 
-import categories_get from "./categories/categories_get";
+import categories_get from "./categories/categories_get_def";
 
-import response_delete from "./response/response_delete";
-import response_post from "./response/response_post";
-import response_put from "./response/response_put";
+import response_delete from "./response/response_delete_def";
+import response_post from "./response/response_post_def";
+import response_put from "./response/response_put_def";
 
-import announcements_get from "./announcements/announcements_get";
+import announcements_get from "./announcements/announcements_get_def";
 
-import publication_post from "./publications/publication_post";
-import publication_put from "./publications/publication_put";
-import publication_delete from "./publications/publication_delete";
+import publication_post from "./publications/publication_post_def";
+import publication_put from "./publications/publication_put_def";
+import publication_delete from "./publications/publication_delete_def";
 
 const forum = new Hono();
 

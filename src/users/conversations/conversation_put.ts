@@ -1,127 +1,4 @@
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-
 import config from "../../config.ts";
-import AuthMiddleware from "../../middlewares/auth.ts";
-
-const conversation_put = new Hono();
-
-conversation_put.put(
-	"/:conv_id",
-	describeRoute({
-		summary: "Update a conversation by ID",
-		description:
-			"Updates an existing conversation for the authenticated user. Auth is required.",
-		tags: ["users-conversations"],
-		requestBody: {
-			required: true,
-			content: {
-				"application/json": {
-					schema: {
-						type: "object",
-						properties: {
-							name: {
-								type: "string",
-								default: "Updated conversation name",
-							},
-						},
-						required: ["name"],
-					},
-				},
-			},
-		},
-		responses: {
-			200: {
-				description: "Successfully updated conversation",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								message: {
-									type: "string",
-									default: "Conversation updated successfully",
-								},
-							},
-						},
-					},
-				},
-			},
-			400: {
-				description: "Bad request",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "Invalid JSON",
-								},
-							},
-						},
-					},
-				},
-			},
-			401: {
-				description: "Unauthorized",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: [
-										"No authorization header found",
-										"Invalid authorization header",
-										"Invalid user",
-									],
-								},
-							},
-						},
-					},
-				},
-			},
-			404: {
-				description: "Not found",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "Conversation not found",
-								},
-							},
-						},
-					},
-				},
-			},
-			500: {
-				description: "Internal Server Error",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "Error message",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}),
-	AuthMiddleware,
-	async (c: any) => {
-		return await put_conversation(c);
-	},
-);
 
 async function put_conversation(c: any) {
 	const user = c.get("user");
@@ -129,8 +6,7 @@ async function put_conversation(c: any) {
 
 	try {
 		json = await c.req.json();
-		if (json?.name == undefined)
-			return c.json({ error: "Invalid JSON" }, 400);
+		if (json?.name == undefined) return c.json({ error: "Invalid JSON" }, 400);
 	} catch (error) {
 		return c.json({ error: "Invalid JSON" }, 400);
 	}
@@ -145,7 +21,7 @@ async function put_conversation(c: any) {
 	if (conversation.data == undefined || conversation.data.length == 0)
 		return c.json({ error: "Conversation not found" }, 404);
 
-	const update = await config.supabaseClient
+	await config.supabaseClient
 		.from("conversations")
 		.update({ name: json.name })
 		.eq("id", conversation.data.id);
@@ -153,4 +29,4 @@ async function put_conversation(c: any) {
 	return c.json({ message: `Conversation updated successfully` }, 200);
 }
 
-export default conversation_put;
+export default put_conversation;

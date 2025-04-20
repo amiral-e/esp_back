@@ -1,11 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-} from "bun:test";
-import chat_post from "./chat_post.ts";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
+import chat_post from "./chat_post_def.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
