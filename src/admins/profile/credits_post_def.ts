@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
 import AuthMiddleware from "../../middlewares/auth.ts";
-import post_credits from "./credits_post.ts";
+import { updateCredits } from "./utils.ts";
 
 const credits_post = new Hono();
 
@@ -120,7 +120,7 @@ credits_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await post_credits(c);
+		return await updateCredits(c, "add");
 	},
 );
 

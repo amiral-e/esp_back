@@ -27,4 +27,35 @@ async function deleteQuestion(id: string) {
 	}
 }
 
-export { createQuestion, deleteQuestion };
+async function validateLevel(c: any, json_level: string) {
+	const levels = await config.supabaseClient
+		.from("prompts")
+		.select("id, type")
+		.eq("knowledge", true);
+	if (levels.data == undefined || levels.data.length == 0)
+		return c.json({ error: "No level found" }, 404);
+
+	if (!levels.data.some((level: any) => level.type == json_level))
+		return c.json({ error: "Invalid level" }, 400);
+
+	return null;
+}
+
+async function validateRequest(c: any) {
+	let json: any;
+	try {
+		json = await c.req.json();
+		if (json?.question == undefined || json?.level == undefined)
+			return c.json({ error: "Invalid JSON" }, 400);
+	} catch (error) {
+		return c.json({ error: "Invalid JSON" }, 400);
+	}
+
+	const level = await validateLevel(c, json.level);
+	if (level != null)
+		return level;
+
+	return json;
+}
+
+export { createQuestion, deleteQuestion, validateRequest, validateLevel };
