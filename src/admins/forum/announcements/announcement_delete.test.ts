@@ -1,11 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	afterAll,
-} from "bun:test";
-import announcement_delete from "./announcement_delete.ts";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
+import announcement_delete from "./announcement_delete_def.ts";
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";
 

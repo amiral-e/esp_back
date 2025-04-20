@@ -63,10 +63,11 @@ async function deleteCollection(collectionName: string) {
 }
 
 async function deleteCollections(userId: string) {
-	const { data: total_data, error: lookupTotalError } = await config.supabaseClient
-		.from("llamaindex_embedding")
-		.select("collection")
-		.like("collection", userId + "_%");
+	const { data: total_data, error: lookupTotalError } =
+		await config.supabaseClient
+			.from("llamaindex_embedding")
+			.select("collection")
+			.like("collection", userId + "_%");
 	if (lookupTotalError != undefined) {
 		throw new Error("Error while looking for collections");
 	}
@@ -85,7 +86,7 @@ async function deleteCollections(userId: string) {
 				.from("llamaindex_embedding")
 				.delete()
 				.eq("id", item.id);
-	
+
 			if (deleteError != undefined) {
 				throw new Error("Error while deleting embeddings");
 			}

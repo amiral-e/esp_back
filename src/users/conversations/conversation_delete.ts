@@ -1,94 +1,4 @@
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-
-import config from "../../config";
-import AuthMiddleware from "../../middlewares/auth.ts";
-
-const conversation_delete = new Hono();
-
-conversation_delete.delete(
-	"/:conv_id",
-	describeRoute({
-		summary: "Delete a conversation by ID",
-		description:
-			"Deletes a specific conversation for the authenticated user. Auth is required.",
-		tags: ["users-conversations"],
-		responses: {
-			200: {
-				description: "Success",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								message: {
-									type: "string",
-									example: "Conversation deleted successfully",
-								},
-							},
-						},
-					},
-				},
-			},
-			401: {
-				description: "Unauthorized",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: [
-										"No authorization header found",
-										"Invalid authorization header",
-										"Invalid user",
-									],
-								},
-							},
-						},
-					},
-				},
-			},
-			404: {
-				description: "Not found",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "Conversation not found",
-								},
-							},
-						},
-					},
-				},
-			},
-			500: {
-				description: "Internal server error",
-				content: {
-					"application/json": {
-						schema: {
-							type: "object",
-							properties: {
-								error: {
-									type: "string",
-									default: "Error message",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}),
-	AuthMiddleware,
-	async (c: any) => {
-		return await delete_conversation(c);
-	},
-);
+import config from "../../config.ts";
 
 async function delete_conversation(c: any) {
 	const user = c.get("user");
@@ -103,7 +13,7 @@ async function delete_conversation(c: any) {
 	if (conversation.data == undefined || conversation.data.length == 0)
 		return c.json({ error: "Conversation not found" }, 404);
 
-	const deletion = await config.supabaseClient
+	await config.supabaseClient
 		.from("conversations")
 		.delete()
 		.eq("id", conversation.data.id);
@@ -111,4 +21,4 @@ async function delete_conversation(c: any) {
 	return c.json({ message: `Conversation deleted successfully` }, 200);
 }
 
-export default conversation_delete;
+export default delete_conversation;

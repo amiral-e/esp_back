@@ -1,14 +1,12 @@
-import {
-	describe,
-	expect,
-	it,
-	afterAll,
-} from "bun:test";
-import documents_get from "./documents_get.ts";
+import { describe, expect, it, afterAll } from "bun:test";
+import documents_get from "./documents_get_def.ts";
 
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
-import { createGlobalCollection, deleteGlobalCollection } from "../collections/utils.ts";
+import {
+	createGlobalCollection,
+	deleteGlobalCollection,
+} from "../collections/utils.ts";
 
 let adminPayload = await generatePayload(config.envVars.ADMIN_ID);
 let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
@@ -54,10 +52,13 @@ describe("GET /admins/documents (unauthorized)", () => {
 
 describe("GET /admins/documents (authorized)", () => {
 	it("should return 404 when no documents found", async () => {
-		const res = await documents_get.request(`/nonexistent_collection/documents`, {
-			method: "GET",
-			headers: { Authorization: `Bearer ${adminPayload}` },
-		});
+		const res = await documents_get.request(
+			`/nonexistent_collection/documents`,
+			{
+				method: "GET",
+				headers: { Authorization: `Bearer ${adminPayload}` },
+			},
+		);
 
 		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({

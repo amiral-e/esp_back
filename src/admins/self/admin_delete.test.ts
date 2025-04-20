@@ -1,9 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	afterAll,
-} from "bun:test";
+import { describe, expect, it, afterAll } from "bun:test";
 import admin from "../index.ts";
 
 import config from "../../config.ts";

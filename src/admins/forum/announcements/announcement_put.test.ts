@@ -1,12 +1,12 @@
 import {
-  describe,
-  expect,
-  it,
-  beforeAll,
-  afterAll,
-  beforeEach,
+	describe,
+	expect,
+	it,
+	beforeAll,
+	afterAll,
+	beforeEach,
 } from "bun:test";
-import announcement_put from "./announcement_put.ts";
+import announcement_put from "./announcement_put_def.ts";
 import config from "../../../config.ts";
 import { generatePayload } from "../../../middlewares/utils.ts";
 
@@ -23,7 +23,7 @@ beforeAll(async () => {
 		.select()
 		.single();
 
-  testAnnouncementId = data.id;
+	testAnnouncementId = data.id;
 });
 
 afterAll(async () => {
@@ -44,16 +44,16 @@ describe("PUT /announcements/:id (without privileges)", () => {
 		expect(res.status).toBe(401);
 	});
 
-  it("invalid authorization header", async () => {
-    const res = await announcement_put.request(`/${testAnnouncementId}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer wrong-header` },
-    });
-    expect(await res.json()).toEqual({
-      error: "Invalid authorization header",
-    });
-    expect(res.status).toBe(401);
-  });
+	it("invalid authorization header", async () => {
+		const res = await announcement_put.request(`/${testAnnouncementId}`, {
+			method: "PUT",
+			headers: { Authorization: `Bearer wrong-header` },
+		});
+		expect(await res.json()).toEqual({
+			error: "Invalid authorization header",
+		});
+		expect(res.status).toBe(401);
+	});
 
 	it("non-user authorization header", async () => {
 		const res = await announcement_put.request(`/${testAnnouncementId}`, {

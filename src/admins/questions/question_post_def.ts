@@ -1,17 +1,17 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
+import post_question from "./question_post.ts";
 
-const credits_post = new Hono();
+const question_post = new Hono();
 
-credits_post.post(
-	"/:user_id/grant",
+question_post.post(
 	describeRoute({
-		summary: "Grant Credits",
-		description: "Grant credits to a user. Admin privileges are required.",
-		tags: ["admins-users-profile"],
+		summary: "Post predefined question",
+		description:
+			"Post predefined question by level. Admin privileges are required.",
+		tags: ["admins-questions"],
 		requestBody: {
 			required: true,
 			content: {
@@ -19,13 +19,18 @@ credits_post.post(
 					schema: {
 						type: "object",
 						properties: {
-							credits: {
-								type: "integer",
-								description: "The number of credits to grant",
-								default: 5,
+							question: {
+								type: "string",
+								description: "The question to add in database",
+								default: "",
+							},
+							level: {
+								type: "string",
+								description: "The knowledge level of the question",
+								default: "beginner",
 							},
 						},
-						required: ["credits"],
+						required: ["question", "level"],
 					},
 				},
 			},
@@ -40,7 +45,7 @@ credits_post.post(
 							properties: {
 								message: {
 									type: "string",
-									default: "Credits granted successfully",
+									default: "Question added successfully",
 								},
 							},
 							required: ["message"],
@@ -109,7 +114,7 @@ credits_post.post(
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid credits format",
+									default: "Error message",
 								},
 							},
 						},
@@ -120,40 +125,8 @@ credits_post.post(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await post_credits(c);
+		return await post_question(c);
 	},
 );
 
-
-async function post_credits(c: any) {
-	const user = c.get("user");
-	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-	const { user_id } = await c.req.param();
-
-	let json: any;
-	try {
-		json = await c.req.json();
-		if (json?.credits == undefined)
-			return c.json({ error: "Invalid JSON" }, 400);
-	} catch (error) {
-		return c.json({ error: "Invalid JSON" }, 400);
-	}
-
-	const credits = await config.supabaseClient
-		.from("profiles")
-		.select("credits")
-		.eq("id", user_id)
-		.single();
-
-	const result = await config.supabaseClient
-		.from("profiles")
-		.update({ credits: credits.data.credits + json.credits })
-		.eq("id", user_id);
-	if (result.error != undefined)
-		return c.json({ error: "Invalid credits format" }, 500);
-
-	return c.json({ message: "Credits granted successfully" }, 200);
-}
-
-export default credits_post;
+export default question_post;

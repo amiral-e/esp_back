@@ -1,17 +1,18 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 
-import config from "../../config.ts";
 import AuthMiddleware from "../../middlewares/auth.ts";
+import put_conversation from "./conversation_put.ts";
 
-const credits_put = new Hono();
+const conversation_put = new Hono();
 
-credits_put.put(
-	"/:user_id/grant",
+conversation_put.put(
+	"/:conv_id",
 	describeRoute({
-		summary: "Update Credits",
-		description: "Update credits of a user. Admin privileges are required.",
-		tags: ["admins-users-profile"],
+		summary: "Update a conversation by ID",
+		description:
+			"Updates an existing conversation for the authenticated user. Auth is required.",
+		tags: ["users-conversations"],
 		requestBody: {
 			required: true,
 			content: {
@@ -19,20 +20,19 @@ credits_put.put(
 					schema: {
 						type: "object",
 						properties: {
-							credits: {
-								type: "integer",
-								description: "The new number of credits to set",
-								default: 5,
+							name: {
+								type: "string",
+								default: "Updated conversation name",
 							},
 						},
-						required: ["credits"],
+						required: ["name"],
 					},
 				},
 			},
 		},
 		responses: {
 			200: {
-				description: "Success",
+				description: "Successfully updated conversation",
 				content: {
 					"application/json": {
 						schema: {
@@ -40,10 +40,9 @@ credits_put.put(
 							properties: {
 								message: {
 									type: "string",
-									default: "Credits updated successfully",
+									default: "Conversation updated successfully",
 								},
 							},
-							required: ["message"],
 						},
 					},
 				},
@@ -84,8 +83,8 @@ credits_put.put(
 					},
 				},
 			},
-			403: {
-				description: "Forbidden",
+			404: {
+				description: "Not found",
 				content: {
 					"application/json": {
 						schema: {
@@ -93,7 +92,7 @@ credits_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Forbidden",
+									default: "Conversation not found",
 								},
 							},
 						},
@@ -101,7 +100,7 @@ credits_put.put(
 				},
 			},
 			500: {
-				description: "Internal server error",
+				description: "Internal Server Error",
 				content: {
 					"application/json": {
 						schema: {
@@ -109,7 +108,7 @@ credits_put.put(
 							properties: {
 								error: {
 									type: "string",
-									default: "Invalid credits format",
+									default: "Error message",
 								},
 							},
 						},
@@ -120,33 +119,8 @@ credits_put.put(
 	}),
 	AuthMiddleware,
 	async (c: any) => {
-		return await put_credits(c);
+		return await put_conversation(c);
 	},
 );
 
-async function put_credits(c: any) {
-	const user = c.get("user");
-	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
-
-	const { user_id } = await c.req.param();
-
-	let json: any;
-	try {
-		json = await c.req.json();
-		if (json?.credits == undefined)
-			return c.json({ error: "Invalid JSON" }, 400);
-	} catch (error) {
-		return c.json({ error: "Invalid JSON" }, 400);
-	}
-
-	const result = await config.supabaseClient
-		.from("profiles")
-		.update({ credits: json.credits })
-		.eq("id", user_id);
-	if (result.error != undefined)
-		return c.json({ error: "Invalid credits format" }, 500);
-
-	return c.json({ message: "Credits updated successfully" }, 200);
-}
-
-export default credits_put;
+export default conversation_put;

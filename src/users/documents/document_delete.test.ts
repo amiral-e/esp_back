@@ -1,9 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-} from "bun:test";
-import document_delete from "./document_delete.ts";
+import { describe, expect, it } from "bun:test";
+import document_delete from "./document_delete_def.ts";
 import config from "../../config.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 import { createCollection } from "../collections/utils.ts";
@@ -16,9 +12,12 @@ let docId = "";
 
 describe("DELETE /users/documents/:collection_name/documents/:document_id (unauthorized)", () => {
 	it("missing authorization header", async () => {
-		const res = await document_delete.request(`/${collectionName}/documents/2`, {
-			method: "DELETE",
-		});
+		const res = await document_delete.request(
+			`/${collectionName}/documents/2`,
+			{
+				method: "DELETE",
+			},
+		);
 		expect(await res.json()).toEqual({
 			error: "No authorization header found",
 		});
@@ -26,10 +25,13 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (unaut
 	});
 
 	it("invalid authorization header", async () => {
-		const res = await document_delete.request(`/${collectionName}/documents/2`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer wrong-header` },
-		});
+		const res = await document_delete.request(
+			`/${collectionName}/documents/2`,
+			{
+				method: "DELETE",
+				headers: { Authorization: `Bearer wrong-header` },
+			},
+		);
 		expect(await res.json()).toEqual({
 			error: "Invalid authorization header",
 		});
@@ -37,10 +39,13 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (unaut
 	});
 
 	it("non-user authorization header", async () => {
-		const res = await document_delete.request(`/${collectionName}/documents/2`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${wrongPayload}` },
-		});
+		const res = await document_delete.request(
+			`/${collectionName}/documents/2`,
+			{
+				method: "DELETE",
+				headers: { Authorization: `Bearer ${wrongPayload}` },
+			},
+		);
 		expect(await res.json()).toEqual({
 			error: "Invalid user",
 		});
@@ -50,10 +55,13 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (unaut
 
 describe("DELETE /users/documents/:collection_name/documents/:document_id (authorized)", () => {
 	it("should return 404 when document not found", async () => {
-		const res = await document_delete.request(`/${collectionName}/documents/nonexistent-doc`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${dummyPayload}` },
-		});
+		const res = await document_delete.request(
+			`/${collectionName}/documents/nonexistent-doc`,
+			{
+				method: "DELETE",
+				headers: { Authorization: `Bearer ${dummyPayload}` },
+			},
+		);
 		expect(res.status).toBe(404);
 		expect(await res.json()).toEqual({
 			error: "Document not found",
@@ -62,7 +70,7 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (autho
 
 	it("should delete a document", async () => {
 		// Create a test document
-        docId = await createCollection(userId, userId + '_' + collectionName);
+		docId = await createCollection(userId, userId + "_" + collectionName);
 
 		if (docId == "") {
 			expect(true).toBe(false);
@@ -70,11 +78,14 @@ describe("DELETE /users/documents/:collection_name/documents/:document_id (autho
 			return;
 		}
 
-		const res = await document_delete.request(`/${collectionName}/documents/${docId}`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${dummyPayload}` },
-		});
-		
+		const res = await document_delete.request(
+			`/${collectionName}/documents/${docId}`,
+			{
+				method: "DELETE",
+				headers: { Authorization: `Bearer ${dummyPayload}` },
+			},
+		);
+
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			message: "Document deleted successfully",
