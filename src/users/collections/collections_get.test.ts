@@ -15,12 +15,10 @@ let wrongPayload = await generatePayload(config.envVars.WRONG_ID);
 let collectionName = `${userId}_test_collection`;
 
 beforeAll(async () => {
-	// Nettoyer la collection de test
 	await deleteCollections(userId);
 });
 
 afterAll(async () => {
-	// Nettoyer la collection de test
 	await deleteCollection(collectionName);
 });
 
