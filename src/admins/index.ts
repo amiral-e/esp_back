@@ -31,6 +31,7 @@ import prompts_get from "./config/prompts_get_def.ts";
 import question_post from "./questions/question_post_def.ts";
 import question_delete from "./questions/question_delete_def.ts";
 import question_put from "./questions/question_put_def.ts";
+import questions_get from "./questions/questions_get_def.ts";
 
 const admin = new Hono();
 
@@ -66,5 +67,6 @@ admin.route("/config/prompts", prompts_get);
 admin.route("/questions", question_post);
 admin.route("/questions", question_delete);
 admin.route("/questions", question_put);
+admin.route("/questions", questions_get);
 
 export default admin;
