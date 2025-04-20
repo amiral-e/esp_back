@@ -1,4 +1,4 @@
-import { deleteCollection } from "./utils.ts"
+import { deleteCollectionHttp } from "./utils.ts"
 
 async function delete_collection(c: any) {
 	const user = c.get("user");
@@ -7,7 +7,7 @@ async function delete_collection(c: any) {
 	const { collection_name } = c.req.param();
 	const collection_id = "global_" + collection_name;
 
-	return await deleteCollection(c, collection_id);
+	return await deleteCollectionHttp(c, collection_id);
 }
 
 export default delete_collection;
