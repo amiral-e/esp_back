@@ -86,21 +86,19 @@ async function createReport(userId: string) {
 }
 
 /**
- * Deletes a report by its ID.
+ * Delete all reports.
  * 
- * @param report_id The ID of the report to delete.
  */
-async function deleteReport(report_id: string) {
-	// Delete the report from the database
+async function deleteReports() {
+  // Delete reports from the database
 	const { error: deleteError } = await config.supabaseClient
 		.from("reports")
 		.delete()
-		.eq("id", report_id);
-	// Check if there was an error deleting the report
+		.neq("id", 0);
 	if (deleteError) {
 		// Rethrow the error
 		throw deleteError;
 	}
 }
 
-export { get_report_prompt, process_query, createReport, deleteReport };
+export { get_report_prompt, process_query, createReport, deleteReports };
