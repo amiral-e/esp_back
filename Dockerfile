@@ -14,7 +14,7 @@ COPY . .
 
 RUN bun run build
 
-FROM oven/bun:latest
+FROM oven/bun:alpine
 
 WORKDIR /app
 
