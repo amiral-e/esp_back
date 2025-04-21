@@ -3,7 +3,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 import report_delete from "./report_delete_def.ts";
 
 import config from "../../config.ts";
-import { createReport, deleteReport } from "./utils.ts";
+import { createReport } from "./utils.ts";
 
 const userPayload = await generatePayload(config.envVars.DUMMY_ID);
 let reportId = "";

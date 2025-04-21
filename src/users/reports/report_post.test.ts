@@ -4,14 +4,14 @@ import report_post from "./report_post_def.ts";
 import { generatePayload } from "../../middlewares/utils.ts";
 
 import config from "../../config.ts";
-import { deleteReport } from "./utils.ts";
+import { deleteReports } from "./utils.ts";
 
 const userId = config.envVars.DUMMY_ID;
 let userPayload = await generatePayload(userId);
 let reportId = "";
 
 afterAll(async () => {
-	await deleteReport(reportId);
+	await deleteReports();
 });
 
 describe("POST /users/reports (unauthorized)", () => {

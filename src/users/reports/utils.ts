@@ -52,14 +52,14 @@ async function createReport(userId: string) {
 	return data.id;
 }
 
-async function deleteReport(report_id: string) {
+async function deleteReports() {
 	const { error: deleteError } = await config.supabaseClient
 		.from("reports")
 		.delete()
-		.eq("id", report_id);
+		.neq("id", 0);
 	if (deleteError) {
 		throw deleteError;
 	}
 }
 
-export { get_report_prompt, process_query, createReport, deleteReport };
+export { get_report_prompt, process_query, createReport, deleteReports };
