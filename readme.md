@@ -75,6 +75,10 @@ Chaque route est documentée de la sorte :
 
 > Les fichiers .test.ts contiennt les tests unitaires, les fichiers _def.ts contiennent les définition des routes. Les autres fichiers contiennent les fonctions utilisées par les routes.
 
+## Résultats Analyse de Qualité SonarQube
+
+![image](sonar/results.png)
+
 ## Liste des commandes Bun disponnibles
 
 - `bun install` installe toutes les dependances
