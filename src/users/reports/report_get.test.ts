@@ -3,7 +3,7 @@ import { generatePayload } from "../../middlewares/utils.ts";
 import report_get from "./report_get_def.ts";
 
 import config from "../../config.ts";
-import { createReport, deleteReport } from "./utils.ts";
+import { createReport, deleteReports } from "./utils.ts";
 
 const userPayload = await generatePayload(config.envVars.DUMMY_ID);
 let reportId = "";
@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	await deleteReport(reportId);
+	await deleteReports();
 });
 
 describe("GET /users/reports/:report_id", () => {

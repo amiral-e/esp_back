@@ -19,12 +19,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	if (testAnnouncementId) {
-		await config.supabaseClient
-			.from("announcements")
-			.delete()
-			.eq("id", testAnnouncementId);
-	}
+	await config.supabaseClient
+		.from("announcements")
+		.delete()
+		.neq("id", 0);
 });
 
 describe("DELETE /announcements/:id (without privileges)", () => {

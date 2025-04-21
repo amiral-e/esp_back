@@ -45,7 +45,7 @@ app.get("/", (c) => {
 
 app.route("/admins", admin);
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.STATE_ENV !== "production") {
 	app.route("/test", test);
 }
 

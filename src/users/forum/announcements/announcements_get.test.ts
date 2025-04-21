@@ -17,7 +17,7 @@ afterAll(async () => {
 	await config.supabaseClient
 		.from("announcements")
 		.delete()
-		.eq("id", testAnnouncementId);
+		.neq("id", 0);
 });
 
 describe("GET /announcements", () => {

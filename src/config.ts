@@ -1,3 +1,8 @@
+/**
+ * Checks for required environment variables and creates instances of Supabase and LlamaIndex clients.
+ * 
+ * @returns An object containing the environment variables, Supabase client, PGVectorStore instance, and LlamaIndex instance.
+ */
 const requiredEnvVars = [
 	"SUPABASE_URL",
 	"SUPABASE_KEY",
@@ -37,6 +42,14 @@ const envVars = {
 	WRONG_ID: process.env.WRONG_ID ?? "",
 };
 
+/**
+ * Creates a Supabase client instance.
+ * 
+ * @param url The Supabase URL.
+ * @param key The Supabase key.
+ * 
+ * @returns A Supabase client instance.
+ */
 import { createClient } from "@supabase/supabase-js";
 
 let supabaseClient: any;
@@ -49,6 +62,16 @@ try {
 
 import { PGVectorStore, Groq, Settings } from "llamaindex";
 
+/**
+ * Creates a LlamaIndex instance.
+ * 
+ * @param apiKey The API key for the LlamaIndex instance.
+ * @param model The model to use for the LlamaIndex instance.
+ * @param temperature The temperature to use for the LlamaIndex instance.
+ * @param timeout The timeout to use for the LlamaIndex instance.
+ * 
+ * @returns A LlamaIndex instance.
+ */
 const llm = new Groq({
 	apiKey: envVars.GROQ_API_KEY,
 	model: "llama-3.3-70b-versatile",
@@ -59,6 +82,13 @@ const llm = new Groq({
 
 Settings.llm = llm;
 
+/**
+ * Creates a PGVectorStore instance.
+ * 
+ * @param clientConfig The client configuration for the PGVectorStore instance.
+ * 
+ * @returns A PGVectorStore instance.
+ */
 const pgvs = new PGVectorStore({
 	clientConfig: { connectionString: envVars.POSTGRES_URL },
 });
