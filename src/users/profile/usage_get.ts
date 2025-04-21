@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves the usage data of a user.
+ * 
+ * @param c The context object containing the user information.
+ * @returns A promise resolving with the user's usage data in JSON format.
+ */
 async function get_usage(c: any) {
 	const user = c.get("user");
 

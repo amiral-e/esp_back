@@ -10,6 +10,13 @@ import {
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["text/markdown", "text/plain;charset=utf-8"];
 
+/**
+ * Process files from a JSON object and return a list of documents and tokens.
+ * 
+ * @param json The JSON object containing files to process.
+ * @param user The user object.
+ * @returns An object containing a list of documents, tokens, and an optional error message.
+ */
 async function processFiles(json: any, user: any): Promise<{ docs: Document[]; tokens: number; error?: string }> {
 	let tokens = 0;
 	const docs: Document[] = [];
@@ -42,6 +49,12 @@ async function processFiles(json: any, user: any): Promise<{ docs: Document[]; t
 	return { docs, tokens };
 }
 
+/**
+ * Handle the post request to ingest documents into a collection.
+ * 
+ * @param c The request context.
+ * @returns A JSON response with a message or an error.
+ */
 async function post_documents(c: any) {
 	const user = c.get("user");
 	const { collection_name } = c.req.param();

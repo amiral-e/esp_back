@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves a list of admin users.
+ * 
+ * @param c The context object containing the request and user information.
+ * @returns A JSON response containing the list of admin users.
+ */
 async function get_admins(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

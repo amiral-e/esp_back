@@ -1,3 +1,9 @@
+/**
+ * Retrieves and returns user information.
+ * 
+ * @param {any} c - The request context.
+ * @returns {Promise<any>} A JSON response containing the user information.
+ */
 async function get_user(c: any) {
 	const user = c.get("user");
 	return c.json({

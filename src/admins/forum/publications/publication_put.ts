@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Updates an existing publication in the database.
+ * 
+ * @param {any} c - The context object containing the user, request parameters, and request body.
+ * @returns {Promise<any>} A JSON response indicating whether the update was successful, along with the updated post.
+ */
 async function post_update(c: any) {
 	try {
 		const user = c.get("user");
@@ -17,7 +23,6 @@ async function post_update(c: any) {
 			return c.json({ error: "Invalid JSON" }, 400);
 		}
 
-		// Vérifier si le post existe
 		const post = await config.supabaseClient
 			.from("publications")
 			.select("*")
@@ -28,7 +33,6 @@ async function post_update(c: any) {
 			return c.json({ error: "Post not found" }, 404);
 		}
 
-		// Vérifier si l'utilisateur est le propriétaire du post
 		if (post.data.user_id !== user.uid) {
 			return c.json(
 				{ error: "Vous n'êtes pas autorisé à modifier ce post" },
@@ -36,7 +40,6 @@ async function post_update(c: any) {
 			);
 		}
 
-		// Mettre à jour le post
 		const update = await config.supabaseClient
 			.from("publications")
 			.update({

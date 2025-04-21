@@ -2,6 +2,14 @@ import { verify } from "hono/jwt";
 import config from "../config.ts";
 import { getUser } from "./utils.ts";
 
+/**
+ * Authentication middleware function.
+ * Verifies the authorization header and sets the user data in the context.
+ * 
+ * @param c The context object.
+ * @param next The next middleware function.
+ * @returns A promise that resolves to the next middleware function.
+ */
 const AuthMiddleware = async (c: any, next: any) => {
 	const { authorization } = c.req.header();
 	if (!authorization)

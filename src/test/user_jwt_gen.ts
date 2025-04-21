@@ -1,6 +1,12 @@
 import config from "../config.ts";
 import { sign } from "hono/jwt";
 
+/**
+ * Generates a JWT token for a given user ID.
+ * 
+ * @param {any} c - The request context.
+ * @returns {Promise<any>} A JSON response containing the generated JWT token.
+ */
 async function generate_user_jwt(c: any) {
 	let json: any;
 	try {

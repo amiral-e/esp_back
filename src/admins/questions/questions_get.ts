@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves a list of all questions from the database.
+ * 
+ * @param c The context object containing the HTTP request and response.
+ * @returns A JSON response containing the list of questions.
+ */
 async function get_questions(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

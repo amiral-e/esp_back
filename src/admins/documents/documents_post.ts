@@ -7,6 +7,14 @@ import {
 } from "llamaindex";
 const ALLOWED_FILE_TYPES = ["text/markdown", "text/plain;charset=utf-8"];
 
+/**
+ * Adds new documents to a specific collection.
+ * 
+ * @param {any} c The request context.
+ * @param {string} c.req.param().collection_name The name of the collection.
+ * @param {File} c.req.body The request containing the files to add.
+ * @returns {Promise<any>} A promise that resolves with a JSON object containing a success message or an error.
+ */
 async function post_documents(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

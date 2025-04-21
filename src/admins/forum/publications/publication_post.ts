@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Creates a new publication in the database.
+ * 
+ * @param {any} c - The context object containing the user and request body.
+ * @returns {Promise<any>} A JSON response indicating whether the creation was successful, along with the created post.
+ */
 async function post_create(c: any) {
 	const user = c.get("user");
 	if (!user) return c.json({ error: "Invalid user" }, 401);

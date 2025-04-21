@@ -1,5 +1,12 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves the list of documents from a specific collection.
+ * 
+ * @param {any} c The request context.
+ * @param {string} c.req.param().collection_name The name of the collection.
+ * @returns {Promise<any>} A promise that resolves with a JSON object containing the list of documents or an error.
+ */
 async function get_documents(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves all conversations for the current user.
+ * 
+ * @param {any} c - The context object containing the user and request information.
+ * @returns {Promise<void>} - A promise that resolves with the conversations response.
+ */
 async function get_conversations(c: any) {
 	const user = c.get("user");
 

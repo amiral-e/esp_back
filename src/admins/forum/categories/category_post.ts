@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Creates a new category in the database.
+ * 
+ * @param {any} c The context object containing the request and response.
+ * @returns {Promise<void>} A promise that resolves when the category has been created.
+ */
 async function post_category(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

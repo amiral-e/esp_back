@@ -1,6 +1,12 @@
 import config from "../../config.ts";
 import { getUser } from "../../middlewares/utils.ts";
 
+/**
+ * Inserts a new admin user.
+ * 
+ * @param c The context object containing the request and user information.
+ * @returns A JSON response indicating the result of the operation.
+ */
 async function insert_admin(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

@@ -4,6 +4,13 @@ import { VectorStoreIndex } from "llamaindex";
 import { add_context_to_query, get_knowledge_prompt } from "./utils.ts";
 import { decrease_credits, check_credits } from "../profile/utils.ts";
 
+/**
+ * Generates a context prompt based on the provided texts and query.
+ * 
+ * @param texts The context information.
+ * @param query The query to answer.
+ * @returns The generated context prompt.
+ */
 function get_context_prompt(texts: string, query: string): string {
 	const context_prompt = `Context information is below.
 ---------------------
@@ -19,6 +26,12 @@ Answer:`;
 	return context_prompt;
 }
 
+/**
+ * Validates the JSON object sent in the request.
+ * 
+ * @param c The request object.
+ * @returns The validated JSON object or an error object if the JSON is invalid.
+ */
 async function validate_json(c: any) {
 	let json: any;
 
@@ -37,6 +50,15 @@ async function validate_json(c: any) {
 	return json;
 }
 
+/**
+ * Sets the message history for the conversation.
+ * 
+ * @param c The request object.
+ * @param conversation The conversation object.
+ * @param json The JSON object containing the message and collections.
+ * @param uid The user ID.
+ * @returns An object containing the prompt, response, texts, and documents.
+ */
 async function set_messages_history(
 	c: any,
 	conversation: any,
@@ -77,6 +99,14 @@ async function set_messages_history(
 	return { prompt: knowledge_prompt, res: res, texts: texts, docs: docs };
 }
 
+/**
+ * Updates the credits for the user based on the input and output tokens.
+ * 
+ * @param uid The user ID.
+ * @param input_tokens The number of input tokens.
+ * @param output_tokens The number of output tokens.
+ * @returns An object containing the result of the credit update operation.
+ */
 async function update_credits(
 	uid: string,
 	input_tokens: number,
@@ -104,6 +134,15 @@ async function update_credits(
 	return { result: "Success" };
 }
 
+/**
+ * Updates the conversation history with the new message and response.
+ * 
+ * @param conversation The conversation object.
+ * @param json The JSON object containing the message and collections.
+ * @param response The response object.
+ * @param docs The documents object.
+ * @returns An object containing the updated conversation history.
+ */
 async function update_conv_history(
 	conversation: any,
 	json: any,
@@ -150,6 +189,12 @@ async function update_conv_history(
 	return { source: sources_details };
 }
 
+/**
+ * Handles the chat with collection API request.
+ * 
+ * @param c The request object.
+ * @returns A response object containing the chat result or an error.
+ */
 async function post_chat_with_collection(c: any) {
 	const user = c.get("user");
 
@@ -223,6 +268,13 @@ async function post_chat_with_collection(c: any) {
 	);
 }
 
+/**
+ * Validates the collection names.
+ * 
+ * @param collections The collection names.
+ * @param uid The user ID.
+ * @returns True if the collections are valid, false otherwise.
+ */
 function validateCollection(collections: any, uid: string) {
 	for (const collec_name of collections) {
 		if (
@@ -234,6 +286,12 @@ function validateCollection(collections: any, uid: string) {
 	return collections.length <= 3;
 }
 
+/**
+ * Gets a response from the LLM.
+ * 
+ * @param elems The elements to send to the LLM.
+ * @returns The response from the LLM or null if an error occurs.
+ */
 async function getResponse(elems: any) {
 	try {
 		return await config.llm.chat({

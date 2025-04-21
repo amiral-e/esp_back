@@ -1,5 +1,13 @@
 import config from "../../config.ts";
 
+/**
+ * Deletes a document from the database.
+ * 
+ * @param {any} c The request context.
+ * @param {string} c.req.param().collection_name The name of the collection.
+ * @param {string} c.req.param().document_id The ID of the document to delete.
+ * @returns {Promise<void>} A promise that resolves with a JSON response.
+ */
 async function delete_document(c: any) {
 	const user = c.get("user");
 	const { collection_name, document_id } = c.req.param();

@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Updates the value of a price in the database.
+ * 
+ * @param c - The context object containing the request and user information.
+ * @returns A JSON response with a message indicating whether the update was successful.
+ */
 async function put_price(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

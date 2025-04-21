@@ -1,5 +1,13 @@
 import config from "../../config.ts";
 
+/**
+ * Decreases the credits of a user based on the tokens used and the type of usage.
+ * 
+ * @param tokens The number of tokens used.
+ * @param id The ID of the user.
+ * @param type The type of usage (e.g. search, doc, etc.).
+ * @returns A promise resolving with a message indicating whether the credits were successfully decreased.
+ */
 async function decrease_credits(tokens: number, id: string, type: string) {
 	const { data: price, error: price_error } = await config.supabaseClient
 		.from("prices")
@@ -34,6 +42,15 @@ async function decrease_credits(tokens: number, id: string, type: string) {
 	return "Success";
 }
 
+/**
+ * Checks if a user has enough credits for a specific usage scenario.
+ * 
+ * @param tokens The number of tokens used.
+ * @param uid The ID of the user.
+ * @param search Whether the usage involves a search.
+ * @param doc Whether the usage involves a document.
+ * @returns A promise resolving with a message indicating whether the user has enough credits.
+ */
 async function check_credits(
 	tokens: number,
 	uid: string,

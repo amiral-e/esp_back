@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Updates an existing response in the database.
+ * 
+ * @param {any} c - The context object containing the user information and request data.
+ * @returns {Promise<any>} A JSON response with a success message.
+ */
 async function put_response(c: any) {
 	const user = c.get("user");
 	const id = c.req.param("id");

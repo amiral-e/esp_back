@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Deletes a conversation from the database.
+ * 
+ * @param {any} c - The context object containing the user and request parameters.
+ * @returns {Promise<void>} A promise that resolves with a JSON response indicating the deletion result.
+ */
 async function delete_conversation(c: any) {
 	const user = c.get("user");
 	const { conv_id } = c.req.param();

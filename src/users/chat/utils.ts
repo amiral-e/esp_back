@@ -1,5 +1,12 @@
 import config from "../../config.ts";
 
+/**
+ * Generates a prompt to add context to a query based on a conversation history.
+ * 
+ * @param history The conversation history.
+ * @param query The query to add context to.
+ * @returns A prompt to add context to the query.
+ */
 function get_prompt(history: any[], query: string): string {
 	const context_prompt = `Chat history is below.
 ---------------------
@@ -15,6 +22,13 @@ New query:`;
 	return context_prompt;
 }
 
+/**
+ * Adds context to a query based on a conversation history.
+ * 
+ * @param history The conversation history.
+ * @param query The query to add context to.
+ * @returns The query with context added.
+ */
 async function add_context_to_query(
 	history: any[],
 	query: string,
@@ -34,6 +48,12 @@ async function add_context_to_query(
 	}
 }
 
+/**
+ * Retrieves a knowledge prompt for a user based on their level.
+ * 
+ * @param uid The user's ID.
+ * @returns The knowledge prompt for the user.
+ */
 async function get_knowledge_prompt(uid: string) {
 	try {
 		const { data: profile, error: profile_error } = await config.supabaseClient

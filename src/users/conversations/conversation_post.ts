@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Creates a new conversation in the database.
+ * 
+ * @param {any} c - The context object containing the user and request body.
+ * @returns {Promise<void>} A promise that resolves with a JSON response containing the created conversation ID or an error message.
+ */
 async function post_conversation(c: any) {
 	const user = c.get("user");
 

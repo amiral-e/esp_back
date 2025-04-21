@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Deletes a publication by its ID if the user is authorized to do so.
+ * 
+ * @param c The context object containing the request and response information.
+ * @returns A JSON response indicating whether the deletion was successful or an error message if the user is not authorized or the publication is not found.
+ */
 async function post_delete(c: any) {
 	const user = c.get("user");
 	if (!user) return c.json({ error: "Invalid user" }, 401);

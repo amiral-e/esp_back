@@ -1,0 +1,9 @@
+{
+  "entryPointStrategy": "expand",
+  "exclude": [
+    "**/*.test.ts",
+    "**/*_def.ts"
+  ],
+  "out": "docs",
+  "readme": "readme.md",
+}

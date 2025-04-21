@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Creates a new publication post.
+ * 
+ * @param {any} c - The context object containing the user and request data.
+ * @returns {Promise<any>} A JSON response with the created post data or an error message.
+ */
 async function post_create(c: any) {
 	const user = c.get("user");
 

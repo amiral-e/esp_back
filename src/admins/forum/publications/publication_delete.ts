@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Deletes a publication from the database.
+ * 
+ * @param {any} c - The context object containing the user and request parameters.
+ * @returns {Promise<any>} A JSON response indicating whether the deletion was successful.
+ */
 async function post_delete(c: any) {
 	const user = c.get("user");
 	if (!user) return c.json({ error: "Invalid user" }, 401);

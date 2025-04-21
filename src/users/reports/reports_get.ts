@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves reports for a given user.
+ * 
+ * @param c The context object containing the user information.
+ * @returns A JSON response with the report data or an error message.
+ */
 async function get_reports(c: any) {
 	const user = c.get("user");
 

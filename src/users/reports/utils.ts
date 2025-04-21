@@ -1,5 +1,10 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves the report prompt from the database.
+ * 
+ * @returns The report prompt as a string.
+ */
 async function get_report_prompt() {
 	try {
 		const { data: prompt, error: prompt_error } = await config.supabaseClient
@@ -15,6 +20,12 @@ async function get_report_prompt() {
 	}
 }
 
+/**
+ * Processes a query using the language model.
+ * 
+ * @param query The user's query to process.
+ * @returns The processed query response as a string.
+ */
 async function process_query(query: string) {
 	try {
 		const { data: prompt, error: prompt_error } = await config.supabaseClient
@@ -40,6 +51,12 @@ async function process_query(query: string) {
 	}
 }
 
+/**
+ * Creates a new report for a given user.
+ * 
+ * @param userId The ID of the user creating the report.
+ * @returns The ID of the newly created report.
+ */
 async function createReport(userId: string) {
 	const { data, error: createError } = await config.supabaseClient
 		.from("reports")
@@ -52,6 +69,11 @@ async function createReport(userId: string) {
 	return data.id;
 }
 
+/**
+ * Deletes a report by its ID.
+ * 
+ * @param report_id The ID of the report to delete.
+ */
 async function deleteReport(report_id: string) {
 	const { error: deleteError } = await config.supabaseClient
 		.from("reports")

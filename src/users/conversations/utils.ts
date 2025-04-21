@@ -1,5 +1,12 @@
 import config from "../../config.ts";
 
+/**
+ * Creates a new conversation for the given user.
+ * 
+ * @param {string} userId - The ID of the user who owns the conversation.
+ * @param {string} conversationName - The name of the conversation to create.
+ * @returns {Promise<string | undefined>} - A promise that resolves with the ID of the created conversation.
+ */
 async function createConversation(userId: string, conversationName: string) {
 	const { data, error } = await config.supabaseClient
 		.from("conversations")
@@ -15,6 +22,13 @@ async function createConversation(userId: string, conversationName: string) {
 	return data.id;
 }
 
+/**
+ * Deletes a conversation for the given user.
+ * 
+ * @param {string} userId - The ID of the user who owns the conversation.
+ * @param {string} convId - The ID of the conversation to delete.
+ * @returns {Promise<void>} - A promise that resolves when the conversation is deleted.
+ */
 async function deleteConversation(userId: string, convId: string) {
 	const { error } = await config.supabaseClient
 		.from("conversations")
@@ -25,6 +39,12 @@ async function deleteConversation(userId: string, convId: string) {
 	if (error != undefined) console.log(error.message);
 }
 
+/**
+ * Deletes all conversations for the given user.
+ * 
+ * @param {string} userId - The ID of the user who owns the conversations.
+ * @returns {Promise<void>} - A promise that resolves when all conversations are deleted.
+ */
 async function deleteConversations(userId: string) {
 	const { error } = await config.supabaseClient
 		.from("conversations")

@@ -1,6 +1,12 @@
 import config from "../../config.ts";
 import { validateRequest } from "./utils.ts";
 
+/**
+ * Updates an existing question in the database.
+ * 
+ * @param c The context object containing the HTTP request and response.
+ * @returns A JSON response indicating whether the question was updated successfully.
+ */
 async function put_question(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

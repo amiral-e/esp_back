@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves a list of collections.
+ * 
+ * @param c The context object.
+ * @returns A JSON response with the list of collections.
+ */
 async function get_collections(c: any) {
 	const collections = await config.supabaseClient
 		.from("llamaindex_embedding")

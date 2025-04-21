@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves a list of collections for the current user.
+ * 
+ * @param {any} c - The context object containing the user.
+ * @returns {Promise<any>} - A promise resolving to a JSON response containing the list of collections.
+ */
 async function get_collections(c: any) {
 	const user = c.get("user");
 

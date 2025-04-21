@@ -3,6 +3,12 @@ import config from "../../config.ts";
 import { decrease_credits, check_credits } from "../profile/utils.ts";
 import { get_knowledge_prompt } from "./utils.ts";
 
+/**
+ * Handles a chat post request.
+ * 
+ * @param c The request context.
+ * @returns A response to the chat post request.
+ */
 async function post_chat(c: any) {
 	const user = c.get("user");
 	let json: any;

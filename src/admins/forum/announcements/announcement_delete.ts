@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Deletes an announcement by ID.
+ * 
+ * @param c The request context.
+ * @returns A JSON response with a success message or an error.
+ */
 async function delete_announcement(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

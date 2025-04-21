@@ -1,6 +1,12 @@
 import config from "../../../config.ts";
 import { isAdmin } from "../../../admins/utils.ts";
 
+/**
+ * Deletes a response.
+ * 
+ * @param {any} c - The context object containing the user and request data.
+ * @returns {Promise<any>} A JSON response with a success message or an error message.
+ */
 async function delete_response(c: any) {
 	const user = c.get("user");
 	const id = c.req.param("id");

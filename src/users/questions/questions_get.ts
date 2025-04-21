@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves questions for the current user based on their level.
+ * 
+ * @param c The context object containing information about the current user.
+ * @returns A JSON response containing an array of questions or an error message if no questions are found.
+ */
 async function get_questions(c: any) {
 	const user = c.get("user");
 

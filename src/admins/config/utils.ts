@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Creates a new price in the database.
+ * 
+ * @param name - The name of the price to create.
+ * @returns The name of the created price, or an error message if creation fails.
+ */
 async function createPrice(name: string) {
 	try {
 		// Create price
@@ -20,6 +26,12 @@ async function createPrice(name: string) {
 	}
 }
 
+/**
+ * Deletes a price from the database.
+ * 
+ * @param price - The name of the price to delete.
+ * @throws An error if deletion fails.
+ */
 async function deletePrice(price: string) {
 	const { error: deleteError } = await config.supabaseClient
 		.from("prices")

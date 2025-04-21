@@ -1,5 +1,12 @@
 import config from "../../config.ts";
 
+/**
+ * Retrieves a list of documents from the database.
+ * 
+ * @param {any} c The request context.
+ * @param {string} c.req.param().collection_name The name of the collection.
+ * @returns {Promise<void>} A promise that resolves with a JSON response containing the list of documents.
+ */
 async function get_documents(c: any) {
 	const user = c.get("user");
 	const { collection_name } = c.req.param();

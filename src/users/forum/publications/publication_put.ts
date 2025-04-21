@@ -1,5 +1,11 @@
 import config from "../../../config.ts";
 
+/**
+ * Updates an existing publication post.
+ * 
+ * @param {any} c - The context object containing the user and request data.
+ * @returns {Promise<any>} A JSON response with the updated post data or an error message.
+ */
 async function post_update(c: any) {
 	const user = c.get("user");
 	if (!user) return c.json({ error: "Invalid user" }, 401);

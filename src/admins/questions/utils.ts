@@ -1,8 +1,12 @@
 import config from "../../config.ts";
 
+/**
+ * Creates a new question in the database with default values.
+ * 
+ * @returns The ID of the newly created question, or false if the creation failed.
+ */
 async function createQuestion() {
 	try {
-		// Create question
 		const question = await config.supabaseClient
 			.from("questions")
 			.insert({ question: "Wassup dawg", level: "beginner" })
@@ -16,6 +20,12 @@ async function createQuestion() {
 	}
 }
 
+/**
+ * Deletes a question from the database by its ID.
+ * 
+ * @param id The ID of the question to delete.
+ * @throws An error if the deletion fails.
+ */
 async function deleteQuestion(id: string) {
 	const { error: deleteError } = await config.supabaseClient
 		.from("questions")
@@ -27,6 +37,13 @@ async function deleteQuestion(id: string) {
 	}
 }
 
+/**
+ * Validates a level by checking if it exists in the database.
+ * 
+ * @param c The context object containing the HTTP request and response.
+ * @param json_level The level to validate.
+ * @returns A JSON response indicating an error if the level is invalid, or null if the level is valid.
+ */
 async function validateLevel(c: any, json_level: string) {
 	const levels = await config.supabaseClient
 		.from("prompts")
@@ -41,6 +58,12 @@ async function validateLevel(c: any, json_level: string) {
 	return null;
 }
 
+/**
+ * Validates an incoming request by checking if it contains the required question and level fields.
+ * 
+ * @param c The context object containing the HTTP request and response.
+ * @returns The parsed JSON object if the request is valid, or a JSON response indicating an error if the request is invalid.
+ */
 async function validateRequest(c: any) {
 	let json: any;
 	try {

@@ -1,5 +1,11 @@
 import config from "../../config.ts";
 
+/**
+ * Deletes a report by ID.
+ * 
+ * @param {any} c - The controller object.
+ * @returns {Promise<void>} A promise that resolves when the report is deleted.
+ */
 async function delete_report(c: any) {
 	const user = c.get("user");
 	const { report_id } = c.req.param();

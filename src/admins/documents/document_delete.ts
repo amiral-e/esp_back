@@ -1,5 +1,13 @@
 import config from "../../config.ts";
 
+/**
+ * Deletes a specific document from a collection.
+ * 
+ * @param {any} c The request context.
+ * @param {string} c.req.param().collection_name The name of the collection.
+ * @param {string} c.req.param().document_id The ID of the document to delete.
+ * @returns {Promise<any>} A promise that resolves with a JSON object containing a success message or an error.
+ */
 async function delete_document(c: any) {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

@@ -1,6 +1,13 @@
 import config from "../../config.ts";
 import { validateLevel } from "../../admins/questions/utils.ts";
 
+/**
+ * Updates a user's level.
+ * 
+ * @param c The request context.
+ * @param user_id The ID of the user to update.
+ * @returns The response to the request, or an error if the update failed.
+ */
 async function updateLevel(c: any, user_id: string) {
 	let json: any;
 	try {
@@ -31,6 +38,13 @@ async function updateLevel(c: any, user_id: string) {
 	return c.json({ message: "Level updated successfully" }, 200);
 }
 
+/**
+ * Updates a user's credits.
+ * 
+ * @param c The request context.
+ * @param operation The operation to perform on the user's credits, either 'set' or 'add'.
+ * @returns The response to the request, or an error if the update failed.
+ */
 async function updateCredits(c: any, operation: 'set' | 'add') {
 	const user = c.get("user");
 	if (!user.admin) return c.json({ error: "Forbidden" }, 403);

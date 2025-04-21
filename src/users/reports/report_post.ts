@@ -4,6 +4,12 @@ import { VectorStoreIndex } from "llamaindex";
 import { decrease_credits, check_credits } from "../profile/utils.ts";
 import { get_report_prompt, process_query } from "./utils.ts";
 
+/**
+ * Validates the JSON payload for the report.
+ * 
+ * @param {any} c - The controller object.
+ * @returns {Promise<any>} A promise that resolves with the validated JSON data.
+ */
 async function validate_json(c: any) {
 	let json: any;
 
@@ -19,6 +25,15 @@ async function validate_json(c: any) {
 	return json;
 }
 
+/**
+ * Processes the documents for the report.
+ * 
+ * @param {any} c - The controller object.
+ * @param {any} json - The JSON data for the report.
+ * @param {string} uid - The user ID.
+ * @param {number} input_tokens - The number of input tokens.
+ * @returns {Promise<any>} A promise that resolves with the processed documents.
+ */
 async function process_documents(
 	c: any,
 	json: any,
@@ -56,6 +71,14 @@ async function process_documents(
 	return { texts: texts };
 }
 
+/**
+ * Processes the model response for the report.
+ * 
+ * @param {any} c - The controller object.
+ * @param {any} json - The JSON data for the report.
+ * @param {any} texts - The processed documents.
+ * @returns {Promise<any>} A promise that resolves with the model response.
+ */
 async function process_model_response(c: any, json: any, texts: any) {
 	const report_prompt = await get_report_prompt();
 	let history = [{ role: "system", content: report_prompt }];
@@ -87,6 +110,15 @@ async function process_model_response(c: any, json: any, texts: any) {
 	return response;
 }
 
+/**
+ * Updates the user credits after processing the report.
+ * 
+ * @param {string} uid - The user ID.
+ * @param {number} input_tokens - The number of input tokens.
+ * @param {any} json - The JSON data for the report.
+ * @param {any} response - The model response.
+ * @returns {Promise<any>} A promise that resolves with the result of the credit update.
+ */
 async function update_credits(
 	uid: string,
 	input_tokens: number,
@@ -120,6 +152,12 @@ async function update_credits(
 	return { result: "Success", id: result.data.id };
 }
 
+/**
+ * Posts a new report.
+ * 
+ * @param {any} c - The controller object.
+ * @returns {Promise<void>} A promise that resolves with the report data.
+ */
 async function post_report(c: any) {
 	const user = c.get("user");
 
