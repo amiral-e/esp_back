@@ -78,8 +78,6 @@ async function deleteCollection(collectionName: string) {
 		if (deleteError)
 			return;
 	}
-	// Return after all documents have been deleted
-	return;
 }
 
 export { createCollection, deleteCollection };
