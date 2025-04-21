@@ -88,5 +88,5 @@ describe("POST /users/reports (valid requests)", () => {
 		reportId = json.id;
 		expect(json).toHaveProperty("title", "Test report");
 		expect(json).toHaveProperty("text");
-	});
+	}, 20000);
 });

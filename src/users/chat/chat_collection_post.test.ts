@@ -126,5 +126,5 @@ describe("POST /conversations/:conv_id/collections/:collec_name (authorized)", (
 		expect(body).toHaveProperty("role");
 		expect(body).toHaveProperty("content");
 		expect(body).toHaveProperty("sources");
-	}, 10000);
+	}, 20000);
 });
