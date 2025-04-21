@@ -7,22 +7,29 @@ import config from "../../config.ts";
  * @returns A JSON response containing an array of questions or an error message if no questions are found.
  */
 async function get_questions(c: any) {
-	const user = c.get("user");
+  // Get the current user from the context object
+  const user = c.get("user");
 
-	const profile = await config.supabaseClient
-		.from("profiles")
-		.select("level")
-		.eq("id", user.uid)
-		.single();
+  // Retrieve the user's profile information from the database
+  const profile = await config.supabaseClient
+    .from("profiles")
+    .select("level")
+    .eq("id", user.uid)
+    .single();
 
-	const questions = await config.supabaseClient
-		.from("questions")
-		.select("question")
-		.eq("level", profile.data.level);
-	if (questions.data == undefined || questions.data.length == 0)
-		return c.json({ error: "No questions found" }, 404);
+  // Fetch questions from the database that match the user's level
+  const questions = await config.supabaseClient
+    .from("questions")
+    .select("question")
+    .eq("level", profile.data.level);
 
-	return c.json({ questions: questions.data.map((l: any) => l.question) }, 200);
+  // Check if any questions were found
+  if (questions.data == undefined || questions.data.length == 0)
+    // If no questions are found, return a 404 error with a message
+    return c.json({ error: "No questions found" }, 404);
+
+  // If questions are found, return a 200 response with the questions
+  return c.json({ questions: questions.data.map((l: any) => l.question) }, 200);
 }
 
 export default get_questions;

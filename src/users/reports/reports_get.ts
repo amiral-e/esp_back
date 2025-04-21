@@ -7,16 +7,22 @@ import config from "../../config.ts";
  * @returns A JSON response with the report data or an error message.
  */
 async function get_reports(c: any) {
-	const user = c.get("user");
+  // Retrieve the user object from the context
+  const user = c.get("user");
 
-	const reports = await config.supabaseClient
-		.from("reports")
-		.select("title, id")
-		.eq("user_id", user.uid);
-	if (reports.data == undefined || reports.data.length == 0)
-		return c.json({ error: "No report found" }, 404);
+  // Query the Supabase database for reports belonging to the current user
+  const reports = await config.supabaseClient
+    .from("reports")
+    .select("title, id")
+    .eq("user_id", user.uid);
+  
+  // Check if the query returned any reports
+  if (reports.data == undefined || reports.data.length == 0)
+    // If no reports were found, return a 404 error response
+    return c.json({ error: "No report found" }, 404);
 
-	return c.json(reports.data, 200);
+  // If reports were found, return a 200 response with the report data
+  return c.json(reports.data, 200);
 }
 
 export default get_reports;

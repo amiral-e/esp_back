@@ -7,12 +7,16 @@ import { updateLevel } from "./utils.ts";
  * @returns The response to the request.
  */
 async function put_level(c: any) {
-	const user = c.get("user");
-	if (!user.admin) return c.json({ error: "Forbidden" }, 403);
+  // Retrieve the current user from the request context
+  const user = c.get("user");
+  // Check if the user has admin privileges, return Forbidden if not
+  if (!user.admin) return c.json({ error: "Forbidden" }, 403);
 
-	const { user_id } = await c.req.param();
+  // Extract the user ID from the request parameters
+  const { user_id } = await c.req.param();
 
-	return await updateLevel(c, user_id);	
+  // Update the user's level using the utility function
+  return await updateLevel(c, user_id);
 }
 
 export default put_level;
